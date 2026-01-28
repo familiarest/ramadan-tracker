@@ -184,25 +184,71 @@
         .thoughts-list { text-align: left; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; margin-bottom: 20px; }
         .thought-entry { font-size: 12px; color: #ddd; margin-bottom: 8px; border-bottom: 1px solid #333; padding-bottom: 8px; font-style: italic;}
 
-        /* ШАРИНГ */
+        /* --- ШАРИНГ (ИСПРАВЛЕНО ДЛЯ 1:1) --- */
         .share-wrapper { position: relative; width: 100%; margin-bottom: 20px; }
+        
         .share-card-container {
-            width: 100%; padding-bottom: 100%; position: relative;
+            width: 100%; 
+            padding-bottom: 100%; /* Квадрат */
+            position: relative;
             background: radial-gradient(circle at 50% -10%, #1a2a40 0%, #000000 70%);
             border-radius: 24px; border: 1px solid #333; overflow: hidden; display: block; 
         }
+        
         .visually-hidden { opacity: 0; pointer-events: none; position: absolute; top: 0; left: 0; }
-        #generatedImageContainer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 24px; overflow: hidden; z-index: 2000; display: none; }
-        #generatedImageContainer img { width: 100%; height: 100%; object-fit: cover; pointer-events: auto !important; -webkit-user-select: auto !important; -webkit-touch-callout: default !important; }
+        
+        #generatedImageContainer { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+            border-radius: 24px; overflow: hidden; z-index: 2000; display: none; 
+        }
+        #generatedImageContainer img { 
+            width: 100%; height: 100%; object-fit: cover; 
+            pointer-events: auto !important; -webkit-user-select: auto !important; -webkit-touch-callout: default !important; 
+        }
 
-        .share-content { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 15px; text-align: center; z-index: 10; }
-        .share-date { font-size: 14px; text-transform: uppercase; letter-spacing: 2px; color: #888; margin-bottom: 10px; }
-        .share-circle-wrap { width: 130px; height: 130px; position: relative; margin-bottom: 25px; }
-        .share-day-num { font-size: 52px; font-weight: 800; color: #fff; }
-        .share-ai-text { font-size: 16px; line-height: 1.4; color: #eee; font-style: italic; max-width: 90%; margin-bottom: 25px; }
-        .share-branding { position: absolute; bottom: 15px; left: 0; width: 100%; text-align: center; z-index: 20; }
+        .share-content { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+            display: flex; flex-direction: column; 
+            /* Выравнивание */
+            justify-content: space-between; 
+            padding: 20px; text-align: center; z-index: 10; 
+        }
+        
+        /* Верхняя часть (дата) */
+        .share-top-part {
+            padding-top: 10px;
+        }
+        .share-date { font-size: 14px; text-transform: uppercase; letter-spacing: 2px; color: #888; }
+
+        /* Центральная часть (круг + текст) */
+        .share-center-part {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            flex-grow: 1; /* Занимает все свободное место */
+        }
+        
+        .share-circle-wrap { 
+            width: 140px; height: 140px; position: relative; 
+            margin-bottom: 15px; 
+            display: flex; align-items: center; justify-content: center;
+        }
+        .share-circle-svg {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            transform: rotate(-90deg);
+        }
+        .share-day-text-block {
+            z-index: 5; text-align: center;
+        }
+        .share-day-num { font-size: 52px; font-weight: 800; color: #fff; line-height: 1;}
+        .share-day-lbl { font-size: 10px; color:#aaa; text-transform:uppercase; margin-top: -5px;}
+
+        .share-ai-text { font-size: 15px; line-height: 1.4; color: #eee; font-style: italic; max-width: 95%; margin-bottom: 15px; }
+        
+        /* Нижняя часть (брендинг) */
+        .share-bottom-part {
+            padding-bottom: 5px;
+        }
         .share-branding-text { font-size: 10px; color: #aaa; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
-        .share-branding-bot { font-size: 12px; color: var(--accent); font-weight: 800; margin-bottom: 4px; }
+        .share-branding-bot { font-size: 12px; color: var(--accent); font-weight: 800; margin-bottom: 2px; }
         .share-branding-sub { font-size: 10px; color: #666; font-weight: 600; }
         
         .btn-send-image { width: 100%; padding: 16px; background: var(--accent); color: black; font-weight: 800; border-radius: 12px; border: none; margin-top: 10px; text-transform: uppercase; font-family: 'Manrope', sans-serif; cursor: pointer; }
@@ -368,8 +414,8 @@
             <div class="ai-text" id="aiText">...</div>
         </div>
         <div class="author-links">
-            <a href="https://t.me/ametovstudio" target="_blank" class="author-btn">Telegram: @ametovstudio</a>
-            <a href="https://instagram.com/ametovstudio" target="_blank" class="author-btn">Instagram: @ametovstudio</a>
+            <a href="https://t.me/ametov_design" target="_blank" class="author-btn">Telegram: @ametov_design</a>
+            <a href="https://instagram.com/a.ametov" target="_blank" class="author-btn">Instagram: @a.ametov</a>
         </div>
     </div>
 </div>
@@ -387,28 +433,32 @@
                 <div class="star-layer stars-2"></div>
 
                 <div class="share-content">
-                    <div class="share-date" id="shareDate">...</div>
+                    <div class="share-top-part">
+                        <div class="share-date" id="shareDate">...</div>
+                    </div>
                     
-                    <div id="shareRegularContent">
-                        <div class="share-circle-wrap">
-                             <svg viewBox="0 0 160 160" style="width:100%; height:100%; transform: rotate(-90deg);">
-                                <circle class="circle-bg" cx="80" cy="80" r="70" style="stroke-width:8;"></circle>
-                                <circle id="shareCircle" stroke="#d4af37" stroke-width="8" fill="none" cx="80" cy="80" r="70" stroke-linecap="round" stroke-dasharray="440" stroke-dashoffset="440"></circle>
-                            </svg>
-                            <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center;">
-                                <div class="share-day-num" id="shareDayNum">1</div>
-                                <div style="font-size:10px; color:#aaa; text-transform:uppercase;">ДЕНЬ</div>
+                    <div id="shareRegularContent" style="display:contents;">
+                        <div class="share-center-part">
+                            <div class="share-circle-wrap">
+                                 <svg class="share-circle-svg" viewBox="0 0 160 160">
+                                    <circle class="circle-bg" cx="80" cy="80" r="70" style="stroke-width:8;"></circle>
+                                    <circle id="shareCircle" stroke="#d4af37" stroke-width="8" fill="none" cx="80" cy="80" r="70" stroke-linecap="round" stroke-dasharray="440" stroke-dashoffset="440"></circle>
+                                </svg>
+                                <div class="share-day-text-block">
+                                    <div class="share-day-num" id="shareDayNum">1</div>
+                                    <div class="share-day-lbl">ДЕНЬ</div>
+                                </div>
                             </div>
+                            <div class="share-ai-text" id="shareAiText">...</div>
+                            <div class="stars" id="shareStars"></div>
                         </div>
-                        <div class="share-ai-text" id="shareAiText">...</div>
-                        <div class="stars" id="shareStars"></div>
                     </div>
 
-                    <div id="shareFinalContent" style="display:none; width:100%;">
+                    <div id="shareFinalContent" style="display:none; width:100%; flex-grow:1; flex-direction:column; justify-content:center; align-items:center;">
                         <div class="share-day-num" style="font-size:32px; margin-bottom:10px;">Рамадан 2026</div>
                         <div style="font-size:14px; color:#ddd; margin-bottom:20px;">Альхамдулиллях, месяц завершен!</div>
                         
-                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; text-align:center; margin-bottom:20px;">
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; text-align:center; margin-bottom:20px; width:100%;">
                             <div style="background:rgba(255,255,255,0.1); padding:10px; border-radius:10px;">
                                 <div style="font-size:24px; font-weight:800;" id="finalAvgScore">0%</div>
                                 <div style="font-size:9px; text-transform:uppercase;">Эффективность</div>
@@ -418,13 +468,15 @@
                                 <div style="font-size:9px; text-transform:uppercase;">Дней без поста</div>
                             </div>
                         </div>
-                        <div class="share-ai-text" id="finalAiText" style="font-size:13px;">...</div>
+                        <div class="share-ai-text" id="finalAiText" style="font-size:12px;">...</div>
                     </div>
 
-                    <div class="share-branding">
-                        <div class="share-branding-text">Трекер "Рамадан на максималках"</div>
-                        <div class="share-branding-bot">@ramadantracking_bot</div>
-                        <div class="share-branding-sub">от Азиза Аметова</div>
+                    <div class="share-bottom-part">
+                        <div class="share-branding">
+                            <div class="share-branding-text">Трекер "Рамадан на максималках"</div>
+                            <div class="share-branding-bot">@ramadantracking_bot</div>
+                            <div class="share-branding-sub">от Азиза Аметова</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -503,7 +555,7 @@
     };
 
     // НАСТРОЙКА: 27 Января 2026
-    const ramadanStart = new Date(2025, 11, 30);
+    const ramadanStart = new Date(2026, 0, 27);
     
     function getCurrentDay() {
         const now = new Date();
@@ -782,7 +834,7 @@
         document.body.classList.add('no-scroll');
         
         // Mode: Regular
-        document.getElementById('shareRegularContent').style.display = 'block';
+        document.getElementById('shareRegularContent').style.display = 'contents'; // Fix flex issue
         document.getElementById('shareFinalContent').style.display = 'none';
         
         // СБРОС
@@ -834,7 +886,7 @@
         
         // Mode: Final
         document.getElementById('shareRegularContent').style.display = 'none';
-        document.getElementById('shareFinalContent').style.display = 'block';
+        document.getElementById('shareFinalContent').style.display = 'flex'; // Flex for centering
         document.getElementById('shareDate').innerText = "ИТОГИ";
         
         // Reset Visuals
@@ -948,4 +1000,3 @@
 </script>
 </body>
 </html>
-
