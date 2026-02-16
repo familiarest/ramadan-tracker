@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
     <title>Ramadan Tracker</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -11,17 +11,18 @@
 
     <style>
         :root {
-            --accent: #d4af37;
+            --accent: #CCFF00; /* Neon Lime - обновлен под референс Sprintly */
+            --accent-dim: rgba(204, 255, 0, 0.2);
             --green: #27ae60;
             --red: #e74c3c;
             --blue: #3498db;
             --bg-color: #000000;
-            --card-bg: rgba(255, 255, 255, 0.05);
-            --border: rgba(255, 255, 255, 0.1);
+            --card-bg: linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
+            --border: rgba(255, 255, 255, 0.08);
             --text-white: #ffffff;
         }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
 
         body {
             background-color: var(--bg-color) !important;
@@ -33,6 +34,7 @@
             -webkit-user-select: none; user-select: none;
         }
         
+        /* Фикс скролла при открытой модалке */
         body.no-scroll { overflow: hidden !important; height: 100vh; position: fixed; width: 100%; }
 
         input, textarea { -webkit-user-select: text !important; user-select: text !important; }
@@ -40,7 +42,7 @@
         /* ФОН */
         #star-bg {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(180deg, #090e16 0%, #000000 100%);
+            background: radial-gradient(circle at 50% 0%, #0f172a 0%, #000000 80%);
             z-index: 0; pointer-events: none; overflow: hidden;
         }
         .star-layer { position: absolute; top: 0; left: 0; right: 0; bottom: 0; animation: moveStars 100s linear infinite; pointer-events: none;}
@@ -57,27 +59,21 @@
         }
         @keyframes moveStars { from { transform: translateY(0); } to { transform: translateY(-100px); } }
 
-        .container { max-width: 450px; margin: 0 auto; padding: 20px; padding-bottom: 140px; position: relative; z-index: 10; }
+        .container { 
+            max-width: 450px; margin: 0 auto; padding: 20px; 
+            padding-bottom: 160px; /* Safe area bottom fix */
+            position: relative; z-index: 10; 
+        }
 
         /* UI ЭЛЕМЕНТЫ */
         .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .btn-mini {
-            background: rgba(255, 255, 255, 0.1); color: #fff; padding: 10px 16px; border-radius: 12px;
+            background: rgba(255, 255, 255, 0.1); color: #fff; padding: 10px 16px; border-radius: 20px;
             font-size: 13px; font-weight: 600; border: 1px solid rgba(255, 255, 255, 0.1);
             cursor: pointer; backdrop-filter: blur(10px); font-family: 'Manrope', sans-serif; transition: 0.2s;
             position: relative; z-index: 20;
         }
-        .btn-add {
-            width: 100%; margin-top: 10px; 
-            background: #1a1a1a; 
-            border: 1px solid #333; 
-            color: #ddd;
-            padding: 14px; border-radius: 14px; cursor: pointer;
-            font-size: 13px; font-weight: 700; font-family: 'Manrope', sans-serif;
-            transition: 0.2s;
-        }
-        .btn-add:active { transform: scale(0.98); background: #222; }
-
+        
         .brand-link {
             display: block; text-align: center; font-size: 12px; color: var(--accent);
             text-decoration: none; font-weight: 600; margin-bottom: 25px; opacity: 0.8; letter-spacing: 0.5px;
@@ -94,9 +90,9 @@
         circle { fill: none; stroke-width: 8; stroke-linecap: round; }
         .circle-bg { stroke: rgba(255, 255, 255, 0.1); }
         .circle-progress { 
-            stroke: var(--red); stroke-dasharray: 440; stroke-dashoffset: 440; 
+            stroke: var(--accent); stroke-dasharray: 440; stroke-dashoffset: 440; 
             transition: stroke-dashoffset 0.6s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.6s ease; 
-            filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.1)); 
+            filter: drop-shadow(0 0 10px var(--accent-dim)); 
         }
         
         .day-info { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; }
@@ -109,18 +105,18 @@
 
         /* БЛОК ПОСТ (FASTING) */
         .fasting-switch {
-            display: flex; background: rgba(255,255,255,0.05); border-radius: 16px; padding: 4px;
+            display: flex; background: rgba(255,255,255,0.05); border-radius: 20px; padding: 4px;
             margin-bottom: 15px; border: 1px solid var(--border); position: relative; z-index: 12;
         }
         .fasting-option {
             flex: 1; text-align: center; padding: 12px; font-size: 14px; font-weight: 700;
-            color: #666; cursor: pointer; border-radius: 12px; transition: 0.3s;
+            color: #666; cursor: pointer; border-radius: 16px; transition: 0.3s;
         }
-        .fasting-option.active { background: var(--accent); color: #000; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3); }
+        .fasting-option.active { background: var(--accent); color: #000; box-shadow: 0 0 15px var(--accent-dim); }
 
         /* БЛОК ВРЕМЕНИ ИФТАРА */
         .fasting-times-block {
-            background: rgba(0,0,0,0.3); border-radius: 14px; padding: 15px;
+            background: rgba(0,0,0,0.3); border-radius: 20px; padding: 15px;
             border: 1px solid rgba(255,255,255,0.05); text-align: center; margin-bottom: 5px;
         }
         .time-row { display: flex; justify-content: space-around; align-items: center; margin-bottom: 8px; }
@@ -134,77 +130,86 @@
             font-family: 'Manrope'; font-size: 13px;
         }
 
-        .tracker-section { background: var(--card-bg); border-radius: 24px; padding: 22px; margin-bottom: 16px; border: 1px solid var(--border); backdrop-filter: blur(5px); position: relative; z-index: 11; }
+        .tracker-section { background: var(--card-bg); border-radius: 24px; padding: 22px; margin-bottom: 16px; border: 1px solid var(--border); backdrop-filter: blur(10px); position: relative; z-index: 11; }
         .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .section-title { font-size: 17px; font-weight: 800; color: var(--accent); display: flex; align-items: center; gap: 8px;}
-        .section-percent { font-size: 13px; color: #888; font-weight: 600; font-variant-numeric: tabular-nums; }
-        .progress-bar-bg { width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 4px; margin-bottom: 15px; overflow: hidden; }
-        .progress-bar-fill { height: 100%; width: 0%; background: var(--accent); border-radius: 4px; transition: width 0.3s ease, background-color 0.3s ease; }
+        .section-title { font-size: 17px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 8px;}
+        .section-percent { font-size: 13px; color: var(--accent); font-weight: 700; font-variant-numeric: tabular-nums; }
+        .progress-bar-bg { width: 100%; height: 6px; background: rgba(255,255,255,0.05); border-radius: 6px; margin-bottom: 15px; overflow: hidden; }
+        .progress-bar-fill { height: 100%; width: 0%; background: var(--accent); border-radius: 6px; transition: width 0.3s ease, background-color 0.3s ease; box-shadow: 0 0 10px var(--accent-dim); }
         .group-label { font-size: 11px; text-transform: uppercase; color: #666; font-weight: 700; margin-top: 18px; margin-bottom: 10px; letter-spacing: 1px; }
         
-        .task-item { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.08); cursor: pointer; }
+        .task-item { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; }
         .task-item:last-child { border-bottom: none; }
         .task-text { font-size: 15px; font-weight: 500; color: #eee; flex-grow: 1; }
-        .checkbox { width: 26px; height: 26px; border-radius: 8px; border: 2px solid #444; display: flex; align-items: center; justify-content: center; transition: all 0.2s; background: transparent; flex-shrink: 0;}
-        .task-item.checked .checkbox { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 10px rgba(212, 175, 55, 0.4); }
-        .checkbox::after { content: '✓'; font-size: 18px; display: none; font-weight: 800; color: #000; }
+        /* Исправленный чекбокс */
+        .checkbox { 
+            width: 24px; height: 24px; border-radius: 8px; border: 2px solid #444; 
+            display: flex; align-items: center; justify-content: center; 
+            transition: all 0.2s; background: transparent; flex-shrink: 0; 
+        }
+        .task-item.checked .checkbox { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 10px var(--accent-dim); }
+        .checkbox::after { content: '✓'; font-size: 16px; display: none; font-weight: 900; color: #000; }
         .task-item.checked .checkbox::after { display: block; }
         
         /* Стили для добавления цели */
         .add-goal-area { display: flex; gap: 10px; margin-top: 15px; }
         .custom-input { 
-            flex: 1; border: 1px solid #333; background: rgba(255,255,255,0.05); 
+            flex: 1; border: 1px solid #333; background: rgba(0,0,0,0.3); 
             padding: 12px; border-radius: 12px; font-size: 14px; color: #fff; 
-            outline: none; font-family: 'Manrope', sans-serif; 
+            outline: none; font-family: 'Manrope', sans-serif; transition: border 0.2s;
         }
+        .custom-input:focus { border-color: var(--accent); }
         .btn-plus {
-            width: 44px; background: #222; border: 1px solid #333; 
-            border-radius: 12px; color: var(--accent); font-size: 20px; 
+            width: 44px; background: rgba(255,255,255,0.1); border: 1px solid #333; 
+            border-radius: 12px; color: var(--accent); font-size: 24px; font-weight: 300;
             cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: 0.2s;
         }
-        .delete-custom { color: #555; padding: 10px; font-size: 18px; cursor: pointer; margin-right: -10px; }
+        .btn-plus:active { transform: scale(0.95); background: var(--accent); color: #000; }
+        .delete-custom { color: #555; padding: 10px; font-size: 18px; cursor: pointer; margin-right: -10px; transition: color 0.2s; }
+        .delete-custom:hover { color: var(--red); }
 
         /* ВОДА ОБНОВЛЕННАЯ */
         .water-row { display: flex; gap: 8px; align-items: center; }
-        .water-glass { width: 22px; height: 30px; cursor: pointer; position: relative; opacity: 0.4; transition: 0.3s; }
+        .water-glass { width: 22px; height: 30px; cursor: pointer; position: relative; opacity: 0.3; transition: 0.3s; }
         .water-glass svg { transform: none; width: 100%; height: 100%; }
         .water-glass path { stroke: #fff; stroke-width: 2; fill: transparent; transition: 0.3s; }
         .water-glass.filled { opacity: 1; transform: scale(1.1); }
-        .water-glass.filled path { fill: var(--blue); stroke: var(--blue); filter: drop-shadow(0 0 5px rgba(52, 152, 219, 0.5)); }
+        .water-glass.filled path { fill: var(--blue); stroke: var(--blue); filter: drop-shadow(0 0 8px rgba(52, 152, 219, 0.6)); }
 
         /* INPUT СТРАНИЦ КОРАНА */
         .page-input { 
-            width: 60px; background: rgba(255,255,255,0.1); border: 1px solid #444; 
-            color: var(--accent); padding: 5px; border-radius: 6px; font-size: 13px; 
+            width: 70px; background: rgba(0,0,0,0.3); border: 1px solid #444; 
+            color: var(--accent); padding: 8px; border-radius: 8px; font-size: 14px; font-weight: 700;
             text-align: center; margin-right: 10px; outline: none;
         }
         .page-input:focus { border-color: var(--accent); }
 
-        .stars { display: flex; justify-content: center; gap: 10px; margin-top: 10px; }
-        .star { font-size: 32px; color: #333; cursor: pointer; transition: color 0.2s; position: relative; z-index: 20;}
-        .star.active { color: var(--accent); text-shadow: 0 0 10px rgba(212, 175, 55, 0.5); }
-        .journal-area { width: 100%; height: 100px; background: rgba(0,0,0,0.3); border: 1px solid #333; border-radius: 12px; padding: 15px; color: #fff; font-family: 'Manrope', sans-serif; font-size: 14px; resize: none; outline: none; margin-top: 5px; transition: 0.3s; position: relative; z-index: 12; }
+        .stars { display: flex; justify-content: center; gap: 8px; margin-top: 10px; }
+        .star { font-size: 36px; color: #333; cursor: pointer; transition: color 0.2s; position: relative; z-index: 20;}
+        .star.active { color: var(--accent); text-shadow: 0 0 15px var(--accent-dim); }
+        .journal-area { width: 100%; height: 120px; background: rgba(0,0,0,0.3); border: 1px solid #333; border-radius: 16px; padding: 15px; color: #fff; font-family: 'Manrope', sans-serif; font-size: 14px; resize: none; outline: none; margin-top: 5px; transition: 0.3s; position: relative; z-index: 12; line-height: 1.5; }
         .journal-area:focus { border-color: var(--accent); }
 
         .bottom-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 30px; }
         .btn-finish { 
-            background: #fff; color: #000; width: 100%; padding: 18px; border: none; border-radius: 16px; 
+            background: #fff; color: #000; width: 100%; padding: 18px; border: none; border-radius: 20px; 
             font-size: 14px; font-weight: 800; cursor: pointer; text-transform: uppercase; 
             font-family: 'Manrope', sans-serif; box-shadow: 0 0 20px rgba(255, 255, 255, 0.1); 
             position: relative; z-index: 50; transition: background 0.3s;
         }
-        .btn-finish.saved { background: var(--green); color: white; }
+        .btn-finish.saved { background: var(--green); color: white; box-shadow: 0 0 20px rgba(39, 174, 96, 0.4); }
         .btn-share {
-            background: #222; border: 1px solid #333; border-radius: 16px; color: #fff;
+            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; color: #fff;
             font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center;
-            text-transform: uppercase; position: relative; z-index: 50;
+            text-transform: uppercase; position: relative; z-index: 50; backdrop-filter: blur(10px);
         }
         .btn-share:active, .btn-finish:active { transform: scale(0.96); }
 
         /* МОДАЛКИ */
         .modal-overlay { 
             position: fixed; bottom: 0; left: 0; width: 100%; height: 100%; 
-            background: #161616; 
+            background: #090e16; 
             border-top-left-radius: 28px; border-top-right-radius: 28px; 
             box-shadow: 0 -10px 50px rgba(0,0,0,0.8); 
             transform: translateY(110%); 
@@ -212,73 +217,65 @@
             z-index: 200; display: flex; flex-direction: column; border-top: 1px solid #333; 
         }
         .modal-overlay.show { transform: translateY(0); }
-        .modal-header { padding: 20px; text-align: center; border-bottom: 1px solid #252525; position: relative; flex-shrink: 0; }
+        .modal-header { padding: 20px; text-align: center; border-bottom: 1px solid #222; position: relative; flex-shrink: 0; }
         .modal-title { font-size: 18px; font-weight: 700; color: white; }
         .close-modal { position: absolute; top: 20px; right: 20px; font-size: 24px; cursor: pointer; color: #666; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; z-index: 202; }
-        .modal-content { flex: 1; overflow-y: auto; padding: 20px; color: white; position: relative; z-index: 201; }
+        .modal-content { flex: 1; overflow-y: auto; padding: 20px; color: white; position: relative; z-index: 201; padding-bottom: 80px; }
 
-        /* HEATMAP (30 ДНЕЙ) */
+        /* HEATMAP */
         .heatmap-grid {
-            display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-bottom: 25px;
+            display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-bottom: 25px;
         }
         .heatmap-day {
-            aspect-ratio: 1/1; background: #222; border-radius: 8px; border: 1px solid #333;
+            aspect-ratio: 1/1; background: #1a1a1a; border-radius: 6px; border: 1px solid #333;
             display: flex; align-items: center; justify-content: center; 
-            font-size: 10px; font-weight: 800; color: #666;
+            font-size: 10px; font-weight: 800; color: #555;
             transition: all 0.3s;
         }
-        .heatmap-day.good { background: var(--green); color: #fff; border-color: var(--green); box-shadow: 0 0 10px rgba(39, 174, 96, 0.3); }
-        .heatmap-day.medium { background: var(--accent); color: #000; border-color: var(--accent); box-shadow: 0 0 10px rgba(212, 175, 55, 0.3); }
+        .heatmap-day.good { background: var(--green); color: #fff; border-color: var(--green); box-shadow: 0 0 8px rgba(39, 174, 96, 0.3); }
+        .heatmap-day.medium { background: var(--accent); color: #000; border-color: var(--accent); box-shadow: 0 0 8px var(--accent-dim); }
         .heatmap-day.bad { background: var(--red); color: #fff; border-color: var(--red); }
 
-        /* ФИНАЛЬНЫЙ ОТЧЕТ СПИСОК */
+        /* STATS LIST */
         .full-stat-list {
             margin-top: 20px;
             background: rgba(255,255,255,0.03);
-            border-radius: 12px;
+            border-radius: 16px;
             padding: 10px;
         }
         .full-stat-item {
             display: flex; justify-content: space-between;
-            padding: 12px;
+            padding: 14px;
             border-bottom: 1px solid rgba(255,255,255,0.05);
             font-size: 13px;
         }
         .full-stat-item:last-child { border-bottom: none; }
         .fs-name { color: #ccc; font-weight: 500; }
         .fs-val { color: var(--accent); font-weight: 700; text-align: right; }
-        .thoughts-list { text-align: left; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; margin-bottom: 20px; }
-        .thought-entry { font-size: 12px; color: #ddd; margin-bottom: 8px; border-bottom: 1px solid #333; padding-bottom: 8px; font-style: italic;}
+        .thoughts-list { text-align: left; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 16px; margin-bottom: 20px; }
+        .thought-entry { font-size: 13px; color: #ddd; margin-bottom: 12px; border-bottom: 1px solid #333; padding-bottom: 12px; font-style: italic; line-height: 1.4;}
 
-        /* --- ШАРИНГ --- */
+        /* SHARE & IMAGE GEN */
         .share-wrapper { position: relative; width: 100%; margin-bottom: 20px; }
-        
         .share-card-container {
-            width: 100%; 
-            padding-bottom: 100%; 
-            position: relative;
+            width: 100%; padding-bottom: 100%; position: relative;
             background: radial-gradient(circle at 50% -10%, #1a2a40 0%, #000000 70%);
             border-radius: 24px; border: 1px solid #333; overflow: hidden; display: block; 
         }
-        
         .visually-hidden { opacity: 0; pointer-events: none; position: absolute; top: 0; left: 0; }
-        
         #generatedImageContainer { 
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
             border-radius: 24px; overflow: hidden; z-index: 2000; display: none; 
         }
         #generatedImageContainer img { 
             width: 100%; height: 100%; object-fit: cover; 
-            pointer-events: auto !important; -webkit-user-select: auto !important; -webkit-touch-callout: default !important; 
+            pointer-events: auto !important; -webkit-user-select: auto !important; 
         }
-
         .share-content { 
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-            display: flex; flex-direction: column; 
-            justify-content: space-between; 
+            display: flex; flex-direction: column; justify-content: space-between; 
             padding: 20px; text-align: center; z-index: 10; 
         }
-        
         .share-top-part { padding-top: 10px; }
         .share-date { font-size: 14px; text-transform: uppercase; letter-spacing: 2px; color: #888; }
         .share-center-part { display: flex; flex-direction: column; align-items: center; justify-content: center; flex-grow: 1; }
@@ -292,7 +289,6 @@
         .share-branding-text { font-size: 10px; color: #aaa; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
         .share-branding-bot { font-size: 12px; color: var(--accent); font-weight: 800; margin-bottom: 2px; }
         .share-branding-sub { font-size: 10px; color: #666; font-weight: 600; }
-        
         .btn-send-image { width: 100%; padding: 16px; background: var(--accent); color: black; font-weight: 800; border-radius: 12px; border: none; margin-top: 10px; text-transform: uppercase; font-family: 'Manrope', sans-serif; cursor: pointer; }
 
         .prayer-table-container { overflow-x: auto; margin-bottom: 20px; }
@@ -300,7 +296,7 @@
         .prayer-table th { text-align: left; font-size: 11px; color: #666; text-transform: uppercase; padding: 10px; border-bottom: 1px solid #333; vertical-align: bottom; }
         .th-sub { display: block; font-size: 9px; opacity: 0.7; margin-top: 2px; text-transform: none; }
         .prayer-table td { padding: 12px 10px; font-size: 13px; border-bottom: 1px solid #222; }
-        .prayer-table tr.today-row { background: rgba(212, 175, 55, 0.1); }
+        .prayer-table tr.today-row { background: rgba(204, 255, 0, 0.1); }
         .change-city-btn { width: 100%; padding: 16px; background: #222; color: #fff; border: 1px solid #444; border-radius: 14px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: 'Manrope', sans-serif; display: flex; align-items: center; justify-content: center; gap: 8px; }
         
         .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 25px; }
@@ -391,7 +387,7 @@
         <div class="progress-bar-bg"><div class="progress-bar-fill"></div></div>
         <div class="task-item">
             <span class="task-text" onclick="toggleTask(this.parentElement, 'quran_read')">Читал Къур'ан</span>
-            <input type="number" id="quranPages" class="page-input" placeholder="стр." oninput="saveQuranPages(this.value)">
+            <input type="number" id="quranPages" class="page-input" placeholder="стр." min="0" autocomplete="off" oninput="saveQuranPages(this.value)">
             <div class="checkbox" onclick="toggleTask(this.parentElement, 'quran_read')"></div>
         </div>
         <div class="task-item" onclick="toggleTask(this, 'lecture')"><span class="task-text">Прослушал лекцию</span><div class="checkbox"></div></div>
@@ -435,14 +431,14 @@
         <div id="extraGoalsContainer"></div>
 
         <div class="add-goal-area">
-            <input type="text" class="custom-input" id="newGoalInput" placeholder="Напиши свою цель...">
+            <input type="text" class="custom-input" id="newGoalInput" autocomplete="off" placeholder="Напиши свою цель...">
             <div class="btn-plus" onclick="addNewGoalFromInput()">+</div>
         </div>
     </div>
 
     <div class="tracker-section">
         <div class="section-title">📝 Мысли за день</div>
-        <textarea id="dailyThoughts" class="journal-area" placeholder="Что сегодня осознал? За что благодарен?..." oninput="saveThoughts()"></textarea>
+        <textarea id="dailyThoughts" class="journal-area" autocomplete="off" placeholder="Что сегодня осознал? За что благодарен?..." oninput="saveThoughts()"></textarea>
     </div>
 
     <div class="tracker-section">
@@ -521,7 +517,7 @@
                             <div class="share-circle-wrap">
                                  <svg class="share-circle-svg" viewBox="0 0 160 160">
                                     <circle class="circle-bg" cx="80" cy="80" r="70" style="stroke-width:8;"></circle>
-                                    <circle id="shareCircle" stroke="#d4af37" stroke-width="8" fill="none" cx="80" cy="80" r="70" stroke-linecap="round" stroke-dasharray="440" stroke-dashoffset="440"></circle>
+                                    <circle id="shareCircle" stroke="#CCFF00" stroke-width="8" fill="none" cx="80" cy="80" r="70" stroke-linecap="round" stroke-dasharray="440" stroke-dashoffset="440"></circle>
                                 </svg>
                                 <div class="share-day-text-block">
                                     <div class="share-day-num" id="shareDayNum">1</div>
@@ -628,7 +624,7 @@
         fajr: 8, dhuhr: 8, asr: 8, maghrib: 8, isha: 8,
         sunnah: 2, tarawih: 2, witr: 2, tahajjud: 2,
         quran_read: 8, lecture: 6, arabic: 4,
-        sadaqah: 5, // НОВЫЙ ВЕС ДЛЯ САДАКА
+        sadaqah: 5,
         no_bad_words: 3, no_gossip: 3, 
         no_overeat: 3 
     };
@@ -708,7 +704,6 @@
         }
         if (dayData.water) score += (dayData.water * 0.6);
         
-        // Кастомные цели (+7 за каждую)
         if (dayData.extraGoals) {
             dayData.extraGoals.forEach(g => {
                 if(g.done) score += 7;
@@ -718,7 +713,6 @@
         return score > 100 ? 100 : Math.round(score);
     }
 
-    // --- РАСЧЕТ ВРЕМЕНИ ---
     function getCityTimes(cityId, day) {
         const city = CITIES[cityId];
         let shift = city.min_shift * (day - 1);
@@ -742,14 +736,14 @@
         document.getElementById('prevDay').classList.toggle('disabled', dayNum <= 1);
         document.getElementById('nextDay').classList.toggle('disabled', dayNum >= realDayNum);
         
+        // BUGFIX: Добавил || {} для безопасности, если данные старые
         const data = fullHistory[dayNum] || { tasks: {}, customText: "", rating: 0, thoughts: "", fasting: true, extraGoals: [], water: 0, quranPageCount: "" };
-        
-        // 1. Пост и Время
+        if(!data.tasks) data.tasks = {};
+
         const isFasting = (data.fasting !== false); 
         document.getElementById('fastingYes').className = isFasting ? 'fasting-option active' : 'fasting-option';
         document.getElementById('fastingNo').className = !isFasting ? 'fasting-option active' : 'fasting-option';
 
-        // Рендер времени ифтара
         const timeBlock = document.getElementById('fastingTimesBlock');
         const cityId = localStorage.getItem('ramadan_city_id_v14');
         
@@ -773,7 +767,6 @@
             timeBlock.innerHTML = `<button class="btn-set-city" onclick="openCityModal()">📍 Указать город для времени намаза</button>`;
         }
 
-        // 2. Чекбоксы (стандартные)
         document.querySelectorAll('.task-item').forEach(el => el.classList.remove('checked'));
         for(const [id, done] of Object.entries(data.tasks)) {
             if(done) {
@@ -785,18 +778,16 @@
             }
         }
         
-        // 3. Вода
         const waterVal = data.water || 0;
         document.querySelectorAll('.water-glass').forEach((el, idx) => {
             if (idx < waterVal) el.classList.add('filled');
             else el.classList.remove('filled');
         });
 
-        // 4. Страницы Корана
         document.getElementById('quranPages').value = data.quranPageCount || "";
         document.getElementById('dailyThoughts').value = data.thoughts || "";
 
-        // 5. ДОП ЦЕЛИ (Личность)
+        // Миграция старых целей (если были)
         if(data.customText && (!data.extraGoals || data.extraGoals.length === 0)) {
             if(!data.extraGoals) data.extraGoals = [];
             if(data.tasks && data.tasks.custom_goal) {
@@ -804,7 +795,7 @@
             } else {
                 data.extraGoals.push({ text: data.customText, done: false });
             }
-            data.customText = ""; // Очищаем старое
+            data.customText = "";
             saveData();
         }
 
@@ -842,14 +833,20 @@
         saveData();
     }
 
+    // BUGFIX: Разделяем таймеры для разных инпутов
+    let quranSaveTimeout;
     window.saveQuranPages = function(val) {
         ensureDayObj(activeDayNum);
+        // BUGFIX: Защита от отрицательных чисел
+        if (val < 0) val = 0;
         fullHistory[activeDayNum].quranPageCount = val;
+        
         if(val && val > 0 && !fullHistory[activeDayNum].tasks['quran_read']) {
             fullHistory[activeDayNum].tasks['quran_read'] = true;
             renderDay(activeDayNum); 
         }
-        clearTimeout(window.st); window.st = setTimeout(saveData, 500);
+        clearTimeout(quranSaveTimeout); 
+        quranSaveTimeout = setTimeout(saveData, 500);
     }
 
     window.setFasting = function(val) {
@@ -902,7 +899,6 @@
         if(title.includes("Личность")) {
              ensureDayObj(activeDayNum);
              const data = fullHistory[activeDayNum];
-             // Теперь 3 статических: злословие, сплетни, садака
              let total = 3; 
              let checked = 0;
              
@@ -937,7 +933,7 @@
         if(fill && text) {
             fill.style.width = percent + "%";
             text.innerText = percent + "%";
-            fill.style.backgroundColor = (percent === 100) ? "#27ae60" : "#d4af37";
+            fill.style.backgroundColor = (percent === 100) ? "#27ae60" : "#CCFF00";
         }
     }
 
@@ -948,7 +944,7 @@
         const circle = document.getElementById('monthCircle');
         circle.style.strokeDashoffset = offset;
         if(percent < 0.3) circle.style.stroke = "#e74c3c"; 
-        else if(percent < 0.8) circle.style.stroke = "#d4af37"; 
+        else if(percent < 0.8) circle.style.stroke = "#CCFF00"; 
         else circle.style.stroke = "#27ae60"; 
     }
 
@@ -975,7 +971,15 @@
         }
     }
     
-    window.saveThoughts = function() { ensureDayObj(activeDayNum); fullHistory[activeDayNum].thoughts = document.getElementById('dailyThoughts').value; clearTimeout(window.st); window.st = setTimeout(saveData, 500); }
+    // BUGFIX: Изолированный таймер
+    let thoughtsSaveTimeout;
+    window.saveThoughts = function() { 
+        ensureDayObj(activeDayNum); 
+        fullHistory[activeDayNum].thoughts = document.getElementById('dailyThoughts').value; 
+        clearTimeout(thoughtsSaveTimeout); 
+        thoughtsSaveTimeout = setTimeout(saveData, 500); 
+    }
+
     document.querySelectorAll('.star').forEach(s => s.addEventListener('click', function() { ensureDayObj(activeDayNum); fullHistory[activeDayNum].rating = parseInt(this.dataset.val); renderDay(activeDayNum); saveData(); haptic(); }));
 
     function ensureDayObj(d){ if(!fullHistory[d]) fullHistory[d] = {tasks:{}, customText:"", rating:0, thoughts:"", fasting:true, extraGoals:[], water:0, quranPageCount:""}; }
@@ -1204,11 +1208,11 @@
         const circle = document.getElementById('shareCircle');
         circle.style.strokeDashoffset = 440 - (percent * 440);
         if(percent < 0.3) circle.style.stroke = "#e74c3c";
-        else if(percent < 0.8) circle.style.stroke = "#d4af37";
+        else if(percent < 0.8) circle.style.stroke = "#CCFF00";
         else circle.style.stroke = "#27ae60";
 
         let starsHtml = '';
-        for(let i=1; i<=5; i++) { starsHtml += `<span style="font-size:24px; color:${i<=rating ? '#d4af37' : '#333'}">★</span>`; }
+        for(let i=1; i<=5; i++) { starsHtml += `<span style="font-size:24px; color:${i<=rating ? '#CCFF00' : '#333'}">★</span>`; }
         document.getElementById('shareStars').innerHTML = starsHtml;
 
         let aiMsg = "День прошел. Постоянство — ключ к успеху.";
@@ -1302,7 +1306,7 @@
             let fM=30-shift, mM=10+shift, fH=city.fajr_base, mH=city.maghrib_base;
             while(fM<0){fM+=60;fH--} while(mM>=60){mM-=60;mH++}
             let isT=(i+1)===activeDayNum?'class="today-row"':'';
-            h+=`<tr ${isT}><td>${i+1}</td><td style="font-weight:700;color:#fff">${fH}:${fM<10?'0'+fM:fM}</td><td>12:30</td><td>15:${20+i}</td><td style="font-weight:700;color:#d4af37">${mH}:${mM<10?'0'+mM:mM}</td><td>${mH+1}:${mM<10?'0'+mM:mM}</td></tr>`;
+            h+=`<tr ${isT}><td>${i+1}</td><td style="font-weight:700;color:#fff">${fH}:${fM<10?'0'+fM:fM}</td><td>12:30</td><td>15:${20+i}</td><td style="font-weight:700;color:#CCFF00">${mH}:${mM<10?'0'+mM:mM}</td><td>${mH+1}:${mM<10?'0'+mM:mM}</td></tr>`;
         }
         h+=`</tbody></table></div><button class="change-city-btn" onclick="changeCity()">📍 Изменить локацию</button>`;
         c.innerHTML = h;
