@@ -164,9 +164,9 @@
         }
         .delete-custom { color: #555; padding: 10px; font-size: 18px; cursor: pointer; margin-right: -10px; }
 
-        /* ВОДА */
-        .water-container { display: flex; justify-content: center; gap: 15px; padding: 15px 0; }
-        .water-glass { width: 30px; height: 40px; cursor: pointer; position: relative; opacity: 0.5; transition: 0.3s; }
+        /* ВОДА ОБНОВЛЕННАЯ */
+        .water-row { display: flex; gap: 8px; align-items: center; }
+        .water-glass { width: 22px; height: 30px; cursor: pointer; position: relative; opacity: 0.4; transition: 0.3s; }
         .water-glass svg { transform: none; width: 100%; height: 100%; }
         .water-glass path { stroke: #fff; stroke-width: 2; fill: transparent; transition: 0.3s; }
         .water-glass.filled { opacity: 1; transform: scale(1.1); }
@@ -405,13 +405,15 @@
         </div>
         <div class="progress-bar-bg"><div class="progress-bar-fill"></div></div>
         
-        <div class="group-label">Вода (1 стакан = 250мл)</div>
-        <div class="water-container">
-            <div class="water-glass" onclick="updateWater(1)"><svg viewBox="0 0 24 24"><path d="M5,5 L19,5 L17,21 L7,21 L5,5 Z"></path></svg></div>
-            <div class="water-glass" onclick="updateWater(2)"><svg viewBox="0 0 24 24"><path d="M5,5 L19,5 L17,21 L7,21 L5,5 Z"></path></svg></div>
-            <div class="water-glass" onclick="updateWater(3)"><svg viewBox="0 0 24 24"><path d="M5,5 L19,5 L17,21 L7,21 L5,5 Z"></path></svg></div>
-            <div class="water-glass" onclick="updateWater(4)"><svg viewBox="0 0 24 24"><path d="M5,5 L19,5 L17,21 L7,21 L5,5 Z"></path></svg></div>
-            <div class="water-glass" onclick="updateWater(5)"><svg viewBox="0 0 24 24"><path d="M5,5 L19,5 L17,21 L7,21 L5,5 Z"></path></svg></div>
+        <div class="task-item" style="cursor: default;">
+            <span class="task-text">Вода (250мл)</span>
+            <div class="water-row">
+                <div class="water-glass" onclick="updateWater(1)"><svg viewBox="0 0 24 24"><path d="M5,5 L19,5 L17,21 L7,21 L5,5 Z"></path></svg></div>
+                <div class="water-glass" onclick="updateWater(2)"><svg viewBox="0 0 24 24"><path d="M5,5 L19,5 L17,21 L7,21 L5,5 Z"></path></svg></div>
+                <div class="water-glass" onclick="updateWater(3)"><svg viewBox="0 0 24 24"><path d="M5,5 L19,5 L17,21 L7,21 L5,5 Z"></path></svg></div>
+                <div class="water-glass" onclick="updateWater(4)"><svg viewBox="0 0 24 24"><path d="M5,5 L19,5 L17,21 L7,21 L5,5 Z"></path></svg></div>
+                <div class="water-glass" onclick="updateWater(5)"><svg viewBox="0 0 24 24"><path d="M5,5 L19,5 L17,21 L7,21 L5,5 Z"></path></svg></div>
+            </div>
         </div>
         
         <div class="task-item" onclick="toggleTask(this, 'no_overeat')"><span class="task-text">Не переел</span><div class="checkbox"></div></div>
@@ -424,6 +426,7 @@
         </div>
         <div class="progress-bar-bg"><div class="progress-bar-fill"></div></div>
         
+        <div class="task-item" onclick="toggleTask(this, 'sadaqah')"><span class="task-text">Сделал садака</span><div class="checkbox"></div></div>
         <div class="task-item" onclick="toggleTask(this, 'no_bad_words')"><span class="task-text">Не злословил</span><div class="checkbox"></div></div>
         <div class="task-item" onclick="toggleTask(this, 'no_gossip')"><span class="task-text">Не сплетничал</span><div class="checkbox"></div></div>
         
@@ -625,8 +628,8 @@
         fajr: 8, dhuhr: 8, asr: 8, maghrib: 8, isha: 8,
         sunnah: 2, tarawih: 2, witr: 2, tahajjud: 2,
         quran_read: 8, lecture: 6, arabic: 4,
+        sadaqah: 5, // НОВЫЙ ВЕС ДЛЯ САДАКА
         no_bad_words: 3, no_gossip: 3, 
-        // Custom goals не имеют веса в SCORES по ключу, они считаются как +7 за каждую выполненную (лимит 100%)
         no_overeat: 3 
     };
 
@@ -793,8 +796,7 @@
         document.getElementById('quranPages').value = data.quranPageCount || "";
         document.getElementById('dailyThoughts').value = data.thoughts || "";
 
-        // 5. ДОП ЦЕЛИ (Личность) - НОВАЯ ЛОГИКА
-        // Сначала миграция старого поля customText, если оно есть и goals пустые
+        // 5. ДОП ЦЕЛИ (Личность)
         if(data.customText && (!data.extraGoals || data.extraGoals.length === 0)) {
             if(!data.extraGoals) data.extraGoals = [];
             if(data.tasks && data.tasks.custom_goal) {
@@ -812,7 +814,6 @@
         if(data.extraGoals && data.extraGoals.length > 0) {
             data.extraGoals.forEach((goal, idx) => {
                 const checked = goal.done ? 'checked' : '';
-                // Визуально как обычный таск
                 const html = `
                 <div class="task-item ${checked}" style="margin-bottom:1px;">
                      <span class="task-text" onclick="toggleExtraGoal(${idx})">${goal.text}</span>
@@ -823,7 +824,6 @@
             });
         }
         
-        // Очищаем инпут добавления
         document.getElementById('newGoalInput').value = "";
 
         const r = data.rating || 0;
@@ -833,7 +833,6 @@
         updateDailyCircle();
     }
 
-    // --- ЛОГИКА ВОДЫ ---
     window.updateWater = function(count) {
         ensureDayObj(activeDayNum);
         const current = fullHistory[activeDayNum].water || 0;
@@ -865,7 +864,6 @@
         document.getElementById('btnCalendar').click();
     }
 
-    // --- НОВАЯ ЛОГИКА ДОБАВЛЕНИЯ ЦЕЛЕЙ ---
     window.addNewGoalFromInput = function() {
         const inp = document.getElementById('newGoalInput');
         const val = inp.value.trim();
@@ -875,7 +873,7 @@
         if(!fullHistory[activeDayNum].extraGoals) fullHistory[activeDayNum].extraGoals = [];
         
         fullHistory[activeDayNum].extraGoals.push({ text: val, done: false });
-        renderDay(activeDayNum); // Перерисует список и очистит инпут
+        renderDay(activeDayNum); 
         saveData();
         haptic();
     }
@@ -898,21 +896,20 @@
     }
 
     function updateSectionProgress(section) {
-        // Спец расчет для Личности с доп целями
         const title = section.querySelector('.section-title').innerText;
         let percent = 0;
 
         if(title.includes("Личность")) {
-             // Считаем статические (злословие, сплетни) + динамические (extraGoals)
-             // Всего айтемов: 2 статических + N динамических
              ensureDayObj(activeDayNum);
              const data = fullHistory[activeDayNum];
-             let total = 2; 
+             // Теперь 3 статических: злословие, сплетни, садака
+             let total = 3; 
              let checked = 0;
              
              if(data && data.tasks) {
                  if(data.tasks.no_bad_words) checked++;
                  if(data.tasks.no_gossip) checked++;
+                 if(data.tasks.sadaqah) checked++;
              }
 
              if(data && data.extraGoals) {
@@ -1015,6 +1012,7 @@
             fajr: 0, dhuhr: 0, asr: 0, maghrib: 0, isha: 0,
             sunnah: 0, tarawih: 0, witr: 0, tahajjud: 0,
             quran_read: 0, lecture: 0, arabic: 0,
+            sadaqah: 0,
             no_bad_words: 0, no_gossip: 0,
             no_overeat: 0,
             water_liters: 0,
@@ -1060,6 +1058,7 @@
             fajr: "Фаджр", dhuhr: "Зухр", asr: "Аср", maghrib: "Магриб", isha: "Иша",
             sunnah: "Сунна намазы", tarawih: "Таравих", witr: "Витр", tahajjud: "Тахаджуд",
             quran_read: "Дней чтения Къур'ана", lecture: "Лекции", arabic: "Арабский",
+            sadaqah: "Сделал Садака",
             no_bad_words: "Не злословил", no_gossip: "Не сплетничал",
             no_overeat: "Не переедал"
         };
@@ -1076,15 +1075,14 @@
         });
 
         html += `<div class="group-label" style="margin-top:10px;">Активность</div>`;
-        // Исправленный текст
         if(stats.quran_pages_total > 0) html += `<div class="full-stat-item"><span class="fs-name">Прочитано страниц Къурана</span><span class="fs-val">${stats.quran_pages_total} стр.</span></div>`;
         else if(stats.quran_read > 0) html += `<div class="full-stat-item"><span class="fs-name">${labels.quran_read}</span><span class="fs-val">${stats.quran_read} дн.</span></div>`;
 
         if(stats.water_liters > 0) html += `<div class="full-stat-item"><span class="fs-name">Выпито воды</span><span class="fs-val">${stats.water_liters} л.</span></div>`;
         html += `<div class="full-stat-item"><span class="fs-name">${labels.no_overeat}</span><span class="fs-val">${stats.no_overeat} дн.</span></div>`;
         
-        ['lecture', 'arabic', 'no_bad_words', 'no_gossip'].forEach(p => {
-             html += `<div class="full-stat-item"><span class="fs-name">${labels[p]}</span><span class="fs-val">${stats[p]} дн.</span></div>`;
+        ['sadaqah', 'lecture', 'arabic', 'no_bad_words', 'no_gossip'].forEach(p => {
+             if(stats[p] > 0) html += `<div class="full-stat-item"><span class="fs-name">${labels[p]}</span><span class="fs-val">${stats[p]} дн.</span></div>`;
         });
 
         if(Object.keys(stats.custom_goals_breakdown).length > 0) {
