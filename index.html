@@ -7,13 +7,14 @@
     
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
         :root {
             /* Золотой/Лунный цвет */
             --accent: #d4af37;
-            --accent-dim: rgba(212, 175, 55, 0.2);
+            --accent-dim: rgba(212, 175, 55, 0.15);
             --green: #27ae60;
             --red: #e74c3c;
             --blue: #3498db;
@@ -39,25 +40,33 @@
 
         input, textarea { -webkit-user-select: text !important; user-select: text !important; }
 
-        /* ФОН */
+        /* ПАРАЛЛАКС ФОН */
         #star-bg {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: radial-gradient(circle at 50% 0%, #0f172a 0%, #000000 80%);
             z-index: 0; pointer-events: none; overflow: hidden;
         }
-        .star-layer { position: absolute; top: 0; left: 0; right: 0; bottom: 0; animation: moveStars 100s linear infinite; pointer-events: none;}
-        .star-layer:nth-child(2) { animation-duration: 150s; opacity: 0.6; }
+        .star-layer { 
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0; 
+            will-change: transform;
+        }
+        
+        /* Звезды сгенерированы через box-shadow */
         .stars-1 {
-            width: 2px; height: 2px; background: transparent;
-            box-shadow: 10vw 10vh #fff, 20vw 50vh #fff, 30vw 20vh #fff, 80vw 80vh #fff, 90vw 10vh #fff, 50vw 50vh #fff, 15vw 90vh #fff;
-            filter: drop-shadow(0 0 2px white);
+            width: 1px; height: 1px; background: transparent;
+            box-shadow: 10vw 10vh #fff, 20vw 50vh #fff, 30vw 20vh #fff, 80vw 80vh #fff, 90vw 10vh #fff, 50vw 50vh #fff, 15vw 90vh #fff, 40vw 40vh #fff;
+            opacity: 0.8;
         }
         .stars-2 {
-            width: 3px; height: 3px; background: transparent;
-            box-shadow: 55vw 15vh #fff, 25vw 85vh #fff, 75vw 25vh #fff, 10vw 60vh #fff;
-            filter: drop-shadow(0 0 4px white);
+            width: 2px; height: 2px; background: transparent;
+            box-shadow: 55vw 15vh #fff, 25vw 85vh #fff, 75vw 25vh #fff, 10vw 60vh #fff, 85vw 30vh #fff;
+            opacity: 0.6;
         }
-        @keyframes moveStars { from { transform: translateY(0); } to { transform: translateY(-100px); } }
+        .stars-3 {
+            width: 3px; height: 3px; background: transparent;
+            box-shadow: 15vw 35vh #fff, 45vw 65vh #fff, 65vw 15vh #fff;
+            opacity: 0.4;
+        }
 
         .container { 
             max-width: 450px; margin: 0 auto; padding: 20px; 
@@ -71,8 +80,9 @@
             background: rgba(255, 255, 255, 0.1); color: #fff; padding: 10px 16px; border-radius: 20px;
             font-size: 13px; font-weight: 600; border: 1px solid rgba(255, 255, 255, 0.1);
             cursor: pointer; backdrop-filter: blur(10px); font-family: 'Manrope', sans-serif; transition: 0.2s;
-            position: relative; z-index: 20;
+            position: relative; z-index: 20; display: flex; align-items: center; gap: 6px;
         }
+        .btn-mini i { font-size: 16px; }
         
         .brand-link {
             display: block; text-align: center; font-size: 12px; color: var(--accent);
@@ -103,25 +113,24 @@
         #syncStatus { font-size: 11px; text-align: center; color: #666; height: 20px; line-height: 20px; margin-bottom: 15px; position: relative; z-index: 10; font-weight: 600; transition: color 0.3s; }
         #syncStatus.active { color: var(--green); }
 
-        /* БЛОК ПОСТ (FASTING) - ОБНОВЛЕНО */
+        /* БЛОК ПОСТ */
         .fasting-switch {
             display: flex; background: rgba(255,255,255,0.05); border-radius: 20px; padding: 4px;
             margin-bottom: 15px; border: 1px solid var(--border); position: relative; z-index: 12;
         }
         .fasting-option {
             flex: 1; text-align: center; padding: 12px; font-size: 14px; font-weight: 700;
-            color: #666; cursor: pointer; border-radius: 16px; transition: 0.3s;
+            color: #666; cursor: pointer; border-radius: 16px; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 6px;
         }
-        /* Стиль для активного "Держу" - светится */
+        /* Не держу - просто серый */
+        .fasting-option.active-nothold { 
+            background: #222; color: #888; 
+        }
+        /* Держу - яркий */
         .fasting-option.active-hold { 
             background: var(--accent); color: #000; box-shadow: 0 0 15px var(--accent-dim); 
         }
-        /* Стиль для активного "Не держу" - просто серый/потухший */
-        .fasting-option.active-nothold { 
-            background: #333; color: #aaa; 
-        }
 
-        /* БЛОК ВРЕМЕНИ ИФТАРА */
         .fasting-times-block {
             background: rgba(0,0,0,0.3); border-radius: 20px; padding: 15px;
             border: 1px solid rgba(255,255,255,0.05); text-align: center; margin-bottom: 5px;
@@ -140,6 +149,7 @@
         .tracker-section { background: var(--card-bg); border-radius: 24px; padding: 22px; margin-bottom: 16px; border: 1px solid var(--border); backdrop-filter: blur(10px); position: relative; z-index: 11; }
         .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .section-title { font-size: 17px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 8px;}
+        .section-title i { font-size: 20px; color: var(--accent); }
         .section-percent { font-size: 13px; color: var(--accent); font-weight: 700; font-variant-numeric: tabular-nums; }
         .progress-bar-bg { width: 100%; height: 6px; background: rgba(255,255,255,0.05); border-radius: 6px; margin-bottom: 15px; overflow: hidden; }
         .progress-bar-fill { height: 100%; width: 0%; background: var(--accent); border-radius: 6px; transition: width 0.3s ease, background-color 0.3s ease; box-shadow: 0 0 10px var(--accent-dim); }
@@ -148,6 +158,7 @@
         .task-item { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; }
         .task-item:last-child { border-bottom: none; }
         .task-text { font-size: 15px; font-weight: 500; color: #eee; flex-grow: 1; }
+        
         .checkbox { 
             width: 24px; height: 24px; border-radius: 8px; border: 2px solid #444; 
             display: flex; align-items: center; justify-content: center; 
@@ -176,9 +187,10 @@
 
         /* ВОДА */
         .water-row { display: flex; gap: 8px; align-items: center; }
+        /* Сохраняем кастомные SVG стаканы, но стилизуем под линии */
         .water-glass { width: 22px; height: 30px; cursor: pointer; position: relative; opacity: 0.3; transition: 0.3s; }
         .water-glass svg { transform: none; width: 100%; height: 100%; }
-        .water-glass path { stroke: #fff; stroke-width: 2; fill: transparent; transition: 0.3s; }
+        .water-glass path { stroke: #fff; stroke-width: 1.5; fill: transparent; transition: 0.3s; } 
         .water-glass.filled { opacity: 1; transform: scale(1.1); }
         .water-glass.filled path { fill: var(--blue); stroke: var(--blue); filter: drop-shadow(0 0 8px rgba(52, 152, 219, 0.6)); }
 
@@ -205,7 +217,7 @@
         .btn-finish.saved { background: var(--green); color: white; box-shadow: 0 0 20px rgba(39, 174, 96, 0.4); }
         .btn-share {
             background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; color: #fff;
-            font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center;
+            font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
             text-transform: uppercase; position: relative; z-index: 50; backdrop-filter: blur(10px);
         }
         .btn-share:active, .btn-finish:active { transform: scale(0.96); }
@@ -222,7 +234,7 @@
         }
         .modal-overlay.show { transform: translateY(0); }
         .modal-header { padding: 20px; text-align: center; border-bottom: 1px solid #222; position: relative; flex-shrink: 0; }
-        .modal-title { font-size: 18px; font-weight: 700; color: white; }
+        .modal-title { font-size: 18px; font-weight: 700; color: white; display: flex; align-items: center; justify-content: center; gap: 8px;}
         .close-modal { position: absolute; top: 20px; right: 20px; font-size: 24px; cursor: pointer; color: #666; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; z-index: 202; }
         .modal-content { flex: 1; overflow-y: auto; padding: 20px; color: white; position: relative; z-index: 201; padding-bottom: 80px; }
 
@@ -240,26 +252,17 @@
         .heatmap-day.medium { background: var(--accent); color: #000; border-color: var(--accent); box-shadow: 0 0 8px var(--accent-dim); }
         .heatmap-day.bad { background: var(--red); color: #fff; border-color: var(--red); }
 
-        /* STATS LIST */
         .full-stat-list {
-            margin-top: 20px;
-            background: rgba(255,255,255,0.03);
-            border-radius: 16px;
-            padding: 10px;
+            margin-top: 20px; background: rgba(255,255,255,0.03); border-radius: 16px; padding: 10px;
         }
         .full-stat-item {
-            display: flex; justify-content: space-between;
-            padding: 14px;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            font-size: 13px;
+            display: flex; justify-content: space-between; padding: 14px;
+            border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 13px;
         }
         .full-stat-item:last-child { border-bottom: none; }
         .fs-name { color: #ccc; font-weight: 500; }
         .fs-val { color: var(--accent); font-weight: 700; text-align: right; }
-        .thoughts-list { text-align: left; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 16px; margin-bottom: 20px; }
-        .thought-entry { font-size: 13px; color: #ddd; margin-bottom: 12px; border-bottom: 1px solid #333; padding-bottom: 12px; font-style: italic; line-height: 1.4;}
-
-        /* SHARE & IMAGE GEN */
+        
         .share-wrapper { position: relative; width: 100%; margin-bottom: 20px; }
         .share-card-container {
             width: 100%; padding-bottom: 100%; position: relative;
@@ -318,12 +321,13 @@
 <div id="star-bg">
     <div class="star-layer stars-1"></div>
     <div class="star-layer stars-2"></div>
+    <div class="star-layer stars-3"></div>
 </div>
 
 <div class="container">
     <div class="top-bar">
-        <button class="btn-mini" id="btnStats">📊 Мой Отчет</button>
-        <button class="btn-mini" id="btnCalendar">📅 Календарь</button>
+        <button class="btn-mini" id="btnStats"><i class="ph ph-chart-bar"></i> Отчет</button>
+        <button class="btn-mini" id="btnCalendar"><i class="ph ph-calendar-blank"></i> Календарь</button>
     </div>
 
     <a href="https://t.me/ametov_design" class="brand-link" target="_blank">
@@ -354,7 +358,7 @@
     <div id="syncStatus">Загрузка...</div>
 
     <div class="tracker-section" style="border-color: var(--accent);">
-        <div class="section-title" style="justify-content:center; margin-bottom:10px;">🌙 Пост сегодня</div>
+        <div class="section-title" style="justify-content:center; margin-bottom:10px;"><i class="ph ph-moon-stars"></i> Пост сегодня</div>
         <div class="fasting-switch">
             <div class="fasting-option" id="fastingNo" onclick="setFasting(false)">Не держу</div>
             <div class="fasting-option" id="fastingYes" onclick="setFasting(true)">Держу</div>
@@ -366,7 +370,7 @@
 
     <div class="tracker-section">
         <div class="section-header">
-            <div class="section-title">🤲 Намаз</div>
+            <div class="section-title"><i class="ph ph-hands-praying"></i> Намаз</div>
             <div class="section-percent">0%</div>
         </div>
         <div class="progress-bar-bg"><div class="progress-bar-fill"></div></div>
@@ -385,7 +389,7 @@
 
     <div class="tracker-section">
         <div class="section-header">
-            <div class="section-title">📖 Знания</div>
+            <div class="section-title"><i class="ph ph-book-open-text"></i> Знания</div>
             <div class="section-percent">0%</div>
         </div>
         <div class="progress-bar-bg"><div class="progress-bar-fill"></div></div>
@@ -400,7 +404,7 @@
 
     <div class="tracker-section">
         <div class="section-header">
-            <div class="section-title">🍎 Питание</div>
+            <div class="section-title"><i class="ph ph-bowl-food"></i> Питание</div>
             <div class="section-percent">0%</div>
         </div>
         <div class="progress-bar-bg"><div class="progress-bar-fill"></div></div>
@@ -421,7 +425,7 @@
 
     <div class="tracker-section">
         <div class="section-header">
-            <div class="section-title">✨ Личность</div>
+            <div class="section-title"><i class="ph ph-sparkle"></i> Личность</div>
             <div class="section-percent">0%</div>
         </div>
         <div class="progress-bar-bg"><div class="progress-bar-fill"></div></div>
@@ -441,12 +445,12 @@
     </div>
 
     <div class="tracker-section">
-        <div class="section-title">📝 Мысли за день</div>
+        <div class="section-title"><i class="ph ph-pencil-simple"></i> Мысли за день</div>
         <textarea id="dailyThoughts" class="journal-area" autocomplete="off" placeholder="Что сегодня осознал? За что благодарен?..." oninput="saveThoughts()"></textarea>
     </div>
 
     <div class="tracker-section">
-        <div class="section-title" style="justify-content:center;">⭐ Оценка дня</div>
+        <div class="section-title" style="justify-content:center;"><i class="ph ph-star"></i> Оценка дня</div>
         <div class="stars">
             <div class="star" data-val="1">★</div>
             <div class="star" data-val="2">★</div>
@@ -458,7 +462,7 @@
 
     <div class="bottom-actions">
         <button class="btn-finish" id="btnFinish">Сохранить день</button>
-        <button class="btn-share" id="btnShare">Поделиться днём</button>
+        <button class="btn-share" id="btnShare"><i class="ph ph-export"></i> Поделиться</button>
     </div>
 </div>
 
@@ -604,6 +608,14 @@
     let tg = window.Telegram ? window.Telegram.WebApp : null;
     if (tg) { tg.expand(); tg.MainButton.hide(); tg.setHeaderColor('#090e16'); tg.setBackgroundColor('#000000'); }
 
+    // PARALLAX SCRIPT
+    window.addEventListener('scroll', () => {
+        const scrolled = window.scrollY;
+        document.querySelector('.stars-1').style.transform = `translateY(${scrolled * 0.3}px)`;
+        document.querySelector('.stars-2').style.transform = `translateY(${scrolled * 0.2}px)`;
+        document.querySelector('.stars-3').style.transform = `translateY(${scrolled * 0.1}px)`;
+    });
+
     const CITIES = [
         { id:0, name: "Москва", fajr_base: 5, maghrib_base: 17, min_shift: 2 }, 
         { id:1, name: "Казань", fajr_base: 5, maghrib_base: 16, min_shift: 2 },
@@ -697,7 +709,9 @@
     function calculateDayScore(dayData) {
         if (!dayData) return 0;
         let score = 0;
-        if (dayData.fasting !== false) score += SCORES.fasting;
+        
+        // Пост считается только если явно true (по умолчанию false)
+        if (dayData.fasting === true) score += SCORES.fasting;
         
         if (dayData.tasks) {
             for (let task in dayData.tasks) {
@@ -708,8 +722,6 @@
         }
         
         // НОВАЯ ЛОГИКА ВОДЫ: 2 стакана = макс балл (3 балла).
-        // 1 стакан = 1.5 балла.
-        // Если выпил больше 2, баллы не растут выше 3 (но это хорошо).
         if (dayData.water) {
             if (dayData.water >= 2) score += 3;
             else score += (dayData.water * 1.5);
@@ -747,16 +759,16 @@
         document.getElementById('prevDay').classList.toggle('disabled', dayNum <= 1);
         document.getElementById('nextDay').classList.toggle('disabled', dayNum >= realDayNum);
         
-        const data = fullHistory[dayNum] || { tasks: {}, customText: "", rating: 0, thoughts: "", fasting: true, extraGoals: [], water: 0, quranPageCount: "" };
+        // DEFAULT FASTING IS FALSE NOW
+        const data = fullHistory[dayNum] || { tasks: {}, customText: "", rating: 0, thoughts: "", fasting: false, extraGoals: [], water: 0, quranPageCount: "" };
         if(!data.tasks) data.tasks = {};
 
         // ЛОГИКА ТУМБЛЕРА:
-        const isFasting = (data.fasting !== false); 
+        const isFasting = (data.fasting === true); 
         
         const btnYes = document.getElementById('fastingYes');
         const btnNo = document.getElementById('fastingNo');
 
-        // Сброс классов
         btnYes.className = 'fasting-option';
         btnNo.className = 'fasting-option';
 
@@ -939,7 +951,7 @@
             ensureDayObj(activeDayNum);
             const water = fullHistory[activeDayNum] ? (fullHistory[activeDayNum].water || 0) : 0;
             const notOvereat = section.querySelector('.task-item.checked') ? 1 : 0;
-            // Вода (считаем как 5 шагов для прогресс бара) + 1 чекбокс = 6
+            // Вода (считаем как 5 шагов) + 1 чекбокс = 6
             percent = Math.round(((water + notOvereat) / 6) * 100);
         } else {
             const totalItems = section.querySelectorAll('.task-item').length;
@@ -1001,7 +1013,7 @@
 
     document.querySelectorAll('.star').forEach(s => s.addEventListener('click', function() { ensureDayObj(activeDayNum); fullHistory[activeDayNum].rating = parseInt(this.dataset.val); renderDay(activeDayNum); saveData(); haptic(); }));
 
-    function ensureDayObj(d){ if(!fullHistory[d]) fullHistory[d] = {tasks:{}, customText:"", rating:0, thoughts:"", fasting:true, extraGoals:[], water:0, quranPageCount:""}; }
+    function ensureDayObj(d){ if(!fullHistory[d]) fullHistory[d] = {tasks:{}, customText:"", rating:0, thoughts:"", fasting:false, extraGoals:[], water:0, quranPageCount:""}; }
     
     function saveData(){
         const val = JSON.stringify(fullHistory);
@@ -1047,7 +1059,7 @@
             const d = fullHistory[i];
             if(!d) continue;
 
-            if(d.fasting !== false) stats.fasting++;
+            if(d.fasting === true) stats.fasting++;
 
             if(d.tasks) {
                 for(let key in stats) {
