@@ -3,27 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
-    <title>Ramadan Tracker Final</title>
+    <title>Ramadan Tracker Final Fixed</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
         :root {
-            /* Исправлено: Глубокий черный фон для "ночи" */
-            --bg-body: #000000;
-            --bg-gradient: radial-gradient(circle at 50% 0%, #1a2332 0%, #000000 85%);
+            /* Максимально темный фон */
+            --bg-body: #050505;
+            --bg-gradient: radial-gradient(circle at 50% 0%, #11151c 0%, #000000 90%);
             
             --accent: #d4af37;
-            --accent-glow: rgba(212, 175, 55, 0.4);
-            --glass-bg: rgba(255, 255, 255, 0.05);
-            --glass-border: rgba(255, 255, 255, 0.1);
+            --accent-glow: rgba(212, 175, 55, 0.25);
+            
+            --glass-bg: rgba(20, 20, 20, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.08);
             
             --text-primary: #ffffff;
-            --text-secondary: #94a3b8;
-            --text-tertiary: #58687d;
+            --text-secondary: #a0a0a0;
+            --text-tertiary: #555555;
             
             --green: #27ae60;
             --red: #e74c3c;
@@ -46,35 +47,34 @@
         
         body.no-scroll { overflow: hidden !important; height: 100vh; position: fixed; width: 100%; }
 
-        /* ИСПРАВЛЕНО: ЗВЕЗДЫ ЯРЧЕ И ЗАМЕТНЕЕ */
+        /* Звезды */
         #star-bg {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             z-index: 0; pointer-events: none; overflow: hidden;
         }
         .star-layer { position: absolute; top: 0; left: 0; right: 0; bottom: 0; will-change: transform; }
-        
         .stars-1 {
-            width: 2px; height: 2px; background: transparent;
-            box-shadow: 10vw 10vh #fff, 20vw 50vh #fff, 30vw 20vh #fff, 80vw 80vh #fff, 50vw 10vh #fff, 85vw 30vh #fff;
-            opacity: 0.8; /* Поднял яркость */
+            width: 2px; height: 2px; background: white;
+            box-shadow: 10vw 10vh #fff, 20vw 50vh #fff, 30vw 20vh #fff, 80vw 80vh #fff, 50vw 10vh #fff, 85vw 30vh #fff, 15vw 90vh #fff;
+            opacity: 0.8;
         }
         .stars-2 {
-            width: 3px; height: 3px; background: transparent;
-            box-shadow: 55vw 15vh #fff, 25vw 85vh #fff, 10vw 40vh #fff;
+            width: 1px; height: 1px; background: white;
+            box-shadow: 55vw 15vh #fff, 25vw 85vh #fff, 10vw 40vh #fff, 90vw 10vh #fff, 40vw 60vh #fff;
             opacity: 0.5;
         }
 
         .container { 
             max-width: 450px; margin: 0 auto; padding: 20px; 
-            padding-bottom: 160px; position: relative; z-index: 10; 
+            padding-bottom: 120px; position: relative; z-index: 10; 
         }
 
         /* Top Bar */
         .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .btn-mini {
-            background: rgba(255, 255, 255, 0.08); color: #ccc; padding: 8px 14px; border-radius: 20px;
+            background: rgba(255, 255, 255, 0.05); color: #ccc; padding: 8px 14px; border-radius: 12px;
             font-size: 13px; font-weight: 600; border: 1px solid var(--glass-border);
-            cursor: pointer; backdrop-filter: blur(10px); display: flex; align-items: center; gap: 6px;
+            cursor: pointer; display: flex; align-items: center; gap: 6px;
         }
         .btn-mini i { color: var(--accent); font-size: 16px; }
 
@@ -83,14 +83,14 @@
             text-decoration: none; font-weight: 600; margin-bottom: 20px; letter-spacing: 1px; text-transform: uppercase;
         }
 
-        /* Круг */
+        /* Header Circle */
         .progress-header { display: flex; flex-direction: column; align-items: center; margin-bottom: 25px; }
         .circle-wrapper { display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 15px; width: 100%; }
         
         .nav-arrow { 
             font-size: 24px; color: var(--text-tertiary); width: 44px; height: 44px; 
             display: flex; align-items: center; justify-content: center; 
-            background: rgba(255,255,255,0.05); border-radius: 50%; cursor: pointer; transition: 0.2s;
+            background: rgba(255,255,255,0.03); border-radius: 50%; cursor: pointer; transition: 0.2s;
         }
         .nav-arrow:active { transform: scale(0.9); background: var(--accent); color: #000; }
         .nav-arrow.disabled { opacity: 0.2; pointer-events: none; }
@@ -107,24 +107,26 @@
         .day-info { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; margin-top: 10px; }
         .day-number { 
             font-size: 68px; font-weight: 200; letter-spacing: -3px; line-height: 1; 
-            background: linear-gradient(180deg, #fff 30%, #a5b4fc 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background: linear-gradient(180deg, #fff 30%, #999 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
         .day-label { font-size: 12px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 2px; font-weight: 700; margin-top: 5px; }
         .greeting-text { text-align: center; font-size: 14px; color: var(--text-secondary); line-height: 1.5; opacity: 0.8; }
+        
         #syncStatus { font-size: 11px; text-align: center; color: var(--text-tertiary); height: 20px; margin-bottom: 10px; }
         #syncStatus.active { color: var(--green); }
 
         /* Карточки */
         .tracker-section { 
-            background: linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%);
-            border-radius: 24px; padding: 22px; margin-bottom: 16px; 
+            background: #0e0e0e;
+            border-radius: 20px; padding: 20px; margin-bottom: 12px; 
             border: 1px solid var(--glass-border); border-top: 2px solid var(--accent); 
-            backdrop-filter: blur(20px); position: relative; z-index: 11;
+            position: relative; z-index: 11;
         }
         .section-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 15px; }
         .section-title { font-size: 16px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
         .section-title i { font-size: 20px; color: var(--accent); }
         .section-percent { font-size: 32px; font-weight: 200; color: #fff; line-height: 1; }
+        
         .progress-bar-bg { width: 100%; height: 4px; background: rgba(255,255,255,0.08); border-radius: 6px; margin-bottom: 15px; overflow: hidden; }
         .progress-bar-fill { height: 100%; width: 0%; background: var(--accent); border-radius: 6px; transition: width 0.3s ease; box-shadow: 0 0 10px var(--accent-glow); }
 
@@ -133,42 +135,44 @@
         .task-item:last-child { border-bottom: none; }
         .task-text { font-size: 15px; font-weight: 400; color: #ccc; flex-grow: 1; }
         .task-item.checked .task-text { color: #fff; }
+        
         .checkbox { width: 22px; height: 22px; border-radius: 6px; border: 1px solid var(--text-tertiary); display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
-        .task-item.checked .checkbox { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 10px var(--accent-glow); }
+        .task-item.checked .checkbox { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 8px var(--accent-glow); }
         .checkbox::after { content: '✓'; font-size: 14px; display: none; font-weight: 800; color: #000; }
         .task-item.checked .checkbox::after { display: block; }
 
         /* Пост */
-        .fasting-switch { display: flex; background: rgba(0,0,0,0.3); border-radius: 14px; padding: 4px; margin-bottom: 15px; border: 1px solid var(--glass-border); }
+        .fasting-switch { display: flex; background: rgba(0,0,0,0.4); border-radius: 14px; padding: 4px; margin-bottom: 15px; border: 1px solid var(--glass-border); }
         .fasting-option { flex: 1; text-align: center; padding: 12px; font-size: 14px; font-weight: 600; color: var(--text-tertiary); cursor: pointer; border-radius: 10px; transition: 0.3s; }
         .fasting-option.active-nothold { background: rgba(255,255,255,0.05); color: #aaa; }
         .fasting-option.active-hold { background: var(--accent); color: #000; box-shadow: 0 0 15px var(--accent-glow); font-weight: 700; }
 
-        /* ИСПРАВЛЕНО: Ровное отображение времени */
-        .fasting-times-block { background: rgba(0,0,0,0.2); border-radius: 16px; padding: 15px; border: 1px solid rgba(255,255,255,0.05); text-align: center; }
+        .fasting-times-block { background: rgba(0,0,0,0.3); border-radius: 16px; padding: 15px; border: 1px solid rgba(255,255,255,0.05); text-align: center; }
         .time-row { display: flex; justify-content: space-between; align-items: center; padding: 0 20px; margin-bottom: 8px; }
         .time-item { text-align: center; }
         .time-label { font-size: 10px; color: var(--text-tertiary); text-transform: uppercase; margin-bottom: 2px; }
         .time-val { font-size: 24px; font-weight: 300; color: #fff; }
-        .time-disclaimer { font-size: 10px; color: #555; margin-top: 5px; font-style: italic; }
+        .time-disclaimer { font-size: 10px; color: #555; margin-top: 5px; }
 
-        /* ИСПРАВЛЕНО: Вода горизонтально */
-        .water-row { display: flex; gap: 12px; align-items: center; justify-content: flex-end; }
-        .water-glass { width: 20px; height: 28px; cursor: pointer; opacity: 0.3; transition: 0.2s; }
-        .water-glass.filled { opacity: 1; transform: scale(1.15); }
-        .water-glass.filled path { fill: var(--blue); stroke: var(--blue); filter: drop-shadow(0 0 8px var(--blue)); }
+        /* Вода */
+        .water-row { display: flex; gap: 10px; align-items: center; justify-content: flex-end; }
+        .water-glass { width: 20px; height: 28px; cursor: pointer; opacity: 0.2; transition: 0.2s; }
+        .water-glass.filled { opacity: 1; transform: scale(1.1); }
+        .water-glass.filled path { fill: var(--blue); stroke: var(--blue); filter: drop-shadow(0 0 6px var(--blue)); }
 
         .custom-input { width: 100%; border: 1px solid #333; background: rgba(0,0,0,0.3); padding: 12px; border-radius: 12px; font-size: 14px; color: #fff; outline: none; margin-bottom: 10px;}
-        .journal-area { width: 100%; height: 100px; background: rgba(0,0,0,0.2); border: 1px solid #333; border-radius: 14px; padding: 15px; color: #fff; font-family: 'Manrope'; resize: none; }
+        .journal-area { width: 100%; height: 100px; background: rgba(0,0,0,0.3); border: 1px solid #333; border-radius: 14px; padding: 15px; color: #fff; font-family: 'Manrope'; resize: none; }
         
         .stars { display: flex; justify-content: center; gap: 10px; margin-top: 5px; }
         .star { font-size: 34px; color: #333; cursor: pointer; }
         .star.active { color: var(--accent); text-shadow: 0 0 15px var(--accent-glow); }
 
-        .btn-finish { background: #fff; color: #000; width: 100%; padding: 16px; border: none; border-radius: 16px; font-size: 14px; font-weight: 800; cursor: pointer; text-transform: uppercase; margin-bottom: 10px; box-shadow: 0 0 20px rgba(255,255,255,0.1); }
-        .btn-share { background: rgba(255,255,255,0.05); color: #fff; width: 100%; padding: 16px; border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; font-size: 14px; font-weight: 700; cursor: pointer; text-transform: uppercase; }
+        .bottom-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        .btn-action { width: 100%; padding: 16px; border-radius: 16px; font-size: 14px; font-weight: 700; cursor: pointer; text-transform: uppercase; border: none; }
+        .btn-save { background: #fff; color: #000; }
+        .btn-share-day { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.1); }
 
-        /* Модальные окна */
+        /* Модалки */
         .modal-overlay { position: fixed; bottom: 0; left: 0; width: 100%; height: 100%; background: #0c0f14; border-top-left-radius: 24px; border-top-right-radius: 24px; transform: translateY(110%); transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); z-index: 200; display: flex; flex-direction: column; border-top: 1px solid #333; padding-top: 10px; }
         .modal-overlay.show { transform: translateY(0); }
         .modal-header { padding: 15px; text-align: center; border-bottom: 1px solid #222; position: relative; }
@@ -180,22 +184,22 @@
         .prayer-table { width: 100%; border-collapse: collapse; }
         .prayer-table th { text-align: left; font-size: 10px; color: var(--text-tertiary); text-transform: uppercase; padding: 10px 5px; border-bottom: 1px solid #333; }
         .prayer-table td { padding: 12px 5px; font-size: 13px; border-bottom: 1px solid #222; color: #ccc; }
-        .prayer-table tr.today-row { background: rgba(212, 175, 55, 0.1); border-left: 2px solid var(--accent); }
 
-        /* ИСПРАВЛЕНО: SHARE CARD - Фиксированная верстка для html2canvas */
-        .share-wrapper { position: relative; width: 100%; margin-bottom: 15px; display: flex; justify-content: center; }
-        .share-card-container {
-            width: 320px; /* Фикс ширина для ровной генерации */
-            height: 480px; /* Фикс высота */
-            background: radial-gradient(circle at 50% 0%, #1e2838 0%, #000000 80%);
-            border-radius: 20px; border: 1px solid #333; overflow: hidden; position: relative;
+        /* ДЕТАЛЬНЫЙ ОТЧЕТ (КАК НА СКРИНЕ) */
+        .full-stat-item { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 14px; }
+        .fs-name { color: #ccc; }
+        .fs-val { color: var(--accent); font-weight: 700; }
+        .stat-group-title { font-size: 11px; text-transform: uppercase; color: #555; margin-top: 20px; margin-bottom: 5px; font-weight: 700; letter-spacing: 1px;}
+
+        /* СКРЫТЫЙ КОНТЕЙНЕР ДЛЯ ГЕНЕРАЦИИ */
+        #hidden-share-container {
+            position: absolute; top: -9999px; left: -9999px;
+            width: 400px; height: 600px;
+            background: #000;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 30px; text-align: center;
+            background-image: radial-gradient(circle at 50% 0%, #1a2332 0%, #000000 90%);
         }
-        .share-content { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: space-between; padding: 25px; text-align: center; z-index: 10; }
-        
-        /* Stats Report */
-        .full-stat-item { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 13px; }
-        .fs-name { color: #aaa; }
-        .fs-val { color: #fff; font-weight: 700; }
     </style>
 </head>
 <body>
@@ -255,13 +259,16 @@
         </div>
         <div class="progress-bar-bg"><div class="progress-bar-fill"></div></div>
         
-        <div class="task-item" onclick="toggleTask(this, 'fajr')"><span class="task-text">Фаджр (Утренний)</span><div class="checkbox"></div></div>
-        <div class="task-item" onclick="toggleTask(this, 'dhuhr')"><span class="task-text">Зухр (Обеденный)</span><div class="checkbox"></div></div>
-        <div class="task-item" onclick="toggleTask(this, 'asr')"><span class="task-text">Аср (Предвечерний)</span><div class="checkbox"></div></div>
-        <div class="task-item" onclick="toggleTask(this, 'maghrib')"><span class="task-text">Магриб (Вечерний)</span><div class="checkbox"></div></div>
-        <div class="task-item" onclick="toggleTask(this, 'isha')"><span class="task-text">Иша (Ночной)</span><div class="checkbox"></div></div>
+        <div class="task-item" onclick="toggleTask(this, 'fajr')"><span class="task-text">Фаджр</span><div class="checkbox"></div></div>
+        <div class="task-item" onclick="toggleTask(this, 'dhuhr')"><span class="task-text">Зухр</span><div class="checkbox"></div></div>
+        <div class="task-item" onclick="toggleTask(this, 'asr')"><span class="task-text">Аср</span><div class="checkbox"></div></div>
+        <div class="task-item" onclick="toggleTask(this, 'maghrib')"><span class="task-text">Магриб</span><div class="checkbox"></div></div>
+        <div class="task-item" onclick="toggleTask(this, 'isha')"><span class="task-text">Иша</span><div class="checkbox"></div></div>
         <div style="height:10px;"></div>
+        <div class="task-item" onclick="toggleTask(this, 'sunnah')"><span class="task-text" style="color:#aaa;">Сунна намазы</span><div class="checkbox"></div></div>
         <div class="task-item" onclick="toggleTask(this, 'tarawih')"><span class="task-text" style="color:var(--accent);">Таравих</span><div class="checkbox"></div></div>
+        <div class="task-item" onclick="toggleTask(this, 'witr')"><span class="task-text" style="color:#aaa;">Витр</span><div class="checkbox"></div></div>
+        <div class="task-item" onclick="toggleTask(this, 'tahajjud')"><span class="task-text" style="color:#aaa;">Тахаджуд</span><div class="checkbox"></div></div>
     </div>
 
     <div class="tracker-section">
@@ -276,6 +283,7 @@
             <div class="checkbox" onclick="toggleTask(this.parentElement, 'quran_read')"></div>
         </div>
         <div class="task-item" onclick="toggleTask(this, 'lecture')"><span class="task-text">Лекция / Урок</span><div class="checkbox"></div></div>
+        <div class="task-item" onclick="toggleTask(this, 'arabic')"><span class="task-text">Арабский язык</span><div class="checkbox"></div></div>
     </div>
 
     <div class="tracker-section">
@@ -286,7 +294,7 @@
         <div class="progress-bar-bg"><div class="progress-bar-fill"></div></div>
         
         <div class="task-item" style="cursor: default;">
-            <span class="task-text">Вода (по 0.5л)</span>
+            <span class="task-text">Вода (3 стакана - цель)</span>
             <div class="water-row">
                 <div class="water-glass" onclick="updateWater(1)"><svg viewBox="0 0 24 24"><path d="M5,5 L19,5 L17,21 L7,21 L5,5 Z" fill="none" stroke="#fff" stroke-width="2"></path></svg></div>
                 <div class="water-glass" onclick="updateWater(2)"><svg viewBox="0 0 24 24"><path d="M5,5 L19,5 L17,21 L7,21 L5,5 Z" fill="none" stroke="#fff" stroke-width="2"></path></svg></div>
@@ -296,7 +304,7 @@
             </div>
         </div>
         
-        <div class="task-item" onclick="toggleTask(this, 'no_overeat')"><span class="task-text">Не переел на Ифтар</span><div class="checkbox"></div></div>
+        <div class="task-item" onclick="toggleTask(this, 'no_overeat')"><span class="task-text">Не переел</span><div class="checkbox"></div></div>
     </div>
 
     <div class="tracker-section">
@@ -306,8 +314,9 @@
         </div>
         <div class="progress-bar-bg"><div class="progress-bar-fill"></div></div>
         
-        <div class="task-item" onclick="toggleTask(this, 'sadaqah')"><span class="task-text">Садака (Милостыня)</span><div class="checkbox"></div></div>
-        <div class="task-item" onclick="toggleTask(this, 'no_bad_words')"><span class="task-text">Без сквернословия</span><div class="checkbox"></div></div>
+        <div class="task-item" onclick="toggleTask(this, 'sadaqah')"><span class="task-text">Садака</span><div class="checkbox"></div></div>
+        <div class="task-item" onclick="toggleTask(this, 'no_bad_words')"><span class="task-text">Не злословил</span><div class="checkbox"></div></div>
+        <div class="task-item" onclick="toggleTask(this, 'no_gossip')"><span class="task-text">Не сплетничал</span><div class="checkbox"></div></div>
         
         <div style="font-size:10px; text-transform:uppercase; color:#666; margin:15px 0 5px;">Мои цели</div>
         <div id="extraGoalsContainer"></div>
@@ -333,8 +342,10 @@
         </div>
     </div>
 
-    <button class="btn-finish" id="btnFinish">Сохранить прогресс</button>
-    <button class="btn-share" id="btnShare"><i class="ph ph-export"></i> Поделиться в сторис</button>
+    <div class="bottom-actions">
+        <button class="btn-action btn-save" id="btnFinish">Сохранить</button>
+        <button class="btn-action btn-share-day" id="btnShare">Поделиться</button>
+    </div>
 </div>
 
 <div class="modal-overlay" id="modalCalendar">
@@ -352,77 +363,35 @@
         <div class="close-modal" onclick="closeModal('modalStats')">×</div>
     </div>
     <div class="modal-content">
-        <div class="heatmap-grid" id="heatmapGrid" style="display:grid; grid-template-columns:repeat(6,1fr); gap:6px; margin-bottom:20px;"></div>
-
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px;">
-            <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:12px; text-align:center;">
-                <div style="font-size:24px; font-weight:800; color:var(--accent);" id="statDays">0</div>
-                <div style="font-size:10px; color:#aaa;">ДНЕЙ</div>
+        <div id="statFullList">
             </div>
-            <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:12px; text-align:center;">
-                <div style="font-size:24px; font-weight:800; color:var(--accent);" id="statRating">0.0</div>
-                <div style="font-size:10px; color:#aaa;">РЕЙТИНГ</div>
-            </div>
-        </div>
-        
-        <div id="statFullList"></div>
     </div>
 </div>
 
-<div class="modal-overlay" id="modalShare">
-    <div class="modal-header">
-        <div class="modal-title">📸 Создание сторис</div>
-        <div class="close-modal" onclick="closeModal('modalShare')">×</div>
-    </div>
-    <div class="modal-content" style="display:flex; flex-direction:column; align-items:center;">
-        
-        <div class="share-wrapper">
-            <div class="share-card-container" id="shareCardToRender">
-                <div style="position:absolute; top:0; left:0; width:100%; height:100%; opacity:0.5;">
-                    <div class="star-layer stars-1"></div>
-                </div>
-
-                <div class="share-content">
-                    <div style="font-size:14px; text-transform:uppercase; letter-spacing:2px; color:#888; margin-top:20px;" id="shareDate">...</div>
-                    
-                    <div style="flex-grow:1; display:flex; flex-direction:column; align-items:center; justify-content:center;">
-                        <div style="width:140px; height:140px; position:relative; margin-bottom:20px; display:flex; align-items:center; justify-content:center;">
-                            <svg style="position:absolute; top:0; left:0; width:100%; height:100%; transform:rotate(-90deg);">
-                                <circle cx="80" cy="80" r="70" style="stroke:rgba(255,255,255,0.1); stroke-width:8; fill:none;"></circle>
-                                <circle id="shareCircle" stroke="#d4af37" stroke-width="8" fill="none" cx="80" cy="80" r="70" stroke-linecap="round" stroke-dasharray="440" stroke-dashoffset="440"></circle>
-                            </svg>
-                            <div style="text-align:center; z-index:5;">
-                                <div id="shareDayNum" style="font-size:52px; font-weight:800; color:#fff; line-height:1;">1</div>
-                                <div style="font-size:10px; color:#aaa; text-transform:uppercase;">ДЕНЬ</div>
-                            </div>
-                        </div>
-                        <div id="shareAiText" style="font-size:16px; color:#fff; font-style:italic; max-width:80%;">...</div>
-                        <div class="stars" id="shareStars" style="margin-top:15px;"></div>
-                    </div>
-
-                    <div style="margin-bottom:10px;">
-                        <div style="font-size:10px; color:#aaa; font-weight:700; text-transform:uppercase;">Трекер Рамадан</div>
-                        <div style="font-size:12px; color:#d4af37; font-weight:800;">@ramadantracking_bot</div>
-                    </div>
-                </div>
-            </div>
-            <div id="generatedImageContainer" style="display:none; border-radius:20px; overflow:hidden; border:1px solid #333;"></div>
+<div id="hidden-share-container">
+    <div style="width:100%; text-align:center; color:#888; text-transform:uppercase; letter-spacing:2px; font-size:14px; margin-bottom:20px;" id="renderDate">1 ФЕВРАЛЯ</div>
+    <div style="position:relative; width:160px; height:160px; display:flex; align-items:center; justify-content:center; margin-bottom:20px;">
+         <svg style="position:absolute; top:0; left:0; width:100%; height:100%; transform:rotate(-90deg);">
+            <circle cx="80" cy="80" r="70" style="stroke:rgba(255,255,255,0.1); stroke-width:8; fill:none;"></circle>
+            <circle id="renderCircle" stroke="#d4af37" stroke-width="8" fill="none" cx="80" cy="80" r="70" stroke-linecap="round" stroke-dasharray="440" stroke-dashoffset="440"></circle>
+        </svg>
+        <div style="text-align:center; z-index:5;">
+            <div id="renderDayNum" style="font-size:60px; font-weight:800; color:#fff; line-height:1;">1</div>
+            <div style="font-size:12px; color:#aaa; text-transform:uppercase;">ДЕНЬ</div>
         </div>
-
-        <button class="btn-share" id="btnGenImage" onclick="generateAndSend()">Создать картинку</button>
-        <p style="text-align:center; font-size:12px; color:#666; margin-top:10px;">Если криво - попробуй еще раз</p>
     </div>
+    <div id="renderStars" style="display:flex; gap:10px; font-size:30px; margin-bottom:20px;"></div>
+    <div style="color:#d4af37; font-weight:700;">@ramadantracking_bot</div>
 </div>
 
 <script>
     let tg = window.Telegram ? window.Telegram.WebApp : null;
     if (tg) { tg.expand(); tg.MainButton.hide(); tg.setHeaderColor('#000000'); tg.setBackgroundColor('#000000'); }
 
-    // Параллакс звезд
+    // Звезды параллакс
     window.addEventListener('scroll', () => {
         const scrolled = window.scrollY;
         document.querySelector('.stars-1').style.transform = `translateY(${scrolled * 0.5}px)`;
-        document.querySelector('.stars-2').style.transform = `translateY(${scrolled * 0.2}px)`;
     });
 
     const SCORES = {
@@ -436,7 +405,7 @@
     };
 
     const ramadanStart = new Date(2026, 01, 01);
-    const STORAGE_KEY = 'ramadan_tracker_final_v2';
+    const STORAGE_KEY = 'ramadan_tracker_fixed_final_v3';
     const CALENDAR_STORAGE_KEY = 'ramadan_api_calendar_v1';
     const CITY_NAME_KEY = 'ramadan_city_name_v1';
 
@@ -483,9 +452,9 @@
                 if (dayData.tasks[task] && SCORES[task]) score += SCORES[task];
             }
         }
-        // Исправлено: учет воды в общий балл (максимум 3 балла за 5 стаканов)
+        // Вода: 3 стакана дают макс балл (3 балла)
         if (dayData.water) {
-             score += Math.min(3, dayData.water * 0.6); 
+             score += Math.min(3, dayData.water); 
         }
         if (dayData.extraGoals) {
             dayData.extraGoals.forEach(g => { if(g.done) score += 7; });
@@ -508,7 +477,7 @@
         btnNo.className = 'fasting-option';
         if(isFasting) btnYes.classList.add('active-hold'); else btnNo.classList.add('active-nothold');
 
-        // Расписание с дисклеймером
+        // Время
         const timeBlock = document.getElementById('fastingTimesBlock');
         const calendar = JSON.parse(localStorage.getItem(CALENDAR_STORAGE_KEY) || 'null');
         
@@ -521,13 +490,14 @@
                     <div style="width:1px; height:30px; background:rgba(255,255,255,0.1)"></div>
                     <div class="time-item"><div class="time-label">Ифтар</div><div class="time-val" style="color:var(--accent)">${times.maghrib}</div></div>
                 </div>
-                <div class="time-disclaimer">📍 ${cityName} • Время приблизительное (MWL)</div>
+                <div class="time-disclaimer">📍 ${cityName} • MWL</div>
                 <div style="text-align:center; font-size:10px; text-decoration:underline; margin-top:5px; cursor:pointer;" onclick="openCityModal()">Сменить город</div>
             `;
         } else {
-            timeBlock.innerHTML = `<button class="btn-share" onclick="openCityModal()" style="padding:10px;">📍 Настроить время</button>`;
+            timeBlock.innerHTML = `<button class="btn-mini" onclick="openCityModal()" style="width:100%; justify-content:center;">📍 Настроить время</button>`;
         }
 
+        // Задачи
         document.querySelectorAll('.task-item').forEach(el => el.classList.remove('checked'));
         for(const [id, done] of Object.entries(data.tasks)) {
             if(done) {
@@ -571,7 +541,6 @@
     function updateDailyCircle() {
         const score = calculateDayScore(fullHistory[activeDayNum]);
         const percent = score / 100;
-        // 330 - visible, 440 total
         const offset = 330 - (percent * 330);
         
         const circle = document.getElementById('monthCircle');
@@ -582,7 +551,7 @@
         else circle.style.stroke = "#27ae60"; 
     }
 
-    // ИСПРАВЛЕНО: Обновление воды + учет в прогресс баре
+    // ИСПРАВЛЕННАЯ ЛОГИКА ВОДЫ (Шкала двигается)
     window.updateWater = function(count) {
         ensureDayObj(activeDayNum);
         const current = fullHistory[activeDayNum].water || 0;
@@ -597,17 +566,19 @@
         
         if(title.includes("Личность")) {
              ensureDayObj(activeDayNum); const data = fullHistory[activeDayNum];
-             let total = 2; let checked = 0; // sadaqah + no_bad
-             if(data.tasks.no_bad_words) checked++; if(data.tasks.sadaqah) checked++;
+             let total = 3; let checked = 0; 
+             if(data.tasks.no_bad_words) checked++; if(data.tasks.sadaqah) checked++; if(data.tasks.no_gossip) checked++;
              if(data.extraGoals) { total += data.extraGoals.length; data.extraGoals.forEach(g => { if(g.done) checked++; }); }
-             percent = total===0 ? 0 : Math.round((checked / total) * 100);
+             percent = Math.round((checked / total) * 100);
         } 
         else if(title.includes("Питание")) {
-            // ИСПРАВЛЕНО: Вода теперь считается (5 стаканов + 1 галочка = 6 пунктов)
+            // Вода (50% шкалы) + Переедание (50% шкалы)
+            // Для воды: 3 стакана = 100% водной части (то есть 50% общей)
             ensureDayObj(activeDayNum);
             const water = fullHistory[activeDayNum] ? (fullHistory[activeDayNum].water || 0) : 0;
-            const notOvereat = section.querySelector('.task-item.checked') ? 1 : 0;
-            percent = Math.round(((water + notOvereat) / 6) * 100);
+            const waterPart = Math.min(water, 3) / 3; // 0 to 1
+            const foodPart = section.querySelector('.task-item.checked') ? 1 : 0;
+            percent = Math.round(((waterPart + foodPart) / 2) * 100);
         } 
         else {
             const totalItems = section.querySelectorAll('.task-item').length;
@@ -624,109 +595,106 @@
         }
     }
 
-    // --- СТАТИСТИКА (ВЕРНУЛ ЛОГИКУ) ---
-    function calculateDetailedStats() {
-        let stats = {
-            fasting: 0, prayers: 0, sunnahs: 0, quran: 0, water_liters: 0
-        };
-        for(let i=1; i<=30; i++) {
-            const d = fullHistory[i]; if(!d) continue;
-            if(d.fasting) stats.fasting++;
-            if(d.tasks) {
-                if(d.tasks.fajr) stats.prayers++; if(d.tasks.dhuhr) stats.prayers++; if(d.tasks.asr) stats.prayers++; if(d.tasks.maghrib) stats.prayers++; if(d.tasks.isha) stats.prayers++;
-                if(d.tasks.tarawih) stats.sunnahs++; 
-            }
-            if(d.quranPageCount) stats.quran += parseInt(d.quranPageCount) || 0;
-            if(d.water) stats.water_liters += (d.water * 0.5);
-        }
-        return stats;
-    }
-
+    // --- ОТЧЕТ (ВОЗВРАЩЕН ДЕТАЛЬНЫЙ СПИСОК) ---
     document.getElementById('btnStats').addEventListener('click', () => {
         document.body.classList.add('no-scroll');
-        let d=0, r=0;
-        const grid = document.getElementById('heatmapGrid'); grid.innerHTML = ''; 
+        
+        let stats = {
+            fajr:0, dhuhr:0, asr:0, maghrib:0, isha:0,
+            sunnah:0, tarawih:0, witr:0, tahajjud:0,
+            quran:0, water:0, no_overeat:0, sadaqah:0, arabic:0, no_bad:0, no_gossip:0
+        };
+
         for(let i=1; i<=30; i++) {
-            const dayData = fullHistory[i];
-            const score = dayData ? calculateDayScore(dayData) : 0;
-            const cell = document.createElement('div'); 
-            cell.style.cssText = "aspect-ratio:1/1; border-radius:4px; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; border:1px solid #333; background:rgba(255,255,255,0.05); color:#555;";
-            
-            if(dayData && calculateDayScore(dayData) > 0) {
-                cell.innerText = score; 
-                if(score >= 80) { cell.style.background = "var(--green)"; cell.style.color="#fff"; }
-                else if(score >= 40) { cell.style.background = "var(--accent)"; cell.style.color="#000"; }
-                else { cell.style.background = "var(--red)"; cell.style.color="#fff"; }
-                d++; r += (dayData.rating || 0);
-            } else { cell.innerText = i; }
-            grid.appendChild(cell);
+            const d = fullHistory[i]; if(!d) continue;
+            if(d.tasks) {
+                if(d.tasks.fajr) stats.fajr++; if(d.tasks.dhuhr) stats.dhuhr++; if(d.tasks.asr) stats.asr++; 
+                if(d.tasks.maghrib) stats.maghrib++; if(d.tasks.isha) stats.isha++;
+                if(d.tasks.sunnah) stats.sunnah++; if(d.tasks.tarawih) stats.tarawih++; 
+                if(d.tasks.witr) stats.witr++; if(d.tasks.tahajjud) stats.tahajjud++;
+                if(d.tasks.quran_read) stats.quran++; if(d.tasks.no_overeat) stats.no_overeat++;
+                if(d.tasks.sadaqah) stats.sadaqah++; if(d.tasks.arabic) stats.arabic++;
+                if(d.tasks.no_bad_words) stats.no_bad++; if(d.tasks.no_gossip) stats.no_gossip++;
+            }
+            if(d.water) stats.water += (d.water * 0.5);
         }
-        
-        document.getElementById('statDays').innerText=d; 
-        document.getElementById('statRating').innerText=d>0?(r/d).toFixed(1):"0.0";
-        
-        // Заполняем детальный список
-        const s = calculateDetailedStats();
+
         const list = document.getElementById('statFullList');
         list.innerHTML = `
-            <div class="full-stat-item"><span class="fs-name">Дней поста</span><span class="fs-val">${s.fasting}/30</span></div>
-            <div class="full-stat-item"><span class="fs-name">Намазов выполнено</span><span class="fs-val">${s.prayers}</span></div>
-            <div class="full-stat-item"><span class="fs-name">Къур'ан (страниц)</span><span class="fs-val">${s.quran}</span></div>
-            <div class="full-stat-item"><span class="fs-name">Воды выпито</span><span class="fs-val">${s.water_liters} л.</span></div>
+            <div class="full-stat-item"><span class="fs-name">Фаджр</span><span class="fs-val">${stats.fajr}/30</span></div>
+            <div class="full-stat-item"><span class="fs-name">Зухр</span><span class="fs-val">${stats.dhuhr}/30</span></div>
+            <div class="full-stat-item"><span class="fs-name">Аср</span><span class="fs-val">${stats.asr}/30</span></div>
+            <div class="full-stat-item"><span class="fs-name">Магриб</span><span class="fs-val">${stats.maghrib}/30</span></div>
+            <div class="full-stat-item"><span class="fs-name">Иша</span><span class="fs-val">${stats.isha}/30</span></div>
+            
+            <div class="full-stat-item"><span class="fs-name">Сунна намазы</span><span class="fs-val">${stats.sunnah} раз</span></div>
+            <div class="full-stat-item"><span class="fs-name">Таравих</span><span class="fs-val">${stats.tarawih} раз</span></div>
+            <div class="full-stat-item"><span class="fs-name">Витр</span><span class="fs-val">${stats.witr} раз</span></div>
+            <div class="full-stat-item"><span class="fs-name">Тахаджуд</span><span class="fs-val">${stats.tahajjud} раз</span></div>
+
+            <div class="stat-group-title">АКТИВНОСТЬ</div>
+            <div class="full-stat-item"><span class="fs-name">Дней чтения Къур'ана</span><span class="fs-val">${stats.quran} дн.</span></div>
+            <div class="full-stat-item"><span class="fs-name">Выпито воды</span><span class="fs-val">${stats.water} л.</span></div>
+            <div class="full-stat-item"><span class="fs-name">Не переедал</span><span class="fs-val">${stats.no_overeat} дн.</span></div>
+            <div class="full-stat-item"><span class="fs-name">Сделал Садака</span><span class="fs-val">${stats.sadaqah} дн.</span></div>
+            <div class="full-stat-item"><span class="fs-name">Арабский</span><span class="fs-val">${stats.arabic} дн.</span></div>
+            <div class="full-stat-item"><span class="fs-name">Не злословил</span><span class="fs-val">${stats.no_bad} дн.</span></div>
+            <div class="full-stat-item"><span class="fs-name">Не сплетничал</span><span class="fs-val">${stats.no_gossip} дн.</span></div>
         `;
 
         document.getElementById('modalStats').classList.add('show');
     });
 
-    // SHARE LOGIC (Исправлена генерация)
+    // SHARE LOGIC (Полностью исправлено)
     document.getElementById('btnShare').addEventListener('click', () => {
-        document.body.classList.add('no-scroll');
-        const d = fullHistory[activeDayNum] || {}; const score = calculateDayScore(d);
+        const btn = document.getElementById('btnShare');
+        const originalText = btn.innerText;
+        btn.innerText = "Создаю...";
         
-        const date = new Date(ramadanStart); date.setDate(ramadanStart.getDate() + (activeDayNum - 1));
-        document.getElementById('shareDate').innerText = date.toLocaleDateString('ru-RU', {day:'numeric', month:'long'});
+        // Данные для рендера
+        const d = fullHistory[activeDayNum] || {};
+        const score = calculateDayScore(d);
+        const r = d.rating || 0;
         
-        document.getElementById('shareDayNum').innerText = activeDayNum;
-        document.getElementById('shareAiText').innerText = score > 80 ? "Мощный день, Альхамдулиллях!" : "Главное — постоянство.";
-        
-        let stars = ''; const r = d.rating || 0;
-        for(let i=1; i<=5; i++) stars += `<span style="font-size:24px; color:${i<=r ? '#d4af37':'#333'}">★</span>`;
-        document.getElementById('shareStars').innerHTML = stars;
-        
-        const circle = document.getElementById('shareCircle');
+        document.getElementById('renderDayNum').innerText = activeDayNum;
+        let stars = ''; for(let i=1; i<=5; i++) stars += `<span style="color:${i<=r ? '#d4af37':'#333'}">★</span>`;
+        document.getElementById('renderStars').innerHTML = stars;
+        const circle = document.getElementById('renderCircle');
         circle.style.strokeDashoffset = 440 - ((score/100) * 440);
         
-        // Сброс UI
-        document.getElementById('shareCardToRender').style.display = 'block';
-        document.getElementById('generatedImageContainer').style.display = 'none';
-        document.getElementById('btnGenImage').innerText = "Создать картинку";
+        const container = document.getElementById('hidden-share-container');
         
-        document.getElementById('modalShare').classList.add('show');
+        html2canvas(container, { scale: 2, backgroundColor: null }).then(canvas => {
+            canvas.toBlob(blob => {
+                const file = new File([blob], `ramadan_day_${activeDayNum}.png`, { type: "image/png" });
+                
+                if (navigator.share) {
+                    navigator.share({
+                        files: [file],
+                        title: 'Мой Рамадан',
+                        text: `День ${activeDayNum} закрыт на ${score}%! @ramadantracking_bot`
+                    }).then(() => btn.innerText = originalText).catch(() => btn.innerText = originalText);
+                } else {
+                    // Fallback если share не работает
+                    alert("Сохранение...");
+                    const link = document.createElement('a');
+                    link.download = `ramadan_${activeDayNum}.png`;
+                    link.href = canvas.toDataURL();
+                    link.click();
+                    btn.innerText = originalText;
+                }
+            });
+        });
     });
 
-    window.generateAndSend = function() {
-        const btn = document.getElementById('btnGenImage');
-        btn.innerText = "Генерация...";
-        const el = document.getElementById('shareCardToRender');
-        
-        html2canvas(el, { 
-            scale: 2, 
-            backgroundColor: null,
-            useCORS: true 
-        }).then(canvas => {
-            const imgData = canvas.toDataURL("image/png");
-            const imgContainer = document.getElementById('generatedImageContainer');
-            imgContainer.innerHTML = `<img src="${imgData}" style="width:100%; display:block;">`;
-            imgContainer.style.display = 'block';
-            el.style.display = 'none'; // Скрываем оригинал
-            btn.innerText = "Готово (Сохрани фото)";
-        }).catch(e => {
-            btn.innerText = "Ошибка";
-            alert("Ошибка генерации. Попробуйте скриншот.");
-        });
-    }
+    // Save Button
+    document.getElementById('btnFinish').addEventListener('click', function() { 
+        saveData(); 
+        const btn = this; btn.innerText = "Сохранено!";
+        setTimeout(() => { btn.innerText = "Сохранить"; }, 2000);
+        haptic();
+    });
 
-    // Служебные
     window.setFasting = function(val) { ensureDayObj(activeDayNum); fullHistory[activeDayNum].fasting = val; renderDay(activeDayNum); saveData(); if(val) haptic(); }
     window.saveQuranPages = function(val) { ensureDayObj(activeDayNum); fullHistory[activeDayNum].quranPageCount = val; if(val>0) fullHistory[activeDayNum].tasks['quran_read']=true; renderDay(activeDayNum); setTimeout(saveData, 500); }
     window.toggleTask = function(el, id) { 
@@ -736,9 +704,20 @@
         fullHistory[activeDayNum].tasks[id] = el.classList.contains('checked'); 
         updateSectionProgress(el.closest('.tracker-section')); updateDailyCircle(); saveData(); haptic();
     }
+    window.addNewGoalFromInput = function() {
+        const inp = document.getElementById('newGoalInput'); const val = inp.value.trim();
+        if(!val) return;
+        ensureDayObj(activeDayNum); if(!fullHistory[activeDayNum].extraGoals) fullHistory[activeDayNum].extraGoals=[];
+        fullHistory[activeDayNum].extraGoals.push({text:val, done:false});
+        renderDay(activeDayNum); saveData();
+    }
+    window.toggleExtraGoal = function(idx) { ensureDayObj(activeDayNum); fullHistory[activeDayNum].extraGoals[idx].done = !fullHistory[activeDayNum].extraGoals[idx].done; renderDay(activeDayNum); saveData(); }
+    window.removeExtraGoal = function(idx) { ensureDayObj(activeDayNum); fullHistory[activeDayNum].extraGoals.splice(idx,1); renderDay(activeDayNum); saveData(); }
+    window.saveThoughts = function() { ensureDayObj(activeDayNum); fullHistory[activeDayNum].thoughts = document.getElementById('dailyThoughts').value; saveData(); }
     
     document.getElementById('prevDay').addEventListener('click', () => { if(activeDayNum>1){activeDayNum--; renderDay(activeDayNum); haptic();} });
     document.getElementById('nextDay').addEventListener('click', () => { if(activeDayNum<realDayNum){activeDayNum++; renderDay(activeDayNum); haptic();} });
+    document.querySelectorAll('.star').forEach(s => s.addEventListener('click', function() { ensureDayObj(activeDayNum); fullHistory[activeDayNum].rating = parseInt(this.dataset.val); renderDay(activeDayNum); saveData(); haptic(); }));
     
     window.openCityModal = function() { document.getElementById('btnCalendar').click(); }
     window.closeModal = function(id){ document.getElementById(id).classList.remove('show'); document.body.classList.remove('no-scroll'); }
@@ -747,7 +726,7 @@
     function saveData(){ const val = JSON.stringify(fullHistory); if(tg&&tg.CloudStorage) tg.CloudStorage.setItem(STORAGE_KEY, val); else localStorage.setItem(STORAGE_KEY, val); }
     function haptic(){ if(tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light'); }
     
-    // Calendar & Search Logic (Упрощенная)
+    // Calendar & Search Logic
     document.getElementById('btnCalendar').addEventListener('click', () => {
         document.body.classList.add('no-scroll');
         const cal = JSON.parse(localStorage.getItem(CALENDAR_STORAGE_KEY));
@@ -789,20 +768,9 @@
     function renderCalendarUI(cal) {
         let h = `<div class="prayer-table-container"><table class="prayer-table"><thead><tr><th>Д</th><th>Сухур</th><th>Ифтар</th></tr></thead><tbody>`;
         cal.forEach((d,i)=>{ h+=`<tr><td>${i+1}</td><td>${d.fajr}</td><td style="color:var(--accent)">${d.maghrib}</td></tr>`; });
-        h+=`</tbody></table></div><button class="btn-share" onclick="localStorage.removeItem('${CALENDAR_STORAGE_KEY}'); renderSearchUI()" style="margin-top:15px;">Сменить город</button>`;
+        h+=`</tbody></table></div><button class="btn-mini" onclick="localStorage.removeItem('${CALENDAR_STORAGE_KEY}'); renderSearchUI()" style="margin-top:15px; width:100%; justify-content:center;">Сменить город</button>`;
         document.getElementById('calContent').innerHTML = h;
     }
-
-    window.addNewGoalFromInput = function() {
-        const inp = document.getElementById('newGoalInput'); const val = inp.value.trim();
-        if(!val) return;
-        ensureDayObj(activeDayNum); if(!fullHistory[activeDayNum].extraGoals) fullHistory[activeDayNum].extraGoals=[];
-        fullHistory[activeDayNum].extraGoals.push({text:val, done:false});
-        renderDay(activeDayNum); saveData();
-    }
-    window.toggleExtraGoal = function(idx) { ensureDayObj(activeDayNum); fullHistory[activeDayNum].extraGoals[idx].done = !fullHistory[activeDayNum].extraGoals[idx].done; renderDay(activeDayNum); saveData(); }
-    window.removeExtraGoal = function(idx) { ensureDayObj(activeDayNum); fullHistory[activeDayNum].extraGoals.splice(idx,1); renderDay(activeDayNum); saveData(); }
-    window.saveThoughts = function() { ensureDayObj(activeDayNum); fullHistory[activeDayNum].thoughts = document.getElementById('dailyThoughts').value; saveData(); }
 
     initApp();
 </script>
