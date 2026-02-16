@@ -14,6 +14,7 @@
             --accent: #d4af37;
             --green: #27ae60;
             --red: #e74c3c;
+            --blue: #3498db;
             --bg-color: #000000;
             --card-bg: rgba(255, 255, 255, 0.05);
             --border: rgba(255, 255, 255, 0.1);
@@ -126,8 +127,8 @@
         .group-label { font-size: 11px; text-transform: uppercase; color: #666; font-weight: 700; margin-top: 18px; margin-bottom: 10px; letter-spacing: 1px; }
         .task-item { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.08); cursor: pointer; }
         .task-item:last-child { border-bottom: none; }
-        .task-text { font-size: 15px; font-weight: 500; color: #eee; }
-        .checkbox { width: 26px; height: 26px; border-radius: 8px; border: 2px solid #444; display: flex; align-items: center; justify-content: center; transition: all 0.2s; background: transparent; }
+        .task-text { font-size: 15px; font-weight: 500; color: #eee; flex-grow: 1; }
+        .checkbox { width: 26px; height: 26px; border-radius: 8px; border: 2px solid #444; display: flex; align-items: center; justify-content: center; transition: all 0.2s; background: transparent; flex-shrink: 0;}
         .task-item.checked .checkbox { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 10px rgba(212, 175, 55, 0.4); }
         .checkbox::after { content: '✓'; font-size: 18px; display: none; font-weight: 800; color: #000; }
         .task-item.checked .checkbox::after { display: block; }
@@ -135,6 +136,23 @@
         .custom-input { border: 1px solid #333; background: rgba(255,255,255,0.05); padding: 14px; border-radius: 12px; font-size: 15px; width: 100%; margin-right: 12px; color: #fff; outline: none; font-family: 'Manrope', sans-serif; position: relative; z-index: 12; }
         .custom-row { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; position: relative;}
         .remove-goal { position: absolute; right: -25px; top: 15px; color: #555; font-size: 18px; padding: 5px; cursor: pointer; }
+
+        /* ВОДА */
+        .water-container { display: flex; justify-content: center; gap: 15px; padding: 15px 0; }
+        .water-glass { width: 30px; height: 40px; cursor: pointer; position: relative; opacity: 0.5; transition: 0.3s; }
+        .water-glass svg { transform: none; width: 100%; height: 100%; }
+        .water-glass path { stroke: #fff; stroke-width: 2; fill: transparent; transition: 0.3s; }
+        .water-glass.filled { opacity: 1; transform: scale(1.1); }
+        .water-glass.filled path { fill: var(--blue); stroke: var(--blue); filter: drop-shadow(0 0 5px rgba(52, 152, 219, 0.5)); }
+        .water-hint { text-align: center; font-size: 10px; color: #666; margin-top: -5px; margin-bottom: 10px; }
+
+        /* INPUT СТРАНИЦ КОРАНА */
+        .page-input { 
+            width: 60px; background: rgba(255,255,255,0.1); border: 1px solid #444; 
+            color: var(--accent); padding: 5px; border-radius: 6px; font-size: 13px; 
+            text-align: center; margin-right: 10px; outline: none;
+        }
+        .page-input:focus { border-color: var(--accent); }
 
         .stars { display: flex; justify-content: center; gap: 10px; margin-top: 10px; }
         .star { font-size: 32px; color: #333; cursor: pointer; transition: color 0.2s; position: relative; z-index: 20;}
@@ -202,16 +220,16 @@
         }
         .full-stat-item:last-child { border-bottom: none; }
         .fs-name { color: #ccc; font-weight: 500; }
-        .fs-val { color: var(--accent); font-weight: 700; }
+        .fs-val { color: var(--accent); font-weight: 700; text-align: right; }
         .thoughts-list { text-align: left; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; margin-bottom: 20px; }
         .thought-entry { font-size: 12px; color: #ddd; margin-bottom: 8px; border-bottom: 1px solid #333; padding-bottom: 8px; font-style: italic;}
 
-        /* --- ШАРИНГ (ИСПРАВЛЕНО ДЛЯ 1:1) --- */
+        /* --- ШАРИНГ --- */
         .share-wrapper { position: relative; width: 100%; margin-bottom: 20px; }
         
         .share-card-container {
             width: 100%; 
-            padding-bottom: 100%; /* Квадрат */
+            padding-bottom: 100%; 
             position: relative;
             background: radial-gradient(circle at 50% -10%, #1a2a40 0%, #000000 70%);
             border-radius: 24px; border: 1px solid #333; overflow: hidden; display: block; 
@@ -231,44 +249,20 @@
         .share-content { 
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
             display: flex; flex-direction: column; 
-            /* Выравнивание */
             justify-content: space-between; 
             padding: 20px; text-align: center; z-index: 10; 
         }
         
-        /* Верхняя часть (дата) */
-        .share-top-part {
-            padding-top: 10px;
-        }
+        .share-top-part { padding-top: 10px; }
         .share-date { font-size: 14px; text-transform: uppercase; letter-spacing: 2px; color: #888; }
-
-        /* Центральная часть (круг + текст) */
-        .share-center-part {
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            flex-grow: 1; /* Занимает все свободное место */
-        }
-        
-        .share-circle-wrap { 
-            width: 140px; height: 140px; position: relative; 
-            margin-bottom: 15px; 
-            display: flex; align-items: center; justify-content: center;
-        }
-        .share-circle-svg {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            transform: rotate(-90deg);
-        }
-        .share-day-text-block {
-            z-index: 5; text-align: center;
-        }
+        .share-center-part { display: flex; flex-direction: column; align-items: center; justify-content: center; flex-grow: 1; }
+        .share-circle-wrap { width: 140px; height: 140px; position: relative; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; }
+        .share-circle-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
+        .share-day-text-block { z-index: 5; text-align: center; }
         .share-day-num { font-size: 52px; font-weight: 800; color: #fff; line-height: 1;}
         .share-day-lbl { font-size: 10px; color:#aaa; text-transform:uppercase; margin-top: -5px;}
-
         .share-ai-text { font-size: 15px; line-height: 1.4; color: #eee; font-style: italic; max-width: 95%; margin-bottom: 15px; }
-        
-        /* Нижняя часть (брендинг) */
-        .share-bottom-part {
-            padding-bottom: 5px;
-        }
+        .share-bottom-part { padding-bottom: 5px; }
         .share-branding-text { font-size: 10px; color: #aaa; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
         .share-branding-bot { font-size: 12px; color: var(--accent); font-weight: 800; margin-bottom: 2px; }
         .share-branding-sub { font-size: 10px; color: #666; font-weight: 600; }
@@ -366,9 +360,32 @@
             <div class="section-percent">0%</div>
         </div>
         <div class="progress-bar-bg"><div class="progress-bar-fill"></div></div>
-        <div class="task-item" onclick="toggleTask(this, 'quran_read')"><span class="task-text">Читал Къур'ан</span><div class="checkbox"></div></div>
+        <div class="task-item">
+            <span class="task-text" onclick="toggleTask(this.parentElement, 'quran_read')">Читал Къур'ан</span>
+            <input type="number" id="quranPages" class="page-input" placeholder="стр." oninput="saveQuranPages(this.value)">
+            <div class="checkbox" onclick="toggleTask(this.parentElement, 'quran_read')"></div>
+        </div>
         <div class="task-item" onclick="toggleTask(this, 'lecture')"><span class="task-text">Прослушал лекцию</span><div class="checkbox"></div></div>
         <div class="task-item" onclick="toggleTask(this, 'arabic')"><span class="task-text">Изучал арабский</span><div class="checkbox"></div></div>
+    </div>
+
+    <div class="tracker-section">
+        <div class="section-header">
+            <div class="section-title">🍎 Питание</div>
+            <div class="section-percent">0%</div>
+        </div>
+        <div class="progress-bar-bg"><div class="progress-bar-fill"></div></div>
+        
+        <div class="group-label">Вода (1 стакан = 250мл)</div>
+        <div class="water-container">
+            <div class="water-glass" onclick="updateWater(1)"><svg viewBox="0 0 24 24"><path d="M5,5 L19,5 L17,21 L7,21 L5,5 Z"></path></svg></div>
+            <div class="water-glass" onclick="updateWater(2)"><svg viewBox="0 0 24 24"><path d="M5,5 L19,5 L17,21 L7,21 L5,5 Z"></path></svg></div>
+            <div class="water-glass" onclick="updateWater(3)"><svg viewBox="0 0 24 24"><path d="M5,5 L19,5 L17,21 L7,21 L5,5 Z"></path></svg></div>
+            <div class="water-glass" onclick="updateWater(4)"><svg viewBox="0 0 24 24"><path d="M5,5 L19,5 L17,21 L7,21 L5,5 Z"></path></svg></div>
+            <div class="water-glass" onclick="updateWater(5)"><svg viewBox="0 0 24 24"><path d="M5,5 L19,5 L17,21 L7,21 L5,5 Z"></path></svg></div>
+        </div>
+        
+        <div class="task-item" onclick="toggleTask(this, 'no_overeat')"><span class="task-text">Не переел</span><div class="checkbox"></div></div>
     </div>
 
     <div class="tracker-section">
@@ -575,23 +592,30 @@
         { id:15, name: "Санкт-Петербург", fajr_base: 6, maghrib_base: 17, min_shift: 3 }
     ];
 
-    // ВЕСА ЗАДАЧ (Сумма = 100%)
+    // ОБНОВЛЕННЫЕ ВЕСА ЗАДАЧ (Сумма = 100%)
+    // Питание - наименьший вес.
     const SCORES = {
-        fasting: 15, // Пост
-        fajr: 9, dhuhr: 9, asr: 9, maghrib: 9, isha: 9, // 45% (9*5)
-        quran_read: 10, // 10%
-        lecture: 10, // 10%
-        // РАЗДЕЛИЛИ 4% на два по 2%
-        no_bad_words: 2, no_gossip: 2, 
-        custom_goal: 4, // 4%
-        sunnah: 2, tarawih: 2, witr: 2, tahajjud: 2, // 8%
-        arabic: 4 // 4%
+        fasting: 15, // Пост (15%)
+        // Намаз (48% итого)
+        fajr: 8, dhuhr: 8, asr: 8, maghrib: 8, isha: 8, // 40% (8*5)
+        sunnah: 2, tarawih: 2, witr: 2, tahajjud: 2, // 8% (2*4)
+        
+        // Знания (18%)
+        quran_read: 8, 
+        lecture: 6, 
+        arabic: 4,
+
+        // Личность (13%)
+        no_bad_words: 3, 
+        no_gossip: 3, 
+        custom_goal: 7, 
+
+        // Питание (6%)
+        no_overeat: 3, 
+        // Вода считается отдельно в коде (0.6 за стакан * 5 = 3 балла)
     };
 
-    // НАСТРОЙКА: 1 Февраля 2026 (месяц 01 = Февраль в JS)
     const ramadanStart = new Date(2026, 01, 01);
-    
-    // ЕДИНЫЙ КЛЮЧ ДЛЯ ВСЕХ БУДУЩИХ ВЕРСИЙ
     const STORAGE_KEY = 'ramadan_tracker_stable_db';
 
     function getCurrentDay() {
@@ -608,47 +632,26 @@
     let activeDayNum = realDayNum;
     let fullHistory = {};
 
-    // ФУНКЦИЯ СПАСЕНИЯ ДАННЫХ (MIGRATION)
     function tryRecoverOldData() {
-        if(localStorage.getItem(STORAGE_KEY)) return; // Уже есть новые данные, не трогаем
-
+        if(localStorage.getItem(STORAGE_KEY)) return;
         const oldKeys = ['ramadan_v19_final', 'ramadan_v18_final'];
         for(let key of oldKeys) {
             const data = localStorage.getItem(key);
-            if(data) {
-                console.log("Восстановлены данные из " + key);
-                localStorage.setItem(STORAGE_KEY, data); // Спасаем в новый ключ
-                return;
-            }
+            if(data) { localStorage.setItem(STORAGE_KEY, data); return; }
         }
     }
 
-   function initApp() {
-        tryRecoverOldData(); // Запускаем спасателя
-
+    function initApp() {
+        tryRecoverOldData();
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz3eBnxD3pkPXVjKy5VXH6srHmrzXtXcJYFkb4V1NKIFbgMtPKSUp9xcx6ftk8QGvaV/exec";
         
         if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
             const user = tg.initDataUnsafe.user;
-            const lastSent = localStorage.getItem('user_data_sent_v1');
-            
-            if (!lastSent) {
-                const dataToSend = {
-                    id: user.id,
-                    username: user.username,
-                    first_name: user.first_name,
-                    last_name: user.last_name,
-                    language_code: user.language_code
-                };
-
+            if (!localStorage.getItem('user_data_sent_v1')) {
                 fetch(GOOGLE_SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'no-cors', 
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(dataToSend)
-                }).then(() => {
-                    localStorage.setItem('user_data_sent_v1', 'true');
-                }).catch(err => console.error(err));
+                    method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: user.id, username: user.username, first_name: user.first_name, last_name: user.last_name, language_code: user.language_code })
+                }).then(() => localStorage.setItem('user_data_sent_v1', 'true')).catch(err => console.error(err));
             }
         }
 
@@ -660,10 +663,7 @@
                         catch(e) { fullHistory = {}; }
                     } else { 
                         const loc = localStorage.getItem(STORAGE_KEY);
-                        if(loc) {
-                             fullHistory = JSON.parse(loc);
-                             saveData(); 
-                        }
+                        if(loc) { fullHistory = JSON.parse(loc); saveData(); }
                         document.getElementById('syncStatus').innerText = "✨ Готов к работе"; 
                     }
                     renderDay(activeDayNum);
@@ -679,7 +679,6 @@
     function calculateDayScore(dayData) {
         if (!dayData) return 0;
         let score = 0;
-        // Пост: если не установлен false, считаем что держит
         if (dayData.fasting !== false) score += SCORES.fasting;
         
         if (dayData.tasks) {
@@ -689,7 +688,11 @@
                 }
             }
         }
-        return score > 100 ? 100 : score;
+        // Вода (макс 3 балла)
+        if (dayData.water) {
+            score += (dayData.water * 0.6);
+        }
+        return score > 100 ? 100 : Math.round(score);
     }
 
     function renderDay(dayNum) {
@@ -697,7 +700,7 @@
         document.getElementById('prevDay').classList.toggle('disabled', dayNum <= 1);
         document.getElementById('nextDay').classList.toggle('disabled', dayNum >= realDayNum);
         
-        const data = fullHistory[dayNum] || { tasks: {}, customText: "", rating: 0, thoughts: "", fasting: true, extraGoals: [] };
+        const data = fullHistory[dayNum] || { tasks: {}, customText: "", rating: 0, thoughts: "", fasting: true, extraGoals: [], water: 0, quranPageCount: "" };
         
         // Пост
         const isFasting = (data.fasting !== false); 
@@ -707,13 +710,35 @@
         // Чекбоксы
         document.querySelectorAll('.task-item').forEach(el => el.classList.remove('checked'));
         for(const [id, done] of Object.entries(data.tasks)) {
-            if(done) document.querySelectorAll(`[onclick*="'${id}'"]`).forEach(el => el.classList.add('checked'));
+            if(done) {
+                // Ищем элемент с onclick, содержащим этот ID
+                const els = document.querySelectorAll('.task-item');
+                els.forEach(el => {
+                    if(el.getAttribute('onclick') && el.getAttribute('onclick').includes(`'${id}'`)) {
+                        el.classList.add('checked');
+                    }
+                    // Для корана вложенная структура
+                    if(!el.getAttribute('onclick') && id === 'quran_read') {
+                         if(el.querySelector(`[onclick*="'quran_read'"]`)) el.classList.add('checked');
+                    }
+                });
+            }
         }
         
+        // Вода
+        const waterVal = data.water || 0;
+        document.querySelectorAll('.water-glass').forEach((el, idx) => {
+            if (idx < waterVal) el.classList.add('filled');
+            else el.classList.remove('filled');
+        });
+
+        // Страницы Корана
+        document.getElementById('quranPages').value = data.quranPageCount || "";
+
         document.getElementById('customInput').value = data.customText || "";
         document.getElementById('dailyThoughts').value = data.thoughts || "";
 
-        // Рендер дополнительных целей
+        // Доп цели
         const extraContainer = document.getElementById('extraGoalsContainer');
         extraContainer.innerHTML = '';
         if(data.extraGoals && data.extraGoals.length > 0) {
@@ -738,18 +763,43 @@
         updateDailyCircle();
     }
 
-    // Обработка переключателя поста
+    // --- ЛОГИКА ВОДЫ ---
+    window.updateWater = function(count) {
+        ensureDayObj(activeDayNum);
+        // Если нажали на уже полный стакан, сбрасываем до него (или на 1 меньше, если клик по последнему активному - логика переключения)
+        // Простая логика: клик на 3 -> ставит 3. Клик на 3 еще раз -> если сейчас 3, можно убрать? Нет, просто ставит уровень.
+        // Сделаем так: если клик по уже активному последнему - убираем его.
+        const current = fullHistory[activeDayNum].water || 0;
+        if (current === count) {
+            fullHistory[activeDayNum].water = count - 1;
+        } else {
+            fullHistory[activeDayNum].water = count;
+            hapticBurst(1);
+        }
+        renderDay(activeDayNum);
+        saveData();
+    }
+
+    // --- ЛОГИКА КОРАНА ---
+    window.saveQuranPages = function(val) {
+        ensureDayObj(activeDayNum);
+        fullHistory[activeDayNum].quranPageCount = val;
+        // Если ввели страницы, автоматически ставим галочку
+        if(val && val > 0 && !fullHistory[activeDayNum].tasks['quran_read']) {
+            fullHistory[activeDayNum].tasks['quran_read'] = true;
+            renderDay(activeDayNum); // обновить UI галочки
+        }
+        clearTimeout(window.st); window.st = setTimeout(saveData, 500);
+    }
+
     window.setFasting = function(val) {
         ensureDayObj(activeDayNum);
         fullHistory[activeDayNum].fasting = val;
         renderDay(activeDayNum);
         saveData();
-        
-        if(val) hapticBurst(SCORES.fasting);
-        else haptic();
+        if(val) hapticBurst(SCORES.fasting); else haptic();
     }
 
-    // --- ЛОГИКА ДОП. ЦЕЛЕЙ ---
     window.addCustomGoal = function() {
         ensureDayObj(activeDayNum);
         if(!fullHistory[activeDayNum].extraGoals) fullHistory[activeDayNum].extraGoals = [];
@@ -773,19 +823,28 @@
         fullHistory[activeDayNum].extraGoals[idx].done = !current;
         renderDay(activeDayNum);
         saveData(); 
-        
-        if(!current) hapticBurst(4);
-        else haptic();
+        if(!current) hapticBurst(4); else haptic();
     }
-    // -------------------------
 
-    // Обновление прогресс-баров
     function updateSectionProgress(section) {
         const totalItems = section.querySelectorAll('.task-item').length;
-        if(totalItems === 0) return; 
-        const checkedItems = section.querySelectorAll('.task-item.checked').length;
+        if(totalItems === 0) return; // Для секции с водой обработаем иначе
         
-        const percent = Math.round((checkedItems / totalItems) * 100);
+        let checkedItems = section.querySelectorAll('.task-item.checked').length;
+        
+        // Спец расчет для Питания (Вода + Чекбокс)
+        const title = section.querySelector('.section-title').innerText;
+        let percent = 0;
+
+        if(title.includes("Питание")) {
+            // Вода - это как бы 5 чекбоксов. Чекбокс "Не переел" - 1. Итого 6 частей.
+            ensureDayObj(activeDayNum);
+            const water = fullHistory[activeDayNum] ? (fullHistory[activeDayNum].water || 0) : 0;
+            const notOvereat = section.querySelector('.task-item.checked') ? 1 : 0;
+            percent = Math.round(((water + notOvereat) / 6) * 100);
+        } else {
+            percent = Math.round((checkedItems / totalItems) * 100);
+        }
         
         const fill = section.querySelector('.progress-bar-fill');
         const text = section.querySelector('.section-percent');
@@ -796,7 +855,6 @@
         }
     }
 
-    // Обновление круга
     function updateDailyCircle() {
         const score = calculateDayScore(fullHistory[activeDayNum]);
         const percent = score / 100;
@@ -813,6 +871,12 @@
     document.getElementById('nextDay').addEventListener('click', () => { if(activeDayNum<realDayNum){activeDayNum++; renderDay(activeDayNum); haptic();} });
     
     window.toggleTask = function(el, id) { 
+        // Если кликнули на инпут, не переключать задачу
+        if(event.target.tagName === 'INPUT') return;
+
+        // Для обертки (коран)
+        if(el.classList.contains('task-text') || el.classList.contains('checkbox')) el = el.parentElement;
+
         el.classList.toggle('checked'); ensureDayObj(activeDayNum); 
         const isChecked = el.classList.contains('checked');
         
@@ -832,16 +896,13 @@
     window.saveThoughts = function() { ensureDayObj(activeDayNum); fullHistory[activeDayNum].thoughts = document.getElementById('dailyThoughts').value; clearTimeout(window.st); window.st = setTimeout(saveData, 500); }
     document.querySelectorAll('.star').forEach(s => s.addEventListener('click', function() { ensureDayObj(activeDayNum); fullHistory[activeDayNum].rating = parseInt(this.dataset.val); renderDay(activeDayNum); saveData(); haptic(); }));
 
-    function ensureDayObj(d){ if(!fullHistory[d]) fullHistory[d] = {tasks:{}, customText:"", rating:0, thoughts:"", fasting:true, extraGoals:[]}; }
+    function ensureDayObj(d){ if(!fullHistory[d]) fullHistory[d] = {tasks:{}, customText:"", rating:0, thoughts:"", fasting:true, extraGoals:[], water:0, quranPageCount:""}; }
     
     function saveData(){
         const val = JSON.stringify(fullHistory);
         const status = document.getElementById('syncStatus');
         status.innerText = "Сохранение...";
-        
-        // Используем стабильный ключ
         const key = STORAGE_KEY;
-        
         const cb = (e) => {
             if(!e) { status.innerText = "Сохранено"; status.classList.add('active'); setTimeout(() => status.classList.remove('active'), 1000); }
         };
@@ -849,22 +910,12 @@
         else { localStorage.setItem(key, val); cb(null); }
     }
     
-    function haptic(){ 
-        if(tg && tg.HapticFeedback) {
-            tg.HapticFeedback.impactOccurred('light');
-        }
-    }
-
+    function haptic(){ if(tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light'); }
     function hapticBurst(count) {
         if (!tg || !tg.HapticFeedback) return;
         if(count > 20) count = 20; 
-        
         let i = 0;
-        let interval = setInterval(() => {
-            tg.HapticFeedback.impactOccurred('light');
-            i++;
-            if (i >= count) clearInterval(interval);
-        }, 40); 
+        let interval = setInterval(() => { tg.HapticFeedback.impactOccurred('light'); i++; if (i >= count) clearInterval(interval); }, 40); 
     }
     
     window.closeModal = function(id){ 
@@ -872,38 +923,60 @@
         document.body.classList.remove('no-scroll'); 
     }
 
-    // === ФУНКЦИЯ ПОДСЧЕТА ВСЕХ ДЕТАЛЕЙ ===
+    // === ПОДСЧЕТ ДЛЯ ОТЧЕТА ===
     function calculateDetailedStats() {
-        // Инициализация счетчиков
         let stats = {
             fasting: 0,
             fajr: 0, dhuhr: 0, asr: 0, maghrib: 0, isha: 0,
             sunnah: 0, tarawih: 0, witr: 0, tahajjud: 0,
             quran_read: 0, lecture: 0, arabic: 0,
             no_bad_words: 0, no_gossip: 0,
-            custom_goals_total: 0
+            no_overeat: 0,
+            water_liters: 0,
+            quran_pages_total: 0,
+            custom_goals_breakdown: {} 
         };
 
+        // Считаем только до текущего реального дня, чтобы статистика была честной (прогресс)
+        // Но если пользователь заполнил что-то на будущее, тоже учтем.
+        // Берем все ключи.
         for(let i=1; i<=30; i++) {
             const d = fullHistory[i];
             if(!d) continue;
 
-            // Пост
             if(d.fasting !== false) stats.fasting++;
 
-            // Задачи
             if(d.tasks) {
                 for(let key in stats) {
                     if(d.tasks[key]) stats[key]++;
                 }
-                // Обработка старого ключа (custom_goal - основная цель)
-                if(d.tasks.custom_goal) stats.custom_goals_total++;
+                // Обработка старой версии custom_goal (основная цель)
+                if(d.tasks.custom_goal) {
+                     const txt = d.customText ? d.customText.trim() : "Моя цель";
+                     if(txt) {
+                         if(!stats.custom_goals_breakdown[txt]) stats.custom_goals_breakdown[txt] = 0;
+                         stats.custom_goals_breakdown[txt]++;
+                     }
+                }
             }
 
-            // Доп цели (extraGoals)
+            // Вода
+            if(d.water) stats.water_liters += (d.water * 0.25);
+            
+            // Коран страницы
+            if(d.quranPageCount) {
+                let p = parseInt(d.quranPageCount);
+                if(!isNaN(p)) stats.quran_pages_total += p;
+            }
+
+            // Доп цели (список)
             if(d.extraGoals && d.extraGoals.length > 0) {
                 d.extraGoals.forEach(g => {
-                    if(g.done) stats.custom_goals_total++;
+                    if(g.done) {
+                        const t = g.text.trim() || "Своя цель";
+                        if(!stats.custom_goals_breakdown[t]) stats.custom_goals_breakdown[t] = 0;
+                        stats.custom_goals_breakdown[t]++;
+                    }
                 });
             }
         }
@@ -911,52 +984,49 @@
     }
 
     function generateDetailedStatsHTML(stats) {
-        // Словарь названий
         const labels = {
             fasting: "Дней поста",
             fajr: "Фаджр", dhuhr: "Зухр", asr: "Аср", maghrib: "Магриб", isha: "Иша",
             sunnah: "Сунна намазы", tarawih: "Таравих", witr: "Витр", tahajjud: "Тахаджуд",
-            quran_read: "Читал Къур'ан", lecture: "Лекции", arabic: "Арабский",
+            quran_read: "Дней чтения Къур'ана", lecture: "Лекции", arabic: "Арабский",
             no_bad_words: "Не злословил", no_gossip: "Не сплетничал",
-            custom_goals_total: "Выполнено своих целей"
+            no_overeat: "Не переедал"
         };
 
         let html = '';
-        // Группировка для красивого вывода
-        // 1. Пост
         html += `<div class="full-stat-item"><span class="fs-name">${labels.fasting}</span><span class="fs-val">${stats.fasting}/30</span></div>`;
         
-        // 2. Намазы (Обязательные)
-        const prayers = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
-        prayers.forEach(p => {
+        ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'].forEach(p => {
              html += `<div class="full-stat-item"><span class="fs-name">${labels[p]}</span><span class="fs-val">${stats[p]}/30</span></div>`;
         });
 
-        // 3. Намазы (Доп)
-        const sunnahs = ['sunnah', 'tarawih', 'witr', 'tahajjud'];
-        sunnahs.forEach(p => {
+        ['sunnah', 'tarawih', 'witr', 'tahajjud'].forEach(p => {
             if(stats[p] > 0) html += `<div class="full-stat-item"><span class="fs-name">${labels[p]}</span><span class="fs-val">${stats[p]} раз</span></div>`;
         });
 
-        // 4. Знания
-        const know = ['quran_read', 'lecture', 'arabic'];
-        know.forEach(p => {
-            if(stats[p] > 0) html += `<div class="full-stat-item"><span class="fs-name">${labels[p]}</span><span class="fs-val">${stats[p]} дн.</span></div>`;
-        });
+        // НОВЫЕ ПУНКТЫ
+        html += `<div class="group-label" style="margin-top:10px;">Активность</div>`;
+        if(stats.quran_pages_total > 0) html += `<div class="full-stat-item"><span class="fs-name">Прочитано страниц</span><span class="fs-val">${stats.quran_pages_total} стр.</span></div>`;
+        else if(stats.quran_read > 0) html += `<div class="full-stat-item"><span class="fs-name">${labels.quran_read}</span><span class="fs-val">${stats.quran_read} дн.</span></div>`;
 
-        // 5. Личность
-        const pers = ['no_bad_words', 'no_gossip'];
-        pers.forEach(p => {
+        if(stats.water_liters > 0) html += `<div class="full-stat-item"><span class="fs-name">Выпито воды</span><span class="fs-val">${stats.water_liters} л.</span></div>`;
+        html += `<div class="full-stat-item"><span class="fs-name">${labels.no_overeat}</span><span class="fs-val">${stats.no_overeat} дн.</span></div>`;
+        
+        ['lecture', 'arabic', 'no_bad_words', 'no_gossip'].forEach(p => {
              html += `<div class="full-stat-item"><span class="fs-name">${labels[p]}</span><span class="fs-val">${stats[p]} дн.</span></div>`;
         });
 
-        // 6. Свои цели
-        html += `<div class="full-stat-item"><span class="fs-name">${labels.custom_goals_total}</span><span class="fs-val">${stats.custom_goals_total} галочек</span></div>`;
+        // КАСТОМНЫЕ ЦЕЛИ
+        if(Object.keys(stats.custom_goals_breakdown).length > 0) {
+            html += `<div class="group-label" style="margin-top:10px;">Мои цели</div>`;
+            for(let [name, count] of Object.entries(stats.custom_goals_breakdown)) {
+                 html += `<div class="full-stat-item"><span class="fs-name">${name}</span><span class="fs-val">${count} раз</span></div>`;
+            }
+        }
 
         return html;
     }
 
-    // === ГЕНЕРАЦИЯ ОТЧЕТА (HEATMAP + %) ===
     document.getElementById('btnStats').addEventListener('click', () => {
         document.body.classList.add('no-scroll');
         
@@ -964,24 +1034,27 @@
         const grid = document.getElementById('heatmapGrid');
         grid.innerHTML = ''; 
 
+        // Строим хитмап для ВСЕХ 30 дней, но подсвечиваем прогресс
         for(let i=1; i<=30; i++) {
             const dayData = fullHistory[i];
             const score = dayData ? calculateDayScore(dayData) : 0;
             
             const cell = document.createElement('div');
             cell.className = 'heatmap-day';
-            cell.innerText = score + '%'; 
             
-            if(score >= 80) cell.classList.add('good');
-            else if(score >= 40) cell.classList.add('medium');
-            else if(score > 0) cell.classList.add('bad');
-            
-            grid.appendChild(cell);
-
-            if(dayData) {
-                if(score > 0) d++;
+            // Если день прошел или заполнен
+            if(dayData && calculateDayScore(dayData) > 0) {
+                cell.innerText = score; 
+                if(score >= 80) cell.classList.add('good');
+                else if(score >= 40) cell.classList.add('medium');
+                else if(score > 0) cell.classList.add('bad');
+                d++;
                 r += (dayData.rating || 0);
+            } else {
+                cell.innerText = i; // Просто номер дня
+                cell.style.opacity = "0.3";
             }
+            grid.appendChild(cell);
         }
 
         document.getElementById('statDays').innerText=d; 
@@ -991,7 +1064,6 @@
         if(d===0) ai.innerText="Данных пока нет.";
         else ai.innerText="Статистика обновлена.";
 
-        // ГЕНЕРАЦИЯ ПОЛНОГО СПИСКА
         const detailedStats = calculateDetailedStats();
         document.getElementById('statFullList').innerHTML = generateDetailedStatsHTML(detailedStats);
 
@@ -1039,7 +1111,6 @@
             thoughtsContainer.innerText = "Ты не записывал мысли.";
         }
 
-        // ПОЛНАЯ СТАТИСТИКА В ФИНАЛЕ
         const detailedStats = calculateDetailedStats();
         document.getElementById('f_fullList').innerHTML = generateDetailedStatsHTML(detailedStats);
 
@@ -1226,7 +1297,8 @@
             let isT=(i+1)===activeDayNum?'class="today-row"':'';
             h+=`<tr ${isT}><td>${i+1}</td><td style="font-weight:700;color:#fff">${fH}:${fM<10?'0'+fM:fM}</td><td>12:30</td><td>15:${20+i}</td><td style="font-weight:700;color:#d4af37">${mH}:${mM<10?'0'+mM:mM}</td><td>${mH+1}:${mM<10?'0'+mM:mM}</td></tr>`;
         }
-        c.innerHTML=h+`</tbody></table></div><button class="change-city-btn" onclick="changeCity()">📍 Изменить локацию</button>`;
+        h+=`</tbody></table></div><button class="change-city-btn" onclick="changeCity()">📍 Изменить локацию</button>`;
+        c.innerHTML = h;
     }
 
     initApp();
