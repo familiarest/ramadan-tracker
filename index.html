@@ -7,6 +7,7 @@
     
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
 
@@ -33,7 +34,7 @@
             font-family: 'Manrope', sans-serif;
             margin: 0; padding: 0; 
             min-height: 100vh;
-            overflow-x: hidden; /* Fix horizontal scroll */
+            overflow-x: hidden;
             -webkit-user-select: none; user-select: none;
             width: 100vw;
         }
@@ -41,7 +42,7 @@
         body.no-scroll { overflow: hidden !important; height: 100vh; position: fixed; width: 100%; }
         input, textarea { -webkit-user-select: text !important; user-select: text !important; }
 
-        /* ЗВЕЗДЫ */
+        /* ЗВЕЗДЫ ФОН */
         #star-bg {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             z-index: 0; pointer-events: none; overflow: hidden;
@@ -112,12 +113,39 @@
         .fasting-option { flex: 1; text-align: center; padding: 12px; font-size: 14px; font-weight: 600; color: #555; cursor: pointer; border-radius: 12px; transition: 0.3s; }
         .fasting-option.active-nothold { background: rgba(255,255,255,0.05); color: #aaa; }
         .fasting-option.active-hold { background: rgba(255,255,255,0.05); color: #fff; border: 1px solid var(--accent); box-shadow: 0 0 15px rgba(212,175,55,0.1); }
-        .fasting-times-block { background: rgba(0,0,0,0.2); border-radius: 20px; padding: 15px; border: 1px solid rgba(255,255,255,0.03); text-align: center; margin-bottom: 5px; }
-        .time-row { display: flex; justify-content: space-around; align-items: center; margin-bottom: 8px; }
-        .time-item { display: flex; flex-direction: column; }
-        .time-label { font-size: 10px; color: #777; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 1px; }
-        .time-val { font-size: 22px; font-weight: 300; color: #fff; }
-        .time-disclaimer { font-size: 10px; color: #444; margin-top: 5px; }
+        
+        /* НОВЫЙ ДИЗАЙН ВРЕМЕНИ НАМАЗА */
+        .fasting-times-block { 
+            background: rgba(255,255,255,0.03); 
+            border-radius: 20px; 
+            padding: 15px; 
+            border: 1px solid rgba(255,255,255,0.08); 
+            text-align: center; 
+            margin-bottom: 5px; 
+        }
+        .time-row { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 8px; 
+            position: relative;
+            padding: 10px 0;
+        }
+        /* Разделительная линия */
+        .time-row::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 5px;
+            bottom: 5px;
+            width: 1px;
+            background: rgba(255,255,255,0.1);
+            transform: translateX(-50%);
+        }
+        .time-item { flex: 1; display: flex; flex-direction: column; align-items: center; }
+        .time-label { font-size: 11px; color: #777; text-transform: uppercase; margin-bottom: 6px; letter-spacing: 2px; font-weight: 700; }
+        .time-val { font-size: 26px; font-weight: 400; color: #fff; letter-spacing: -1px; }
+        .time-disclaimer { font-size: 11px; color: #555; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 5px;}
         .btn-set-city { background: transparent; border: 1px dashed #444; color: #888; padding: 12px; width: 100%; border-radius: 12px; cursor: pointer; font-family: 'Manrope'; font-size: 13px; }
 
         /* TASKS LIST */
@@ -291,7 +319,7 @@
         <div class="section-title" style="justify-content:center; margin-bottom:15px;"><i class="ph ph-moon-stars"></i> Пост сегодня</div>
         <div class="fasting-switch">
             <div class="fasting-option" id="fastingNo" onclick="setFasting(false)">Пропустил</div>
-            <div class="fasting-option" id="fastingYes" onclick="setFasting(true)">Держу</div>
+            <div class="fasting-option" id="fastingYes" onclick="setFasting(true)">Соблюдаю</div>
         </div>
         
         <div class="fasting-times-block" id="fastingTimesBlock"></div>
@@ -458,7 +486,7 @@
         </div>
 
         <div style="flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%;">
-            <div style="position: relative; width: 300px; height: 300px; display: flex; align-items: center; justify-content: center;">
+            <div style="position: relative; width: 300px; height: 300px; display: flex; align-items: center; justify-content: center; top: 20px;">
                 
                 <canvas id="renderCanvas" width="300" height="300" style="position: absolute; top:0; left:0;"></canvas>
 
@@ -645,8 +673,8 @@
                         <span class="time-val" style="color:var(--accent)">${times.maghrib}</span>
                     </div>
                 </div>
-                <div class="time-disclaimer">📍 ${cityName}</div>
-                <div style="text-align:center; margin-top:5px; font-size:10px; color:#444; cursor:pointer;" onclick="openCityModal()">Изменить</div>
+                <div class="time-disclaimer"><i class="ph ph-map-pin"></i> ${cityName}</div>
+                <div style="text-align:center; margin-top:10px; font-size:10px; color:#444; cursor:pointer;" onclick="openCityModal()">Изменить локацию</div>
             `;
         } else {
             timeBlock.innerHTML = `<button class="btn-set-city" onclick="openCityModal()">📍 Выбрать город</button>`;
@@ -724,7 +752,20 @@
         fullHistory[activeDayNum].fasting = val;
         renderDay(activeDayNum);
         saveData();
-        if(val) hapticBurst(SCORES.fasting); else haptic();
+        if(val) {
+            hapticBurst(SCORES.fasting);
+            // FIREWORKS!
+            if(window.confetti) {
+                confetti({
+                    particleCount: 100,
+                    spread: 70,
+                    origin: { y: 0.6 },
+                    colors: ['#d4af37', '#ffffff', '#27ae60']
+                });
+            }
+        } else {
+            haptic();
+        }
     }
     
     window.openCityModal = function() {
@@ -1023,9 +1064,9 @@
     document.getElementById('btnStats').addEventListener('click', () => {
         document.body.classList.add('no-scroll');
         
-        let totalRating = 0;
-        let daysWithRating = 0;
-        let totalPercent = 0;
+        // NEW STATS LOGIC: Calculate Average Rating based on Task Completion %
+        let totalScoreSum = 0;
+        let daysWithScore = 0;
         let filledDaysCount = 0;
 
         const grid = document.getElementById('heatmapGrid'); grid.innerHTML = ''; 
@@ -1035,17 +1076,13 @@
             const score = dayData ? calculateDayScore(dayData) : 0;
             const cell = document.createElement('div'); cell.className = 'heatmap-day';
             
-            if(dayData && calculateDayScore(dayData) > 0) {
+            if(dayData && score > 0) {
                 cell.innerText = score; 
                 if(score >= 80) cell.classList.add('good'); else if(score >= 40) cell.classList.add('medium'); else if(score > 0) cell.classList.add('bad');
                 
                 filledDaysCount++;
-                totalPercent += score; 
-                
-                if(dayData.rating > 0) {
-                    totalRating += dayData.rating;
-                    daysWithRating++;
-                }
+                totalScoreSum += score;
+                daysWithScore++;
             } else { 
                 cell.innerText = i; 
                 cell.style.opacity = "0.3"; 
@@ -1062,10 +1099,15 @@
 
         document.getElementById('statDays').innerText = daysPassedReal; 
         
-        const avgRating = daysWithRating > 0 ? (totalRating / daysWithRating).toFixed(1) : "0.0";
-        document.getElementById('statRating').innerText = avgRating;
+        // CALCULATE AVG RATING (0-100% -> 0.0-5.0)
+        let avgRatingVal = 0;
+        if(daysWithScore > 0) {
+            const avgPercent = totalScoreSum / daysWithScore;
+            avgRatingVal = (avgPercent / 20); // 100% / 20 = 5.0
+        }
+        document.getElementById('statRating').innerText = avgRatingVal.toFixed(1);
 
-        const avgScore = filledDaysCount > 0 ? (totalPercent / filledDaysCount) : 0;
+        const avgScore = filledDaysCount > 0 ? (totalScoreSum / filledDaysCount) : 0;
         let msg = "";
         if(filledDaysCount === 0) msg = "Статистика пуста. Начни отмечать дни!";
         else if(avgScore >= 90) msg = "МашаАллах! Ты идешь очень мощно. Так держать!";
@@ -1146,13 +1188,12 @@
         const centerX = width / 2;
         const centerY = height / 2;
         
-        // УВЕЛИЧЕННЫЙ РАДИУС (было 70, стало 125)
         const radius = 125; 
         
         // Clear
         ctx.clearRect(0, 0, width, height);
         
-        // Settings. УВЕЛИЧЕННАЯ ТОЛЩИНА ЛИНИИ (было 10, стало 15)
+        // Settings. 
         ctx.lineWidth = 15; 
         ctx.lineCap = 'round';
         
@@ -1180,7 +1221,6 @@
             ctx.shadowBlur = 15;
             
             ctx.beginPath();
-            // ИСПОЛЬЗУЕМ ПЕРЕМЕННУЮ radius
             ctx.arc(centerX, centerY, radius, startAngle, progressEndAngle);
             ctx.stroke();
             
