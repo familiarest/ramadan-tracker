@@ -199,34 +199,32 @@
         }
         .author-btn:active { transform: scale(0.98); background: rgba(255,255,255,0.1); }
 
-        /* --- ИСПРАВЛЕННАЯ ГЕНЕРАЦИЯ КАРТИНКИ --- */
-        /* Используем абсолютное позиционирование в верхнем углу, но скрываем под контентом */
-        /* Это исправляет "кривой" рендеринг html2canvas */
+        /* --- ИСПРАВЛЕННАЯ ГЕНЕРАЦИЯ КАРТИНКИ (4:5 Ratio) --- */
+        /* Размер 4:5 (600x750) - оптимально для ленты и экранов */
         #hidden-share-container {
             position: absolute;
             top: 0; left: 0;
-            width: 540px; 
-            height: 960px;
+            width: 600px; /* 4:5 Ratio width */
+            height: 750px; /* 4:5 Ratio height */
             background: radial-gradient(circle at 50% 0%, #1a2332 0%, #000000 90%);
             display: flex; 
             flex-direction: column; 
             justify-content: space-between;
             align-items: center; 
-            padding: 60px 40px; 
+            padding: 50px 40px; 
             text-align: center;
             z-index: -5; /* Скрываем за контентом */
             pointer-events: none;
             font-family: 'Manrope', sans-serif;
             color: #fff;
             box-sizing: border-box;
-            /* Сдвигаем визуально, если мешает, но лучше оставить под низом для точности */
             visibility: hidden; 
         }
 
         #hidden-share-container .share-border {
-            position: absolute; top: 20px; left: 20px; right: 20px; bottom: 20px;
+            position: absolute; top: 15px; left: 15px; right: 15px; bottom: 15px;
             border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 30px;
+            border-radius: 20px;
             pointer-events: none;
         }
 
@@ -245,6 +243,9 @@
         }
         .btn-send-image:active { transform: scale(0.96); }
         .btn-send-image:disabled { opacity: 0.7; cursor: wait; }
+        
+        .loading-text { color: #888; margin-top: 20px; font-size: 14px; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
     </style>
 </head>
 <body>
@@ -443,40 +444,44 @@
     </div>
     <div class="modal-content" style="display:flex; flex-direction:column; align-items:center;">
         
+        <div id="loadingState" class="loading-text" style="display:none;">Создаем красоту...</div>
         <div id="generatedImageContainer"></div>
-        <div id="shareHint" style="margin-bottom:20px; color:#666; font-size:12px; margin-top: 15px;">Нажми кнопку ниже</div>
+        <div id="shareHint" style="margin-bottom:20px; color:#666; font-size:12px; margin-top: 15px; display:none;">Нажми кнопку ниже, если меню не открылось</div>
 
-        <button class="btn-send-image" id="btnGenImage" onclick="generateAndSend()">Отправить в сторис</button>
+        <button class="btn-send-image" id="btnGenImage" onclick="manualShare()" style="display:none;">Отправить</button>
     </div>
 </div>
 
 <div id="hidden-share-container">
     <div class="share-border"></div>
     
-    <div style="width: 100%; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px;">
-        <div style="font-size: 24px; font-weight: 300; color: #aaa; letter-spacing: 5px; text-transform: uppercase;">Рамадан 2026</div>
+    <div style="width: 100%; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 25px;">
+        <div style="font-size: 22px; font-weight: 300; color: #aaa; letter-spacing: 5px; text-transform: uppercase;">Рамадан 2026</div>
         <div id="renderDate" style="font-size: 18px; color: #d4af37; font-weight: 700; margin-top: 10px;">...</div>
     </div>
 
     <div style="flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%;">
         <div style="position: relative; width: 300px; height: 300px; display: flex; align-items: center; justify-content: center;">
-            <svg style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; transform: rotate(135deg);" viewBox="0 0 160 160">
-                <circle cx="80" cy="80" r="70" style="stroke: rgba(255,255,255,0.05); stroke-width: 4; fill: none; stroke-dasharray: 330 440; stroke-linecap: round;"></circle>
-                <circle id="renderCircle" cx="80" cy="80" r="70" style="stroke: #d4af37; stroke-width: 4; fill: none; stroke-dasharray: 330 440; stroke-dashoffset: 330; stroke-linecap: round; filter: drop-shadow(0 0 15px rgba(212,175,55,0.5));"></circle>
-            </svg>
+            <div style="position:absolute; width:100%; height:100%; top:0; left:0; transform: rotate(135deg);">
+                 <svg width="300" height="300" viewBox="0 0 160 160" style="width:100%; height:100%; display:block;">
+                    <circle cx="80" cy="80" r="70" style="stroke: rgba(255,255,255,0.05); stroke-width: 5; fill: none; stroke-dasharray: 330 440; stroke-linecap: round;"></circle>
+                    <circle id="renderCircle" cx="80" cy="80" r="70" style="stroke: #d4af37; stroke-width: 5; fill: none; stroke-dasharray: 330 440; stroke-dashoffset: 330; stroke-linecap: round; filter: drop-shadow(0 0 15px rgba(212,175,55,0.5));"></circle>
+                </svg>
+             </div>
+
             <div style="position: absolute; display: flex; flex-direction: column; align-items: center; z-index: 10;">
-                <div id="renderDayNum" style="font-size: 100px; font-weight: 200; color: #fff; line-height: 0.9;">1</div>
+                <div id="renderDayNum" style="font-size: 110px; font-weight: 200; color: #fff; line-height: 0.9;">1</div>
                 <div style="font-size: 14px; font-weight: 800; color: #666; letter-spacing: 4px; text-transform: uppercase; margin-top: 10px;">День</div>
             </div>
         </div>
 
-        <div id="renderAiText" style="font-size: 20px; color: #eee; font-weight: 500; margin-top: 30px; max-width: 80%; line-height: 1.5; font-style: italic;">...</div>
-        <div id="renderStars" style="display: flex; gap: 15px; font-size: 40px; margin-top: 20px;"></div>
+        <div id="renderAiText" style="font-size: 20px; color: #eee; font-weight: 500; margin-top: 35px; max-width: 85%; line-height: 1.5; font-style: italic;">...</div>
+        <div id="renderStars" style="display: flex; gap: 15px; font-size: 44px; margin-top: 25px;"></div>
     </div>
 
-    <div style="width: 100%; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
+    <div style="width: 100%; padding-top: 25px; border-top: 1px solid rgba(255,255,255,0.1);">
         <div style="font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;">Мой прогресс в боте</div>
-        <div style="font-size: 16px; color: #fff; font-weight: 700;">@ramadan_tracker_bot</div>
+        <div style="font-size: 16px; color: #fff; font-weight: 700;">@ramadantracking_bot</div>
     </div>
 </div>
 
@@ -1115,14 +1120,14 @@
         document.getElementById('modalFinal').classList.add('show');
     }
 
-    // --- SHARE LOGIC FIXED ---
+    // --- NEW AUTO SHARE LOGIC ---
     document.getElementById('btnShare').addEventListener('click', () => {
         document.body.classList.add('no-scroll');
         const d = fullHistory[activeDayNum] || {}; 
         const score = calculateDayScore(d);
         const rating = d.rating || 0;
         
-        // Prepare hidden container data
+        // Prepare hidden container
         const date = new Date(ramadanStart); 
         date.setDate(ramadanStart.getDate() + (activeDayNum - 1));
         document.getElementById('renderDate').innerText = date.toLocaleDateString('ru-RU', {day:'numeric', month:'long'});
@@ -1152,85 +1157,87 @@
         else if(percent < 0.8) circle.style.stroke = "#d4af37"; 
         else circle.style.stroke = "#27ae60";
 
-        // Показываем превью генерации в модалке, но пока пустое, если нужно
+        // Reset Modal State
         document.getElementById('generatedImageContainer').style.display = 'none';
+        document.getElementById('btnGenImage').style.display = 'none';
+        document.getElementById('shareHint').style.display = 'none';
         
-        // Сразу показываем кнопку "Отправить"
-        const btn = document.getElementById('btnGenImage');
-        btn.innerText = "Отправить в сторис";
-        btn.disabled = false;
+        // Show Loading
+        const loader = document.getElementById('loadingState');
+        loader.style.display = 'block';
         
-        // Делаем hidden container видимым для рендеринга (через visibility, z-index остается низким)
+        // Make hidden container visible for render
         document.getElementById('hidden-share-container').style.visibility = 'visible';
 
         document.getElementById('modalShare').classList.add('show');
-    });
 
-    window.generateAndSend = function() {
-        const btn = document.getElementById('btnGenImage'); 
-        const hint = document.getElementById('shareHint');
-        const hiddenContainer = document.getElementById('hidden-share-container');
-        const imgContainer = document.getElementById('generatedImageContainer');
-
-        btn.innerText = "Подготовка...";
-        btn.disabled = true;
-        
+        // Auto Generate immediately
         setTimeout(() => {
+            const hiddenContainer = document.getElementById('hidden-share-container');
+            
             html2canvas(hiddenContainer, { 
-                scale: 3, 
+                scale: 2, // Sufficient for mobile
                 useCORS: true, 
                 backgroundColor: null,
                 allowTaint: true,
-                scrollY: 0, // IMPORTANT: Ignore scroll
+                scrollY: 0,
                 scrollX: 0
             }).then(canvas => {
-                // Скрываем обратно
                 hiddenContainer.style.visibility = 'hidden';
+                loader.style.display = 'none';
 
                 const imgData = canvas.toDataURL("image/png"); 
-                
-                // Show preview in modal
                 const img = document.createElement('img'); 
                 img.src = imgData; 
-                imgContainer.innerHTML = ''; 
-                imgContainer.appendChild(img); 
-                imgContainer.style.display = 'block';
                 
-                // Convert to blob and share
+                const imgCont = document.getElementById('generatedImageContainer');
+                imgCont.innerHTML = ''; 
+                imgCont.appendChild(img); 
+                imgCont.style.display = 'block';
+
+                const btn = document.getElementById('btnGenImage');
+                btn.style.display = 'block';
+                btn.innerText = "Отправить";
+                
+                document.getElementById('shareHint').style.display = 'block';
+                
+                // Try auto share
                 canvas.toBlob(function(blob) {
-                    const file = new File([blob], "ramadan_story.png", { type: "image/png" });
+                    const file = new File([blob], "ramadan_report.png", { type: "image/png" });
                     const shareData = {
                         files: [file],
                         text: "Сегодня мой день прошел так. Отслеживаю это в @ramadantracking_bot"
                     };
 
                     if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-                        navigator.share(shareData)
-                            .then(() => {
-                                btn.innerText = "Отправлено!";
-                                setTimeout(() => { btn.innerText = "Отправить в сторис"; btn.disabled = false; }, 2000);
-                            })
-                            .catch((err) => {
-                                console.log(err);
-                                btn.innerText = "Сохраните фото вручную";
-                                hint.innerText = "Не удалось открыть меню. Зажмите фото, чтобы сохранить.";
-                                btn.disabled = false;
-                            });
-                    } else {
-                        btn.innerText = "Сохраните фото вручную";
-                        hint.innerText = "Ваш браузер не поддерживает отправку. Зажмите фото выше, чтобы сохранить.";
-                        btn.disabled = false;
+                        navigator.share(shareData).catch((err) => { console.log("Auto-share dismissed"); });
                     }
                 });
 
-                haptic();
             }).catch(err => { 
                 console.error(err);
-                alert("Ошибка генерации."); 
-                btn.innerText = "Ошибка"; 
-                btn.disabled = false;
+                loader.innerText = "Ошибка создания картинки";
             });
-        }, 100);
+        }, 300);
+    });
+
+    window.manualShare = function() {
+        // Just trigger the same logic if auto-share failed or user cancelled
+        const img = document.querySelector('#generatedImageContainer img');
+        if(img) {
+            fetch(img.src).then(res => res.blob()).then(blob => {
+                const file = new File([blob], "ramadan_report.png", { type: "image/png" });
+                const shareData = {
+                     files: [file],
+                     text: "Сегодня мой день прошел так. Отслеживаю это в @ramadantracking_bot"
+                };
+                if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+                    navigator.share(shareData);
+                } else {
+                    alert("Ваше устройство не поддерживает отправку. Сохраните фото долгим нажатием.");
+                }
+            });
+        }
     }
 
     initApp();
