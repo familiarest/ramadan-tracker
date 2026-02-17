@@ -200,13 +200,12 @@
         .author-btn:active { transform: scale(0.98); background: rgba(255,255,255,0.1); }
 
         /* --- ИСПРАВЛЕННАЯ ГЕНЕРАЦИЯ КАРТИНКИ --- */
-        /* Контейнер для генерации - спрятан, но рендерится. */
-        /* Важно: фиксированные размеры для предсказуемого результата (Story 9:16) */
+        /* Используем абсолютное позиционирование в верхнем углу, но скрываем под контентом */
+        /* Это исправляет "кривой" рендеринг html2canvas */
         #hidden-share-container {
-            position: fixed; 
-            left: -2000px; /* Убираем за экран */
-            top: 0;
-            width: 540px; /* Хорошее разрешение */
+            position: absolute;
+            top: 0; left: 0;
+            width: 540px; 
             height: 960px;
             background: radial-gradient(circle at 50% 0%, #1a2332 0%, #000000 90%);
             display: flex; 
@@ -215,10 +214,13 @@
             align-items: center; 
             padding: 60px 40px; 
             text-align: center;
-            z-index: -100;
+            z-index: -5; /* Скрываем за контентом */
+            pointer-events: none;
             font-family: 'Manrope', sans-serif;
             color: #fff;
             box-sizing: border-box;
+            /* Сдвигаем визуально, если мешает, но лучше оставить под низом для точности */
+            visibility: hidden; 
         }
 
         #hidden-share-container .share-border {
@@ -229,7 +231,7 @@
         }
 
         #generatedImageContainer { width: 100%; border-radius: 16px; overflow: hidden; margin-top: 20px; display: none; box-shadow: 0 10px 40px rgba(0,0,0,0.5); border: 1px solid #333; }
-        #generatedImageContainer img { width: 100%; display: block; }
+        #generatedImageContainer img { width: 100%; display: block; height: auto; }
 
         .btn-send-image {
             background: linear-gradient(135deg, #d4af37 0%, #b4932a 100%);
@@ -444,7 +446,7 @@
         <div id="generatedImageContainer"></div>
         <div id="shareHint" style="margin-bottom:20px; color:#666; font-size:12px; margin-top: 15px;">Нажми кнопку ниже</div>
 
-        <button class="btn-send-image" id="btnGenImage" onclick="generateAndSend()">Создать картинку</button>
+        <button class="btn-send-image" id="btnGenImage" onclick="generateAndSend()">Отправить в сторис</button>
     </div>
 </div>
 
@@ -553,10 +555,8 @@
     let fullHistory = {};
 
     function initApp() {
-        // Simple analytics
         if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
             const user = tg.initDataUnsafe.user;
-            // Place for analytics logic if needed
         }
 
         try {
@@ -567,13 +567,11 @@
             }
             renderDay(activeDayNum);
             
-            // Try cloud storage if available
             if (tg && tg.CloudStorage) {
                 tg.CloudStorage.getItem(STORAGE_KEY, (err, val) => {
                     if (!err && val) { 
                         try { 
                             const cloudData = JSON.parse(val);
-                            // Merge strategy: Cloud overrides local if valid
                             fullHistory = cloudData;
                             document.getElementById('syncStatus').innerText = "☁️ Синхронизировано";
                             renderDay(activeDayNum);
@@ -624,7 +622,6 @@
         const data = fullHistory[dayNum] || { tasks: {}, rating: 0, thoughts: "", fasting: false, extraGoals: [], water: 0, quranPageCount: "" };
         if(!data.tasks) data.tasks = {};
 
-        // Fasting UI
         const isFasting = (data.fasting === true); 
         const btnYes = document.getElementById('fastingYes');
         const btnNo = document.getElementById('fastingNo');
@@ -632,7 +629,6 @@
         btnNo.className = 'fasting-option';
         if(isFasting) btnYes.classList.add('active-hold'); else btnNo.classList.add('active-nothold');
 
-        // Times UI
         const timeBlock = document.getElementById('fastingTimesBlock');
         const calendar = getStoredCalendar();
         
@@ -658,32 +654,26 @@
             timeBlock.innerHTML = `<button class="btn-set-city" onclick="openCityModal()">📍 Выбрать город</button>`;
         }
 
-        // Tasks UI
         document.querySelectorAll('.task-item').forEach(el => el.classList.remove('checked'));
         for(const [id, done] of Object.entries(data.tasks)) {
             if(done) {
                 const els = document.querySelectorAll('.task-item');
                 els.forEach(el => {
-                    // Check onclick attribute matches logic
                     if(el.getAttribute('onclick') && el.getAttribute('onclick').includes(`'${id}'`)) el.classList.add('checked');
-                    // Special case for Quran input row
                     if(!el.getAttribute('onclick') && id === 'quran_read' && el.querySelector(`[onclick*="'quran_read'"]`)) el.classList.add('checked');
                 });
             }
         }
         
-        // Water UI
         const waterVal = data.water || 0;
         document.querySelectorAll('.water-glass').forEach((el, idx) => {
             if (idx < waterVal) el.classList.add('filled');
             else el.classList.remove('filled');
         });
 
-        // Inputs UI
         document.getElementById('quranPages').value = data.quranPageCount || "";
         document.getElementById('dailyThoughts').value = data.thoughts || "";
 
-        // Goals UI
         const extraContainer = document.getElementById('extraGoalsContainer');
         extraContainer.innerHTML = '';
         if(data.extraGoals && data.extraGoals.length > 0) {
@@ -700,11 +690,9 @@
         }
         document.getElementById('newGoalInput').value = "";
         
-        // Rating UI
         const r = data.rating || 0;
         document.querySelectorAll('.star').forEach(s => s.classList.toggle('active', parseInt(s.dataset.val) <= r));
         
-        // Update Bars
         document.querySelectorAll('.tracker-section').forEach(updateSectionProgress);
         updateDailyCircle();
     }
@@ -921,20 +909,15 @@
         const resDiv = document.getElementById('searchResults');
         resDiv.innerHTML = '<div style="text-align:center;color:var(--accent); margin-top:20px;">Загрузка расписания...</div>';
         
-        // Month 2 = February, Month 3 = March for 2026
         const p1 = fetch(`https://api.aladhan.com/v1/calendar?latitude=${lat}&longitude=${lon}&method=3&month=2&year=2026`).then(r=>r.json());
         const p2 = fetch(`https://api.aladhan.com/v1/calendar?latitude=${lat}&longitude=${lon}&method=3&month=3&year=2026`).then(r=>r.json());
 
         Promise.all([p1, p2]).then(([d1, d2]) => {
             let finalCalendar = [];
-            // Ramadan logic (Needs to be precise with islamic dates, assuming standard 30 days starting Feb 18 approx for code simplicity based on user request)
-            // But user code implies start Feb 01. Sticking to user logic of 30 days array.
-            
             const arr1 = d1.data || [];
             const arr2 = d2.data || [];
             const fullArr = [...arr1, ...arr2];
 
-            // Safety slice
             for(let i=0; i<30; i++) {
                 if(fullArr[i]) {
                      const dayObj = fullArr[i];
@@ -1146,24 +1129,21 @@
         
         document.getElementById('renderDayNum').innerText = activeDayNum;
         
-        // AI Text
         let aiMsg = "День прошел. Постоянство — ключ к успеху.";
         if(score >= 80) aiMsg = "🔥 МашаАллах! Очень продуктивный день. Пусть Аллах примет!"; 
         else if(score >= 50) aiMsg = "💪 Хорошая работа, но можно лучше. Старайся усерднее."; 
         else aiMsg = "Не останавливайся. Каждый день — это новый шанс стать лучше.";
         document.getElementById('renderAiText').innerText = aiMsg;
 
-        // Stars
         let starsHtml = ''; 
         for(let i=1; i<=5; i++) { 
             starsHtml += `<span style="color:${i<=rating ? '#d4af37' : '#333'}">★</span>`; 
         }
         document.getElementById('renderStars').innerHTML = starsHtml;
 
-        // Circle
         const percent = score / 100;
         const circle = document.getElementById('renderCircle');
-        const dash = 440; // 2 * PI * 70 approx
+        const dash = 440; 
         const offset = dash - (percent * dash);
         circle.style.strokeDasharray = `${dash} ${dash}`;
         circle.style.strokeDashoffset = offset;
@@ -1172,12 +1152,17 @@
         else if(percent < 0.8) circle.style.stroke = "#d4af37"; 
         else circle.style.stroke = "#27ae60";
 
-        // Reset UI
+        // Показываем превью генерации в модалке, но пока пустое, если нужно
         document.getElementById('generatedImageContainer').style.display = 'none';
+        
+        // Сразу показываем кнопку "Отправить"
         const btn = document.getElementById('btnGenImage');
-        btn.innerText = "Создать картинку";
+        btn.innerText = "Отправить в сторис";
         btn.disabled = false;
         
+        // Делаем hidden container видимым для рендеринга (через visibility, z-index остается низким)
+        document.getElementById('hidden-share-container').style.visibility = 'visible';
+
         document.getElementById('modalShare').classList.add('show');
     });
 
@@ -1187,46 +1172,61 @@
         const hiddenContainer = document.getElementById('hidden-share-container');
         const imgContainer = document.getElementById('generatedImageContainer');
 
-        if (btn.innerText.includes("Отправить")) {
-             // If already generated, trigger share
-             const existingImg = imgContainer.querySelector('img');
-             if(existingImg && navigator.share) {
-                 fetch(existingImg.src).then(res => res.blob()).then(blob => {
-                    const file = new File([blob], "ramadan_report.png", { type: "image/png" });
-                    navigator.share({ files: [file], title: 'Отчет Рамадан' }).catch(()=>{});
-                 });
-             } else {
-                 hint.innerText = "Зажми фото сверху, чтобы сохранить его в галерею.";
-             }
-             return;
-        }
-
-        btn.innerText = "Рисуем...";
+        btn.innerText = "Подготовка...";
         btn.disabled = true;
         
-        // Short delay to ensure DOM update
         setTimeout(() => {
             html2canvas(hiddenContainer, { 
-                scale: 3, // High quality
+                scale: 3, 
                 useCORS: true, 
                 backgroundColor: null,
-                allowTaint: true
+                allowTaint: true,
+                scrollY: 0, // IMPORTANT: Ignore scroll
+                scrollX: 0
             }).then(canvas => {
+                // Скрываем обратно
+                hiddenContainer.style.visibility = 'hidden';
+
                 const imgData = canvas.toDataURL("image/png"); 
                 
+                // Show preview in modal
                 const img = document.createElement('img'); 
                 img.src = imgData; 
                 imgContainer.innerHTML = ''; 
                 imgContainer.appendChild(img); 
                 imgContainer.style.display = 'block';
                 
-                btn.innerText = "Отправить в сторис"; 
-                btn.disabled = false;
-                hint.innerText = "Картинка готова!"; 
+                // Convert to blob and share
+                canvas.toBlob(function(blob) {
+                    const file = new File([blob], "ramadan_story.png", { type: "image/png" });
+                    const shareData = {
+                        files: [file],
+                        text: "Сегодня мой день прошел так. Отслеживаю это в @ramadantracking_bot"
+                    };
+
+                    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+                        navigator.share(shareData)
+                            .then(() => {
+                                btn.innerText = "Отправлено!";
+                                setTimeout(() => { btn.innerText = "Отправить в сторис"; btn.disabled = false; }, 2000);
+                            })
+                            .catch((err) => {
+                                console.log(err);
+                                btn.innerText = "Сохраните фото вручную";
+                                hint.innerText = "Не удалось открыть меню. Зажмите фото, чтобы сохранить.";
+                                btn.disabled = false;
+                            });
+                    } else {
+                        btn.innerText = "Сохраните фото вручную";
+                        hint.innerText = "Ваш браузер не поддерживает отправку. Зажмите фото выше, чтобы сохранить.";
+                        btn.disabled = false;
+                    }
+                });
+
                 haptic();
             }).catch(err => { 
                 console.error(err);
-                alert("Ошибка генерации. Попробуй еще раз."); 
+                alert("Ошибка генерации."); 
                 btn.innerText = "Ошибка"; 
                 btn.disabled = false;
             });
