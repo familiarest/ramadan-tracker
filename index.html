@@ -3,27 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
-    <title>Ramadan Tracker Final Design</title>
+    <title>Ramadan Tracker Pro</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
         :root {
-            /* Цвета из твоего дизайна */
-            --bg-body: #050505; /* Глубокий черный */
-            --bg-gradient: radial-gradient(circle at 50% -20%, #1a1f2e 0%, #050505 70%);
-            
-            --accent: #FFD700; /* Более яркое золото как на скрине */
-            --accent-dim: rgba(255, 215, 0, 0.1);
-            
-            --card-bg: #121212; /* Матовый темный фон карточек */
-            --card-border-top: 2px solid var(--accent);
-            
+            --accent: #FFC107; /* Яркий золотой как на скриншоте */
+            --accent-glow: rgba(255, 193, 7, 0.3);
+            --bg-body: #0a0e14; /* Глубокий темный фон */
             --text-white: #ffffff;
-            --text-gray: #888888;
+            --text-gray: #9ca3af;
+            
+            /* Эффект жидкого стекла */
+            --glass-bg: rgba(22, 27, 34, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.08);
             
             --green: #27ae60;
             --red: #e74c3c;
@@ -34,8 +31,7 @@
 
         body {
             background-color: var(--bg-body) !important;
-            background-image: var(--bg-gradient);
-            background-attachment: fixed;
+            background-image: radial-gradient(circle at 50% 0%, #1a202c 0%, #0a0e14 80%);
             color: var(--text-white) !important;
             font-family: 'Manrope', sans-serif;
             margin: 0; padding: 0; 
@@ -46,196 +42,241 @@
         
         body.no-scroll { overflow: hidden !important; height: 100vh; position: fixed; width: 100%; }
 
-        /* ЗВЕЗДЫ (Твои старые, оставлены) */
+        input, textarea { -webkit-user-select: text !important; user-select: text !important; }
+
+        /* ЗВЕЗДЫ (Оставлены как просили) */
         #star-bg {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             z-index: 0; pointer-events: none; overflow: hidden;
         }
         .star-layer { position: absolute; top: 0; left: 0; right: 0; bottom: 0; will-change: transform; }
         .stars-1 {
-            width: 2px; height: 2px; background: white; opacity: 0.8;
-            box-shadow: 10vw 10vh #fff, 20vw 50vh #fff, 30vw 20vh #fff, 80vw 80vh #fff, 50vw 10vh #fff;
+            width: 2px; height: 2px; background: transparent;
+            box-shadow: 10vw 10vh #fff, 20vw 50vh #fff, 30vw 20vh #fff, 80vw 80vh #fff, 90vw 10vh #fff, 50vw 50vh #fff, 15vw 90vh #fff;
+            opacity: 0.7;
         }
         .stars-2 {
-            width: 1px; height: 1px; background: white; opacity: 0.5;
-            box-shadow: 55vw 15vh #fff, 25vw 85vh #fff, 10vw 40vh #fff;
+            width: 1px; height: 1px; background: transparent;
+            box-shadow: 55vw 15vh #fff, 25vw 85vh #fff, 75vw 25vh #fff, 10vw 60vh #fff, 85vw 30vh #fff;
+            opacity: 0.5;
         }
 
         .container { 
             max-width: 450px; margin: 0 auto; padding: 20px; 
-            padding-bottom: 160px; position: relative; z-index: 10; 
+            padding-bottom: 140px; position: relative; z-index: 10; 
         }
 
         /* UI ЭЛЕМЕНТЫ */
-        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .btn-mini {
-            background: rgba(255, 255, 255, 0.08); color: #ccc; padding: 10px 16px; border-radius: 20px;
-            font-size: 13px; font-weight: 600; border: 1px solid rgba(255, 255, 255, 0.05);
-            cursor: pointer; backdrop-filter: blur(10px); font-family: 'Manrope', sans-serif;
+            background: rgba(255, 255, 255, 0.05); color: #ccc; padding: 10px 16px; border-radius: 12px;
+            font-size: 13px; font-weight: 600; border: 1px solid var(--glass-border);
+            cursor: pointer; backdrop-filter: blur(10px); transition: 0.2s;
             display: flex; align-items: center; gap: 6px;
         }
+        .btn-mini i { font-size: 16px; color: var(--accent); }
         
         .brand-link {
-            display: block; text-align: center; font-size: 11px; color: var(--text-gray);
-            text-decoration: none; font-weight: 600; margin-bottom: 30px; letter-spacing: 1px; text-transform: uppercase;
+            display: block; text-align: center; font-size: 12px; color: var(--text-gray);
+            text-decoration: none; font-weight: 500; margin-bottom: 25px; letter-spacing: 0.5px;
+            position: relative; z-index: 20;
         }
 
-        /* КРУГОВАЯ ДИАГРАММА (КАК НА СКРИНЕ) */
+        /* КРУГОВАЯ ДИАГРАММА (СПИДОМЕТР) */
         .progress-header { display: flex; flex-direction: column; align-items: center; margin-bottom: 30px; position: relative; z-index: 11; }
-        .circle-wrapper { display: flex; justify-content: center; align-items: center; gap: 10px; width: 100%; }
+        .circle-wrapper { display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 10px; width: 100%; }
         
         .nav-arrow { font-size: 24px; color: #555; padding: 15px; cursor: pointer; transition: 0.2s; }
-        .nav-arrow.disabled { opacity: 0.1; pointer-events: none; }
+        .nav-arrow.disabled { opacity: 0.2; pointer-events: none; }
         
-        .circle-container { position: relative; width: 180px; height: 180px; }
-        /* Поворачиваем SVG, чтобы разрыв был снизу */
-        svg { width: 100%; height: 100%; transform: rotate(135deg); }
+        .circle-container { position: relative; width: 170px; height: 170px; }
+        /* Поворот SVG чтобы разрыв был снизу */
+        svg { transform: rotate(135deg); width: 100%; height: 100%; overflow: visible; }
         circle { fill: none; stroke-width: 5; stroke-linecap: round; }
+        .circle-bg { stroke: rgba(255, 255, 255, 0.1); }
         
-        .circle-bg { stroke: rgba(255, 255, 255, 0.1); stroke-dasharray: 330 440; } /* 330 видимо, остальное пусто */
         .circle-progress { 
             stroke: var(--accent); 
-            stroke-dasharray: 330 440; /* Максимум 330 */
-            stroke-dashoffset: 330; /* Старт с пустого */
-            transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-            filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.3)); 
+            /* 350 - длина дуги (неполный круг), 440 - полная длина */
+            stroke-dasharray: 350 440; 
+            stroke-dashoffset: 350; 
+            transition: stroke-dashoffset 0.8s ease; 
+            filter: drop-shadow(0 0 10px var(--accent-glow)); 
         }
         
-        .day-info { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; margin-top: 5px; }
+        .day-info { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; }
         .day-number { 
-            font-size: 64px; font-weight: 200; /* Очень тонкий шрифт */
-            line-height: 1; color: #fff; margin-bottom: 5px;
+            font-size: 64px; font-weight: 200; /* Тонкий шрифт как на скрине */
+            line-height: 1; color: #fff; 
         }
-        .day-label { font-size: 12px; color: var(--text-gray); text-transform: uppercase; font-weight: 700; letter-spacing: 2px; }
-        
-        .greeting-text { text-align: center; font-size: 14px; color: #999; margin-top: 10px; font-weight: 400; }
-        #syncStatus { font-size: 11px; text-align: center; color: #444; margin-bottom: 10px; margin-top: 5px; }
+        .day-label { 
+            font-size: 11px; color: var(--text-gray); text-transform: uppercase; 
+            font-weight: 600; letter-spacing: 2px; margin-top: 5px; 
+        }
+        .greeting-text { text-align: center; font-size: 14px; color: var(--text-gray); line-height: 1.5; font-weight: 400; }
 
-        /* КАРТОЧКИ (КАК НА СКРИНЕ - ПОЛОСКА ТОЛЬКО СВЕРХУ) */
+        #syncStatus { font-size: 11px; text-align: center; color: #555; height: 20px; margin-bottom: 15px; font-weight: 600; }
+        #syncStatus.active { color: var(--green); }
+
+        /* КАРТОЧКИ (Жидкое стекло) */
         .tracker-section { 
-            background: var(--card-bg); 
+            background: var(--glass-bg); 
             border-radius: 20px; 
-            padding: 24px; 
-            margin-bottom: 16px; 
-            /* Убираем рамку по кругу, оставляем только верх */
-            border: 1px solid rgba(255,255,255,0.03);
-            border-top: 2px solid var(--accent); 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            padding: 20px; 
+            margin-bottom: 15px; 
+            border: 1px solid var(--glass-border); 
+            backdrop-filter: blur(12px); 
+            -webkit-backdrop-filter: blur(12px);
             position: relative; z-index: 11; 
+        }
+
+        /* Особый стиль для блока Пост (Линия сверху) */
+        .section-highlight-top {
+            border-top: 2px solid var(--accent);
+            border-bottom: none; border-left: 1px solid var(--glass-border); border-right: 1px solid var(--glass-border);
         }
 
         .section-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 15px; }
         
         .section-title { 
             font-size: 16px; font-weight: 700; color: #fff; 
-            display: flex; align-items: center; gap: 8px;
+            display: flex; align-items: center; gap: 10px;
         }
+        .section-title i { font-size: 20px; color: var(--accent); }
         
-        /* ПРОЦЕНТЫ СПРАВА, КРУПНЫЕ И ТОНКИЕ */
+        /* Проценты справа (Крупные и тонкие) */
         .section-percent { 
-            font-size: 32px; 
-            font-weight: 200; 
-            color: #fff; 
+            font-size: 28px; color: #fff; font-weight: 300; 
             line-height: 1;
         }
 
         .progress-bar-bg { width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 4px; margin-bottom: 20px; overflow: hidden; }
-        .progress-bar-fill { height: 100%; width: 0%; background: var(--accent); border-radius: 4px; transition: width 0.3s ease; box-shadow: 0 0 10px var(--accent-dim); }
+        .progress-bar-fill { height: 100%; width: 0%; background: var(--accent); border-radius: 4px; transition: width 0.3s ease; box-shadow: 0 0 10px var(--accent-glow); }
         
-        .group-label { font-size: 11px; text-transform: uppercase; color: var(--text-gray); font-weight: 700; margin-top: 20px; margin-bottom: 12px; letter-spacing: 1px; }
+        .group-label { font-size: 11px; text-transform: uppercase; color: var(--text-gray); font-weight: 700; margin-top: 20px; margin-bottom: 10px; letter-spacing: 1px; }
         
+        /* ЗАДАЧИ */
         .task-item { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; }
         .task-item:last-child { border-bottom: none; }
-        .task-text { font-size: 15px; font-weight: 500; color: #ddd; flex-grow: 1; }
+        .task-text { font-size: 15px; font-weight: 500; color: #e0e0e0; flex-grow: 1; }
         
-        /* ГАЛОЧКИ (КАК НА СКРИНЕ - ЖЕЛТЫЕ КВАДРАТЫ) */
+        /* ГАЛОЧКИ (Новый дизайн) */
         .checkbox { 
             width: 24px; height: 24px; 
-            border-radius: 6px; 
-            border: 1px solid #444; 
+            border-radius: 6px; /* Закругленный квадрат */
+            border: 2px solid #444; 
             display: flex; align-items: center; justify-content: center; 
             transition: all 0.2s; background: transparent; flex-shrink: 0; 
         }
         .task-item.checked .checkbox { 
             background: var(--accent); 
             border-color: var(--accent); 
-            box-shadow: 0 0 10px var(--accent-dim); 
+            box-shadow: 0 0 10px var(--accent-glow); 
         }
         .checkbox::after { 
-            content: '✓'; 
-            font-size: 14px; 
-            font-weight: 800; 
-            color: #000; /* Черная галочка */
-            display: none; 
+            content: '✓'; font-size: 16px; display: none; 
+            font-weight: 900; color: #000; /* Черная галочка */
         }
         .task-item.checked .checkbox::after { display: block; }
-
-        /* Переключатель Поста */
+        
+        /* FASTING TOGGLE (Новый дизайн) */
         .fasting-switch {
             display: flex; background: rgba(0,0,0,0.3); border-radius: 12px; padding: 4px;
-            margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.05);
+            margin-bottom: 15px; border: 1px solid var(--glass-border);
         }
         .fasting-option {
-            flex: 1; text-align: center; padding: 12px; font-size: 14px; font-weight: 600;
-            color: #666; cursor: pointer; border-radius: 10px; transition: 0.3s;
+            flex: 1; text-align: center; padding: 12px; font-size: 13px; font-weight: 600;
+            color: var(--text-gray); cursor: pointer; border-radius: 10px; transition: 0.3s; 
         }
-        .fasting-option.active-nothold { background: rgba(255,255,255,0.05); color: #888; }
-        .fasting-option.active-hold { background: var(--accent); color: #000; font-weight: 700; }
+        .fasting-option.active-nothold { background: rgba(255,255,255,0.05); color: #aaa; }
+        .fasting-option.active-hold { 
+            background: #1a1a1a; /* Темный фон активного */
+            color: var(--accent); /* Золотой текст */
+            border: 1px solid var(--accent);
+            box-shadow: 0 0 15px var(--accent-glow); 
+        }
 
+        /* TIMES BLOCK */
         .fasting-times-block {
-            background: rgba(255,255,255,0.03); border-radius: 16px; padding: 15px;
-            border: 1px solid rgba(255,255,255,0.03); text-align: center; margin-bottom: 5px;
+            background: rgba(0,0,0,0.2); border-radius: 16px; padding: 15px;
+            border: 1px solid rgba(255,255,255,0.05); text-align: center;
         }
         .time-row { display: flex; justify-content: space-around; align-items: center; margin-bottom: 5px; }
         .time-item { display: flex; flex-direction: column; }
-        .time-label { font-size: 10px; color: #666; text-transform: uppercase; margin-bottom: 2px; }
-        .time-val { font-size: 20px; font-weight: 300; color: #fff; }
-        .time-disclaimer { font-size: 10px; color: #444; margin-top: 5px; }
+        .time-label { font-size: 10px; color: var(--text-gray); text-transform: uppercase; margin-bottom: 4px; letter-spacing: 1px; }
+        .time-val { font-size: 20px; font-weight: 700; color: #fff; }
+        .time-disclaimer { font-size: 10px; color: #555; margin-top: 5px; }
+        .btn-set-city { 
+            background: transparent; border: 1px dashed #444; color: #888; 
+            padding: 10px; width: 100%; border-radius: 10px; cursor: pointer; 
+            font-family: 'Manrope'; font-size: 13px;
+        }
 
-        /* Вода */
-        .water-row { display: flex; gap: 8px; align-items: center; }
+        /* INPUTS */
+        .add-goal-area { display: flex; gap: 10px; margin-top: 15px; }
+        .custom-input { flex: 1; border: 1px solid #333; background: rgba(0,0,0,0.3); padding: 12px; border-radius: 12px; font-size: 14px; color: #fff; outline: none; font-family: 'Manrope', sans-serif; transition: border 0.2s; }
+        .btn-plus { width: 44px; background: rgba(255,255,255,0.05); border: 1px solid #333; border-radius: 12px; color: var(--accent); font-size: 24px; font-weight: 300; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .delete-custom { color: #555; padding: 10px; font-size: 18px; cursor: pointer; }
+
+        .water-row { display: flex; gap: 8px; align-items: center; justify-content: flex-end; }
         .water-glass { width: 22px; height: 30px; cursor: pointer; position: relative; opacity: 0.3; transition: 0.3s; }
+        .water-glass svg { transform: none; width: 100%; height: 100%; }
         .water-glass path { stroke: #fff; stroke-width: 1.5; fill: transparent; transition: 0.3s; } 
         .water-glass.filled { opacity: 1; transform: scale(1.1); }
         .water-glass.filled path { fill: var(--blue); stroke: var(--blue); filter: drop-shadow(0 0 8px rgba(52, 152, 219, 0.6)); }
 
-        .custom-input { flex: 1; border: 1px solid #333; background: rgba(0,0,0,0.3); padding: 12px; border-radius: 12px; font-size: 14px; color: #fff; outline: none; font-family: 'Manrope'; }
-        .btn-plus { width: 44px; background: rgba(255,255,255,0.05); border: 1px solid #333; border-radius: 12px; color: var(--accent); font-size: 24px; font-weight: 300; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .page-input { width: 70px; background: rgba(0,0,0,0.3); border: 1px solid #333; color: var(--accent); padding: 8px; border-radius: 8px; font-size: 14px; font-weight: 700; text-align: center; margin-right: 10px; outline: none; }
+
+        .stars { display: flex; justify-content: center; gap: 8px; margin-top: 10px; }
+        .star { font-size: 36px; color: #333; cursor: pointer; transition: color 0.2s; }
+        .star.active { color: var(--accent); text-shadow: 0 0 15px var(--accent-glow); }
         
-        .journal-area { width: 100%; height: 100px; background: rgba(0,0,0,0.3); border: 1px solid #333; border-radius: 16px; padding: 15px; color: #fff; font-family: 'Manrope'; resize: none; margin-top: 5px; }
-        
-        .stars { display: flex; justify-content: center; gap: 10px; margin-top: 10px; }
-        .star { font-size: 32px; color: #333; cursor: pointer; }
-        .star.active { color: var(--accent); text-shadow: 0 0 15px var(--accent-dim); }
+        .journal-area { width: 100%; height: 100px; background: rgba(0,0,0,0.2); border: 1px solid #333; border-radius: 14px; padding: 15px; color: #fff; font-family: 'Manrope', sans-serif; font-size: 14px; resize: none; margin-top: 5px; }
 
         .bottom-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 30px; }
-        .btn-finish { background: #fff; color: #000; width: 100%; padding: 16px; border: none; border-radius: 16px; font-size: 14px; font-weight: 800; cursor: pointer; text-transform: uppercase; font-family: 'Manrope'; margin-bottom: 20px;}
+        .btn-finish { background: #fff; color: #000; width: 100%; padding: 16px; border: none; border-radius: 16px; font-size: 14px; font-weight: 800; cursor: pointer; text-transform: uppercase; font-family: 'Manrope'; box-shadow: 0 0 20px rgba(255, 255, 255, 0.1); }
+        .btn-finish.saved { background: var(--green); color: white; }
         .btn-share { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; color: #fff; font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; text-transform: uppercase; }
 
-        /* SEARCH & MODALS */
-        .modal-overlay { position: fixed; bottom: 0; left: 0; width: 100%; height: 100%; background: #050505; border-top-left-radius: 28px; border-top-right-radius: 28px; transform: translateY(110%); transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); z-index: 200; display: flex; flex-direction: column; border-top: 1px solid #222; }
+        /* MODALS */
+        .modal-overlay { position: fixed; bottom: 0; left: 0; width: 100%; height: 100%; background: #0a0e14; border-top-left-radius: 28px; border-top-right-radius: 28px; box-shadow: 0 -10px 50px rgba(0,0,0,0.8); transform: translateY(110%); transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); z-index: 200; display: flex; flex-direction: column; border-top: 1px solid #333; }
         .modal-overlay.show { transform: translateY(0); }
-        .modal-header { padding: 20px; text-align: center; border-bottom: 1px solid #222; }
+        .modal-header { padding: 20px; text-align: center; border-bottom: 1px solid #222; position: relative; }
         .modal-title { font-size: 18px; font-weight: 700; color: white; }
-        .close-modal { position: absolute; top: 20px; right: 20px; font-size: 24px; cursor: pointer; color: #666; }
-        .modal-content { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 80px; }
+        .close-modal { position: absolute; top: 20px; right: 20px; font-size: 24px; cursor: pointer; color: #666; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; }
+        .modal-content { flex: 1; overflow-y: auto; padding: 20px; color: white; padding-bottom: 80px; }
 
-        .search-input { width: 100%; padding: 16px; background: #121212; border: 1px solid #333; color: white; border-radius: 14px; font-size: 15px; outline: none; font-family: 'Manrope'; }
-        .search-item { padding: 15px; background: rgba(255,255,255,0.03); border-radius: 12px; cursor: pointer; border: 1px solid transparent; margin-bottom: 5px; }
-        
-        /* Stats & Heatmap */
-        .heatmap-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; margin-bottom: 25px; }
-        .heatmap-day { aspect-ratio: 1/1; background: #1a1a1a; border-radius: 4px; border: 1px solid #222; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #555; }
+        /* SEARCH & CALENDAR */
+        .search-input { width: 100%; padding: 16px; background: #151a23; border: 1px solid #333; color: white; border-radius: 14px; font-size: 15px; outline: none; font-family: 'Manrope'; }
+        .search-item { padding: 15px; background: rgba(255,255,255,0.05); border-radius: 12px; cursor: pointer; margin-top: 5px; }
+        .prayer-table { width: 100%; border-collapse: collapse; min-width: 500px; }
+        .prayer-table th { text-align: left; font-size: 11px; color: #666; padding: 10px; border-bottom: 1px solid #333; }
+        .prayer-table td { padding: 12px 10px; font-size: 13px; border-bottom: 1px solid #222; }
+        .prayer-table tr.today-row { background: rgba(255, 193, 7, 0.1); border-left: 3px solid var(--accent); }
+
+        /* HEATMAP & STATS (Сохранены стили) */
+        .heatmap-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-bottom: 25px; }
+        .heatmap-day { aspect-ratio: 1/1; background: #1a1a1a; border-radius: 6px; border: 1px solid #333; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 800; color: #555; }
         .heatmap-day.good { background: var(--green); color: #fff; }
         .heatmap-day.medium { background: var(--accent); color: #000; }
         .heatmap-day.bad { background: var(--red); color: #fff; }
-        
-        .full-stat-item { display: flex; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 14px; }
-        .fs-name { color: #ccc; }
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 25px; }
+        .stat-card { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 16px; text-align: center; border: 1px solid #333; }
+        .stat-num { font-size: 24px; font-weight: 800; color: var(--accent); margin-bottom: 4px; }
+        .stat-desc { font-size: 11px; color: #aaa; font-weight: 600; text-transform: uppercase; }
+        .full-stat-list { margin-top: 20px; background: rgba(255,255,255,0.03); border-radius: 16px; padding: 10px; }
+        .full-stat-item { display: flex; justify-content: space-between; padding: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 13px; }
         .fs-val { color: var(--accent); font-weight: 700; }
 
-        /* SHARE GENERATION (Hidden) */
-        .visually-hidden { position: absolute; top: -9999px; left: -9999px; }
+        /* SHARE SCREEN */
+        .share-wrapper { position: relative; width: 100%; margin-bottom: 20px; }
+        .share-card-container { width: 100%; padding-bottom: 100%; position: relative; background: radial-gradient(circle at 50% -10%, #1a2a40 0%, #000000 70%); border-radius: 24px; border: 1px solid #333; overflow: hidden; display: block; }
+        .visually-hidden { opacity: 0; pointer-events: none; position: absolute; top: 0; left: 0; }
+        #generatedImageContainer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 24px; overflow: hidden; z-index: 2000; display: none; }
+        #generatedImageContainer img { width: 100%; height: 100%; object-fit: cover; pointer-events: auto !important; }
+        .share-content { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: space-between; padding: 20px; text-align: center; z-index: 10; }
+        .share-circle-wrap { width: 140px; height: 140px; position: relative; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; }
+        .share-day-num { font-size: 52px; font-weight: 800; color: #fff; line-height: 1;}
     </style>
 </head>
 <body>
@@ -251,10 +292,13 @@
         <button class="btn-mini" id="btnCalendar"><i class="ph ph-calendar-blank"></i> Календарь</button>
     </div>
 
+    <a href="https://t.me/ametov_design" class="brand-link" target="_blank">
+        Трекер Азиза Аметова ↗
+    </a>
+
     <div class="progress-header">
         <div class="circle-wrapper">
-            <div class="nav-arrow" id="prevDay"><i class="ph ph-caret-left"></i></div>
-            
+            <div class="nav-arrow" id="prevDay">❮</div>
             <div class="circle-container">
                 <svg viewBox="0 0 160 160">
                     <circle class="circle-bg" cx="80" cy="80" r="70"></circle>
@@ -265,18 +309,18 @@
                     <div class="day-label" id="uiDayLabel">РАМАДАН</div>
                 </div>
             </div>
-
-            <div class="nav-arrow disabled" id="nextDay"><i class="ph ph-caret-right"></i></div>
+            <div class="nav-arrow disabled" id="nextDay">❯</div>
         </div>
         
         <div class="greeting-text">
             Сделай этот день лучше, чем вчера.
         </div>
-        <div id="syncStatus"></div>
     </div>
 
-    <div class="tracker-section">
-        <div class="section-title" style="justify-content:center; margin-bottom:15px; color:var(--accent);"><i class="ph ph-moon-stars"></i> Статус Поста</div>
+    <div id="syncStatus">Загрузка...</div>
+
+    <div class="tracker-section section-highlight-top">
+        <div class="section-title" style="justify-content:center; margin-bottom:15px;"><i class="ph ph-moon-stars"></i> Статус Поста</div>
         <div class="fasting-switch">
             <div class="fasting-option" id="fastingNo" onclick="setFasting(false)">Пропустил</div>
             <div class="fasting-option" id="fastingYes" onclick="setFasting(true)">Держу пост</div>
@@ -297,9 +341,9 @@
         <div class="task-item" onclick="toggleTask(this, 'maghrib')"><span class="task-text">Магриб</span><div class="checkbox"></div></div>
         <div class="task-item" onclick="toggleTask(this, 'isha')"><span class="task-text">Иша</span><div class="checkbox"></div></div>
         
-        <div class="group-label">Дополнительно</div>
+        <div class="group-label">Дополнительные</div>
         <div class="task-item" onclick="toggleTask(this, 'sunnah')"><span class="task-text">Сунна намазы</span><div class="checkbox"></div></div>
-        <div class="task-item" onclick="toggleTask(this, 'tarawih')"><span class="task-text" style="color:var(--accent)">Таравих</span><div class="checkbox"></div></div>
+        <div class="task-item" onclick="toggleTask(this, 'tarawih')"><span class="task-text">Таравих</span><div class="checkbox"></div></div>
         <div class="task-item" onclick="toggleTask(this, 'witr')"><span class="task-text">Витр</span><div class="checkbox"></div></div>
         <div class="task-item" onclick="toggleTask(this, 'tahajjud')"><span class="task-text">Тахаджуд</span><div class="checkbox"></div></div>
     </div>
@@ -311,12 +355,12 @@
         </div>
         <div class="progress-bar-bg"><div class="progress-bar-fill"></div></div>
         <div class="task-item">
-            <span class="task-text" onclick="toggleTask(this.parentElement, 'quran_read')">Чтение Къур'ана</span>
-            <input type="number" id="quranPages" class="search-input" style="width:70px; padding:8px; margin-right:10px; text-align:center;" placeholder="стр." oninput="saveQuranPages(this.value)">
+            <span class="task-text" onclick="toggleTask(this.parentElement, 'quran_read')">Читал Къур'ан</span>
+            <input type="number" id="quranPages" class="page-input" placeholder="стр." min="0" autocomplete="off" oninput="saveQuranPages(this.value)">
             <div class="checkbox" onclick="toggleTask(this.parentElement, 'quran_read')"></div>
         </div>
-        <div class="task-item" onclick="toggleTask(this, 'lecture')"><span class="task-text">Лекция / Урок</span><div class="checkbox"></div></div>
-        <div class="task-item" onclick="toggleTask(this, 'arabic')"><span class="task-text">Арабский язык</span><div class="checkbox"></div></div>
+        <div class="task-item" onclick="toggleTask(this, 'lecture')"><span class="task-text">Прослушал лекцию</span><div class="checkbox"></div></div>
+        <div class="task-item" onclick="toggleTask(this, 'arabic')"><span class="task-text">Изучал арабский</span><div class="checkbox"></div></div>
     </div>
 
     <div class="tracker-section">
@@ -326,8 +370,8 @@
         </div>
         <div class="progress-bar-bg"><div class="progress-bar-fill"></div></div>
         
-        <div class="task-item" style="cursor:default;">
-            <span class="task-text">Вода</span>
+        <div class="task-item" style="cursor: default;">
+            <span class="task-text">Вода (стакан - 500мл)</span>
             <div class="water-row">
                 <div class="water-glass" onclick="updateWater(1)"><svg viewBox="0 0 24 24"><path d="M5,5 L19,5 L17,21 L7,21 L5,5 Z"></path></svg></div>
                 <div class="water-glass" onclick="updateWater(2)"><svg viewBox="0 0 24 24"><path d="M5,5 L19,5 L17,21 L7,21 L5,5 Z"></path></svg></div>
@@ -336,6 +380,7 @@
                 <div class="water-glass" onclick="updateWater(5)"><svg viewBox="0 0 24 24"><path d="M5,5 L19,5 L17,21 L7,21 L5,5 Z"></path></svg></div>
             </div>
         </div>
+        
         <div class="task-item" onclick="toggleTask(this, 'no_overeat')"><span class="task-text">Не переел</span><div class="checkbox"></div></div>
     </div>
 
@@ -346,25 +391,25 @@
         </div>
         <div class="progress-bar-bg"><div class="progress-bar-fill"></div></div>
         
-        <div class="task-item" onclick="toggleTask(this, 'sadaqah')"><span class="task-text">Сделал Садака</span><div class="checkbox"></div></div>
+        <div class="task-item" onclick="toggleTask(this, 'sadaqah')"><span class="task-text">Сделал садака</span><div class="checkbox"></div></div>
         <div class="task-item" onclick="toggleTask(this, 'no_bad_words')"><span class="task-text">Не злословил</span><div class="checkbox"></div></div>
         <div class="task-item" onclick="toggleTask(this, 'no_gossip')"><span class="task-text">Не сплетничал</span><div class="checkbox"></div></div>
         
         <div class="group-label">Мои цели</div>
         <div id="extraGoalsContainer"></div>
-        <div class="add-goal-area" style="display:flex; gap:10px; margin-top:10px;">
-            <input type="text" class="custom-input" id="newGoalInput" placeholder="Добавить цель...">
+        <div class="add-goal-area">
+            <input type="text" class="custom-input" id="newGoalInput" autocomplete="off" placeholder="Напиши свою цель...">
             <div class="btn-plus" onclick="addNewGoalFromInput()">+</div>
         </div>
     </div>
 
     <div class="tracker-section">
-        <div class="section-title" style="margin-bottom:10px;">Мысли за день</div>
-        <textarea id="dailyThoughts" class="journal-area" placeholder="Запиши инсайты..." oninput="saveThoughts()"></textarea>
+        <div class="section-title">Мысли за день</div>
+        <textarea id="dailyThoughts" class="journal-area" autocomplete="off" placeholder="Что сегодня осознал?..." oninput="saveThoughts()"></textarea>
     </div>
 
     <div class="tracker-section">
-        <div class="section-title" style="justify-content:center; margin-bottom:5px;">Оценка дня</div>
+        <div class="section-title" style="justify-content:center;">Оценка дня</div>
         <div class="stars">
             <div class="star" data-val="1">★</div>
             <div class="star" data-val="2">★</div>
@@ -375,14 +420,14 @@
     </div>
 
     <div class="bottom-actions">
-        <button class="btn-finish" id="btnFinish">Сохранить</button>
+        <button class="btn-finish" id="btnFinish">Сохранить день</button>
         <button class="btn-share" id="btnShare">Поделиться</button>
     </div>
 </div>
 
 <div class="modal-overlay" id="modalCalendar">
     <div class="modal-header">
-        <div class="modal-title">📅 Календарь</div>
+        <div class="modal-title" id="calTitle">📅 Календарь</div>
         <div class="close-modal" onclick="closeModal('modalCalendar')">×</div>
     </div>
     <div class="modal-content" id="calContent"></div>
@@ -394,57 +439,94 @@
         <div class="close-modal" onclick="closeModal('modalStats')">×</div>
     </div>
     <div class="modal-content">
-        <div class="group-label">Прогресс дней</div>
+        <div class="group-label" style="margin-bottom:10px;">Прогресс по дням</div>
         <div class="heatmap-grid" id="heatmapGrid"></div>
-        
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px;">
-            <div style="background:#1a1a1a; padding:15px; border-radius:10px; text-align:center;">
-                <div style="font-size:24px; font-weight:700; color:var(--accent);" id="statDays">0</div>
-                <div style="font-size:10px; color:#666;">ДНЕЙ</div>
-            </div>
-            <div style="background:#1a1a1a; padding:15px; border-radius:10px; text-align:center;">
-                <div style="font-size:24px; font-weight:700; color:var(--accent);" id="statRating">0.0</div>
-                <div style="font-size:10px; color:#666;">РЕЙТИНГ</div>
-            </div>
+        <div class="stat-grid">
+            <div class="stat-card"><div class="stat-num" id="statDays">0</div><div class="stat-desc">Дней пройдено</div></div>
+            <div class="stat-card"><div class="stat-num" id="statRating">0.0</div><div class="stat-desc">Средняя оценка</div></div>
         </div>
-
-        <div class="group-label">Детально</div>
-        <div id="statFullList"></div>
+        <div class="ai-feedback" style="margin-bottom:10px;">
+            <div class="ai-title">🤖 Мнение трекера</div>
+            <div class="ai-text" id="aiText">...</div>
+        </div>
+        <div class="group-label">Подробная статистика</div>
+        <div class="full-stat-list" id="statFullList"></div>
     </div>
 </div>
 
-<div class="share-wrapper" style="display:none;">
-    <div class="share-card-container" id="shareCardToRender">
-        <div style="padding:20px; background:#000; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;">
-            <div style="color:#888; margin-bottom:20px;" id="shareDate"></div>
-            <div style="font-size:60px; font-weight:800; color:#fff;" id="shareDayNum">1</div>
-            <div style="color:var(--accent);">РАМАДАН</div>
-            <div id="shareAiText" style="margin:20px 0; color:#ccc;"></div>
-            <div class="stars" id="shareStars"></div>
-            <div style="margin-top:30px; font-size:12px; color:#555;">@ramadantracking_bot</div>
-        </div>
-    </div>
-    <div id="generatedImageContainer"></div>
-</div>
 <div class="modal-overlay" id="modalShare">
     <div class="modal-header">
-        <div class="modal-title">Поделиться</div>
+        <div class="modal-title">📸 Поделись успехом</div>
         <div class="close-modal" onclick="closeModal('modalShare')">×</div>
     </div>
-    <div class="modal-content" style="text-align:center;">
-        <button class="btn-finish" id="btnGenImage" onclick="generateAndSend()">Создать картинку</button>
-        <p style="color:#666; font-size:12px;">Нажмите кнопку выше</p>
+    <div class="modal-content" style="display:flex; flex-direction:column; align-items:center;">
+        <div class="share-wrapper">
+            <div class="share-card-container" id="shareCardToRender">
+                <div class="star-layer stars-1"></div>
+                <div class="share-content">
+                    <div class="share-top-part"><div class="share-date" id="shareDate">...</div></div>
+                    <div id="shareRegularContent" style="display:contents;">
+                        <div class="share-center-part">
+                            <div class="share-circle-wrap">
+                                 <svg class="share-circle-svg" viewBox="0 0 160 160" style="transform: rotate(135deg);">
+                                    <circle class="circle-bg" cx="80" cy="80" r="70" style="stroke-width:8; stroke-dasharray:350 440; stroke-dashoffset:350;"></circle>
+                                    <circle id="shareCircle" stroke="#FFC107" stroke-width="8" fill="none" cx="80" cy="80" r="70" stroke-linecap="round" stroke-dasharray="350 440" stroke-dashoffset="350"></circle>
+                                </svg>
+                                <div class="share-day-text-block">
+                                    <div class="share-day-num" id="shareDayNum">1</div>
+                                    <div class="share-day-lbl">ДЕНЬ</div>
+                                </div>
+                            </div>
+                            <div class="share-ai-text" id="shareAiText">...</div>
+                            <div class="stars" id="shareStars"></div>
+                        </div>
+                    </div>
+                    <div id="shareFinalContent" style="display:none; width:100%; flex-grow:1; flex-direction:column; justify-content:center; align-items:center;">
+                        </div>
+                    <div class="share-bottom-part">
+                        <div class="share-branding">
+                            <div class="share-branding-text">Трекер Рамадан</div>
+                            <div class="share-branding-bot">@ramadantracking_bot</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="generatedImageContainer"></div>
+        </div>
+        <button class="btn-share" id="btnGenImage" onclick="generateAndSend()" style="width:100%;">Отправить отчет</button>
+        <p style="text-align:center; font-size:12px; color:#666; margin-top:10px;" id="shareHint">Нажми кнопку</p>
+    </div>
+</div>
+
+<div class="modal-overlay" id="modalFinal">
+    <div class="modal-header">
+        <div class="modal-title">🎉 Итоги</div>
+        <div class="close-modal" onclick="closeModal('modalFinal')">×</div>
+    </div>
+    <div class="modal-content">
+        <div style="text-align:center; margin-bottom:20px;">
+            <div style="font-size:16px; color:#aaa;">Альхамдулиллях, месяц прошел.</div>
+            <div style="font-size:22px; font-weight:800; color:var(--accent);">Твой результат</div>
+        </div>
+        <div class="stat-grid">
+            <div class="stat-card"><div class="stat-num" id="f_avg">0%</div><div class="stat-desc">Эффективность</div></div>
+            <div class="stat-card"><div class="stat-num" id="f_fast">0</div><div class="stat-desc">Пропустил пост</div></div>
+        </div>
+        <div class="group-label">Подробная статистика</div>
+        <div class="full-stat-list" id="f_fullList"></div>
+        <div class="group-label">Топ мыслей</div>
+        <div class="thoughts-list" id="f_thoughts">Нет записей.</div>
     </div>
 </div>
 
 <script>
-    // JS CORE (UNCHANGED LOGIC)
     let tg = window.Telegram ? window.Telegram.WebApp : null;
-    if (tg) { tg.expand(); tg.MainButton.hide(); tg.setHeaderColor('#050505'); tg.setBackgroundColor('#050505'); }
+    if (tg) { tg.expand(); tg.MainButton.hide(); tg.setHeaderColor('#0a0e14'); tg.setBackgroundColor('#0a0e14'); }
 
     window.addEventListener('scroll', () => {
         const scrolled = window.scrollY;
         document.querySelector('.stars-1').style.transform = `translateY(${scrolled * 0.3}px)`;
+        document.querySelector('.stars-2').style.transform = `translateY(${scrolled * 0.2}px)`;
     });
 
     const SCORES = { fasting: 15, fajr: 8, dhuhr: 8, asr: 8, maghrib: 8, isha: 8, sunnah: 2, tarawih: 2, witr: 2, tahajjud: 2, quran_read: 8, lecture: 6, arabic: 4, sadaqah: 5, no_bad_words: 3, no_gossip: 3, no_overeat: 3 };
@@ -467,7 +549,7 @@
     let fullHistory = {};
 
     function initApp() {
-        // Recovery logic omitted for brevity, keeping core init
+        // ... (Old initialization logic maintained)
         try {
             const loc = localStorage.getItem(STORAGE_KEY);
             if(loc) fullHistory = JSON.parse(loc);
@@ -479,7 +561,9 @@
         if (!dayData) return 0;
         let score = 0;
         if (dayData.fasting === true) score += SCORES.fasting;
-        if (dayData.tasks) { for (let task in dayData.tasks) { if (dayData.tasks[task] && SCORES[task]) score += SCORES[task]; } }
+        if (dayData.tasks) {
+            for (let task in dayData.tasks) { if (dayData.tasks[task] && SCORES[task]) score += SCORES[task]; }
+        }
         if (dayData.water) { if (dayData.water >= 2) score += 3; else score += (dayData.water * 1.5); }
         if (dayData.extraGoals) { dayData.extraGoals.forEach(g => { if(g.done) score += 7; }); }
         return score > 100 ? 100 : Math.round(score);
@@ -492,34 +576,34 @@
         document.getElementById('prevDay').classList.toggle('disabled', dayNum <= 1);
         document.getElementById('nextDay').classList.toggle('disabled', dayNum >= realDayNum);
         
-        const data = fullHistory[dayNum] || { tasks: {}, customText: "", rating: 0, thoughts: "", fasting: false, extraGoals: [], water: 0, quranPageCount: "" };
+        const data = fullHistory[dayNum] || { tasks: {}, rating: 0, thoughts: "", fasting: false, extraGoals: [], water: 0, quranPageCount: "" };
         if(!data.tasks) data.tasks = {};
 
         const isFasting = (data.fasting === true); 
         const btnYes = document.getElementById('fastingYes');
         const btnNo = document.getElementById('fastingNo');
-        btnYes.className = 'fasting-option';
-        btnNo.className = 'fasting-option';
+        btnYes.className = 'fasting-option'; btnNo.className = 'fasting-option';
         if(isFasting) btnYes.classList.add('active-hold'); else btnNo.classList.add('active-nothold');
 
+        // CALENDAR
         const timeBlock = document.getElementById('fastingTimesBlock');
         const calendar = getStoredCalendar();
-        
         if(calendar && calendar[dayNum-1]) {
             const times = calendar[dayNum-1];
             const cityName = localStorage.getItem(CITY_NAME_KEY) || "Город";
             timeBlock.innerHTML = `
                 <div class="time-row">
                     <div class="time-item"><span class="time-label">Сухур</span><span class="time-val">${times.fajr}</span></div>
+                    <div style="width:1px; height:30px; background:rgba(255,255,255,0.1)"></div>
                     <div class="time-item"><span class="time-label">Ифтар</span><span class="time-val" style="color:var(--accent)">${times.maghrib}</span></div>
                 </div>
-                <div class="time-disclaimer">📍 ${cityName}</div>
-                <div style="text-align:center; font-size:10px; margin-top:5px; opacity:0.5;" onclick="openCityModal()">Сменить</div>
-            `;
+                <div class="time-disclaimer">📍 ${cityName} (MWL)</div>
+                <div style="text-align:center; font-size:10px; margin-top:5px; opacity:0.5;" onclick="openCityModal()">Сменить</div>`;
         } else {
-            timeBlock.innerHTML = `<button class="btn-mini" onclick="openCityModal()" style="width:100%; justify-content:center;">Настроить город</button>`;
+            timeBlock.innerHTML = `<button class="btn-set-city" onclick="openCityModal()">📍 Настроить время</button>`;
         }
 
+        // TASKS
         document.querySelectorAll('.task-item').forEach(el => el.classList.remove('checked'));
         for(const [id, done] of Object.entries(data.tasks)) {
             if(done) {
@@ -539,17 +623,11 @@
         document.getElementById('quranPages').value = data.quranPageCount || "";
         document.getElementById('dailyThoughts').value = data.thoughts || "";
 
-        const extraContainer = document.getElementById('extraGoalsContainer');
-        extraContainer.innerHTML = '';
+        const extraContainer = document.getElementById('extraGoalsContainer'); extraContainer.innerHTML = '';
         if(data.extraGoals) {
             data.extraGoals.forEach((goal, idx) => {
                 const checked = goal.done ? 'checked' : '';
-                extraContainer.insertAdjacentHTML('beforeend', `
-                <div class="task-item ${checked}">
-                     <span class="task-text" onclick="toggleExtraGoal(${idx})">${goal.text}</span>
-                     <div class="checkbox" onclick="toggleExtraGoal(${idx})"></div>
-                     <div style="padding:10px; color:#555;" onclick="removeExtraGoal(${idx})">×</div>
-                </div>`);
+                extraContainer.insertAdjacentHTML('beforeend', `<div class="task-item ${checked}"><span class="task-text" onclick="toggleExtraGoal(${idx})">${goal.text}</span><div class="checkbox" onclick="toggleExtraGoal(${idx})"></div><div class="delete-custom" onclick="removeExtraGoal(${idx})">×</div></div>`);
             });
         }
         document.getElementById('newGoalInput').value = "";
@@ -559,162 +637,183 @@
         updateDailyCircle();
     }
 
+    // JS LOGIC FOR CIRCLE (Adjusted for Arc 350)
     function updateDailyCircle() {
         const score = calculateDayScore(fullHistory[activeDayNum]);
         const percent = score / 100;
-        // 330 is visible stroke (gap is 110)
-        const offset = 330 - (percent * 330);
+        // 350 is max dasharray for the arc
+        const offset = 350 - (percent * 350);
         const circle = document.getElementById('monthCircle');
         circle.style.strokeDashoffset = offset;
-        
         if(percent < 0.3) circle.style.stroke = "#e74c3c"; 
-        else if(percent < 0.8) circle.style.stroke = "#FFD700"; 
+        else if(percent < 0.8) circle.style.stroke = "#FFC107"; 
         else circle.style.stroke = "#27ae60"; 
     }
 
-    // UTILS
-    window.updateWater = function(count) { ensureDayObj(activeDayNum); const c = fullHistory[activeDayNum].water||0; fullHistory[activeDayNum].water = (c===count)?count-1:count; renderDay(activeDayNum); saveData(); }
-    window.saveQuranPages = function(val) { ensureDayObj(activeDayNum); fullHistory[activeDayNum].quranPageCount = val; if(val>0) fullHistory[activeDayNum].tasks['quran_read']=true; renderDay(activeDayNum); setTimeout(saveData,500); }
-    window.setFasting = function(val) { ensureDayObj(activeDayNum); fullHistory[activeDayNum].fasting = val; renderDay(activeDayNum); saveData(); }
+    window.updateWater = function(count) {
+        ensureDayObj(activeDayNum);
+        const current = fullHistory[activeDayNum].water || 0;
+        if (current === count) fullHistory[activeDayNum].water = count - 1;
+        else { fullHistory[activeDayNum].water = count; hapticBurst(1); }
+        renderDay(activeDayNum); saveData();
+    }
+
+    // OLD LOGIC PRESERVED
+    window.saveQuranPages = function(val) { ensureDayObj(activeDayNum); if (val < 0) val = 0; fullHistory[activeDayNum].quranPageCount = val; if(val && val > 0 && !fullHistory[activeDayNum].tasks['quran_read']) { fullHistory[activeDayNum].tasks['quran_read'] = true; renderDay(activeDayNum); } setTimeout(saveData, 500); }
+    window.setFasting = function(val) { ensureDayObj(activeDayNum); fullHistory[activeDayNum].fasting = val; renderDay(activeDayNum); saveData(); if(val) hapticBurst(SCORES.fasting); else haptic(); }
     window.openCityModal = function() { document.getElementById('btnCalendar').click(); }
+    window.addNewGoalFromInput = function() { const inp = document.getElementById('newGoalInput'); const val = inp.value.trim(); if(!val) return; ensureDayObj(activeDayNum); if(!fullHistory[activeDayNum].extraGoals) fullHistory[activeDayNum].extraGoals = []; fullHistory[activeDayNum].extraGoals.push({ text: val, done: false }); renderDay(activeDayNum); saveData(); haptic(); }
+    window.removeExtraGoal = function(idx) { if(!confirm('Удалить?')) return; ensureDayObj(activeDayNum); fullHistory[activeDayNum].extraGoals.splice(idx, 1); renderDay(activeDayNum); saveData(); }
+    window.toggleExtraGoal = function(idx) { ensureDayObj(activeDayNum); const current = fullHistory[activeDayNum].extraGoals[idx].done; fullHistory[activeDayNum].extraGoals[idx].done = !current; renderDay(activeDayNum); saveData(); if(!current) hapticBurst(4); else haptic(); }
+    window.saveThoughts = function() { ensureDayObj(activeDayNum); fullHistory[activeDayNum].thoughts = document.getElementById('dailyThoughts').value; setTimeout(saveData, 500); }
     
-    // SECTION PROGRESS
+    // UPDATE SECTION PROGRESS (Added Percent Logic)
     function updateSectionProgress(section) {
         const title = section.querySelector('.section-title').innerText;
         let percent = 0;
         if(title.includes("Личность")) {
-             ensureDayObj(activeDayNum); const data = fullHistory[activeDayNum]; let total = 3; let checked = 0;
-             if(data.tasks.no_bad_words) checked++; if(data.tasks.no_gossip) checked++; if(data.tasks.sadaqah) checked++;
-             if(data.extraGoals) { total += data.extraGoals.length; data.extraGoals.forEach(g => { if(g.done) checked++; }); }
+             ensureDayObj(activeDayNum); const data = fullHistory[activeDayNum];
+             let total = 3; let checked = 0;
+             if(data && data.tasks) { if(data.tasks.no_bad_words) checked++; if(data.tasks.no_gossip) checked++; if(data.tasks.sadaqah) checked++; }
+             if(data && data.extraGoals) { total += data.extraGoals.length; data.extraGoals.forEach(g => { if(g.done) checked++; }); }
              percent = total===0?0:Math.round((checked/total)*100);
         } else if(title.includes("Питание")) {
-            ensureDayObj(activeDayNum); const water = fullHistory[activeDayNum].water || 0;
+            ensureDayObj(activeDayNum); const water = fullHistory[activeDayNum] ? (fullHistory[activeDayNum].water || 0) : 0;
             const notOvereat = section.querySelector('.task-item.checked') ? 1 : 0;
-            percent = Math.round(((water + notOvereat)/6)*100); // 5 water + 1 overeat
+            percent = Math.round(((water + notOvereat) / 6) * 100);
         } else {
-            const total = section.querySelectorAll('.task-item').length; if(total===0) return;
-            const checked = section.querySelectorAll('.task-item.checked').length;
-            percent = Math.round((checked/total)*100);
+            const totalItems = section.querySelectorAll('.task-item').length;
+            if(totalItems === 0) return; 
+            const checkedItems = section.querySelectorAll('.task-item.checked').length;
+            percent = Math.round((checkedItems / totalItems) * 100);
         }
         const fill = section.querySelector('.progress-bar-fill');
-        const text = section.querySelector('.section-percent');
-        if(fill && text) { fill.style.width = percent+"%"; text.innerText = percent+"%"; fill.style.backgroundColor = (percent===100)?"#27ae60":"#FFD700"; }
+        const text = section.querySelector('.section-percent'); // Target the new percent element
+        if(fill && text) {
+            fill.style.width = percent + "%"; 
+            text.innerText = percent + "%"; // Update text
+            fill.style.backgroundColor = (percent === 100) ? "#27ae60" : "#FFC107";
+        }
     }
 
-    // EVENT LISTENERS
-    document.getElementById('prevDay').addEventListener('click', () => { if(activeDayNum>1){activeDayNum--; renderDay(activeDayNum);} });
-    document.getElementById('nextDay').addEventListener('click', () => { if(activeDayNum<realDayNum){activeDayNum++; renderDay(activeDayNum);} });
+    // Toggle Task Logic
     window.toggleTask = function(el, id) { 
-        if(event.target.tagName==='INPUT')return; if(el.classList.contains('task-text')||el.classList.contains('checkbox')) el=el.parentElement;
-        el.classList.toggle('checked'); ensureDayObj(activeDayNum); fullHistory[activeDayNum].tasks[id]=el.classList.contains('checked');
+        if(event.target.tagName === 'INPUT') return;
+        if(el.classList.contains('task-text') || el.classList.contains('checkbox')) el = el.parentElement;
+        el.classList.toggle('checked'); ensureDayObj(activeDayNum); 
+        const isChecked = el.classList.contains('checked');
+        fullHistory[activeDayNum].tasks[id] = isChecked; 
         updateSectionProgress(el.closest('.tracker-section')); updateDailyCircle(); saveData(); 
+        if(isChecked) { const points = SCORES[id] || 1; hapticBurst(points); } else haptic(); 
     }
-    window.saveThoughts = function() { ensureDayObj(activeDayNum); fullHistory[activeDayNum].thoughts = document.getElementById('dailyThoughts').value; saveData(); }
-    document.querySelectorAll('.star').forEach(s => s.addEventListener('click', function() { ensureDayObj(activeDayNum); fullHistory[activeDayNum].rating = parseInt(this.dataset.val); renderDay(activeDayNum); saveData(); }));
-    
-    function ensureDayObj(d){ if(!fullHistory[d]) fullHistory[d] = {tasks:{}, rating:0, thoughts:"", fasting:false, extraGoals:[], water:0, quranPageCount:""}; }
-    function saveData(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(fullHistory)); if(document.getElementById('syncStatus')) document.getElementById('syncStatus').innerText = "Сохранение..."; setTimeout(()=>document.getElementById('syncStatus').innerText="",1000); }
+
+    // Helpers
+    document.getElementById('prevDay').addEventListener('click', () => { if(activeDayNum>1){activeDayNum--; renderDay(activeDayNum); haptic();} });
+    document.getElementById('nextDay').addEventListener('click', () => { if(activeDayNum<realDayNum){activeDayNum++; renderDay(activeDayNum); haptic();} });
+    document.querySelectorAll('.star').forEach(s => s.addEventListener('click', function() { ensureDayObj(activeDayNum); fullHistory[activeDayNum].rating = parseInt(this.dataset.val); renderDay(activeDayNum); saveData(); haptic(); }));
+    function ensureDayObj(d){ if(!fullHistory[d]) fullHistory[d] = {tasks:{}, customText:"", rating:0, thoughts:"", fasting:false, extraGoals:[], water:0, quranPageCount:""}; }
+    function saveData(){ const val = JSON.stringify(fullHistory); const key = STORAGE_KEY; if(tg && tg.CloudStorage) tg.CloudStorage.setItem(key, val); else localStorage.setItem(key, val); }
+    function haptic(){ if(tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light'); }
+    function hapticBurst(count) { if (!tg || !tg.HapticFeedback) return; if(count > 20) count = 20; let i = 0; let interval = setInterval(() => { tg.HapticFeedback.impactOccurred('light'); i++; if (i >= count) clearInterval(interval); }, 40); }
     window.closeModal = function(id){ document.getElementById(id).classList.remove('show'); document.body.classList.remove('no-scroll'); }
 
-    // API SEARCH (FIXED)
-    document.getElementById('btnCalendar').addEventListener('click', () => {
-        document.body.classList.add('no-scroll');
-        const cal = getStoredCalendar(); if(!cal) renderSearchUI(document.getElementById('calContent')); else renderTableUI(document.getElementById('calContent'), cal);
-        document.getElementById('modalCalendar').classList.add('show');
-    });
-    function renderSearchUI(con) {
-        con.innerHTML = `<div class="search-container"><input type="text" class="search-input" placeholder="Введите город..." oninput="searchCity(this.value)"><div class="search-results" id="searchResults"></div></div>`;
-    }
-    function searchCity(q) {
-        if(q.length<3) return;
-        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&accept-language=ru`)
-            .then(r=>r.json()).then(d=>{
-                const res = document.getElementById('searchResults'); res.innerHTML='';
-                d.slice(0,5).forEach(i=>{
-                    const simpleName = i.display_name.split(',')[0]; // FIX: Only City Name
-                    const el = document.createElement('div'); el.className='search-item'; el.innerText=simpleName;
-                    el.onclick=()=>loadCalendarForLocation(i.lat,i.lon,simpleName); res.appendChild(el);
+    // API & SEARCH
+    document.getElementById('btnCalendar').addEventListener('click', () => { document.body.classList.add('no-scroll'); renderCalendarUI(); document.getElementById('modalCalendar').classList.add('show'); });
+    function renderCalendarUI() { const container = document.getElementById('calContent'); const calendar = getStoredCalendar(); if (!calendar) { renderSearchUI(container); } else { renderTableUI(container, calendar); } }
+    function renderSearchUI(container) { container.innerHTML = `<div class="search-container"><input type="text" class="search-input" id="citySearchInput" placeholder="Введите город (например: Казань)"><div class="search-results" id="searchResults"></div></div>`; const inp = document.getElementById('citySearchInput'); let debounce; inp.addEventListener('input', (e) => { clearTimeout(debounce); debounce = setTimeout(() => searchCity(e.target.value), 600); }); }
+    
+    // CITY NAME FIX APPLIED HERE
+    function searchCity(query) {
+        if(query.length < 3) return;
+        const resDiv = document.getElementById('searchResults');
+        resDiv.innerHTML = '<div style="text-align:center;color:#666;">Поиск...</div>';
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&accept-language=ru`)
+            .then(r => r.json()).then(data => {
+                resDiv.innerHTML = '';
+                if(data.length === 0) { resDiv.innerHTML = '<div style="text-align:center;color:#666;">Не найдено</div>'; return; }
+                data.slice(0, 5).forEach(item => {
+                    const el = document.createElement('div'); el.className = 'search-item';
+                    const simpleName = item.display_name.split(',')[0]; // FIXED
+                    el.innerText = simpleName; 
+                    el.onclick = () => loadCalendarForLocation(item.lat, item.lon, simpleName);
+                    resDiv.appendChild(el);
                 });
-            });
-    }
-    function loadCalendarForLocation(lat,lon,name) {
-        Promise.all([
-            fetch(`https://api.aladhan.com/v1/calendar?latitude=${lat}&longitude=${lon}&method=3&month=2&year=2026`).then(r=>r.json()),
-            fetch(`https://api.aladhan.com/v1/calendar?latitude=${lat}&longitude=${lon}&method=3&month=3&year=2026`).then(r=>r.json())
-        ]).then(([d1,d2])=>{
-            let cal=[]; for(let i=0; i<30; i++) { cal.push(i<28?d1.data[i]:d2.data[i-28]); }
-            const final = cal.map(d=>({ fajr: d.timings.Fajr.split(' ')[0], dhuhr: d.timings.Dhuhr.split(' ')[0], asr: d.timings.Asr.split(' ')[0], maghrib: d.timings.Maghrib.split(' ')[0], isha: d.timings.Isha.split(' ')[0] }));
-            localStorage.setItem(CALENDAR_STORAGE_KEY, JSON.stringify(final)); localStorage.setItem(CITY_NAME_KEY, name);
-            renderTableUI(document.getElementById('calContent'), final); renderDay(activeDayNum);
-        });
-    }
-    function renderTableUI(con, cal) {
-        const city = localStorage.getItem(CITY_NAME_KEY)||"Город";
-        let h = `<div class="current-city-info">📍 ${city}</div><div class="prayer-table-container"><table class="prayer-table"><thead><tr><th>Д</th><th>Фаджр</th><th>Магриб</th></tr></thead><tbody>`;
-        cal.forEach((d,i)=>{ h+=`<tr><td>${i+1}</td><td>${d.fajr}</td><td>${d.maghrib}</td></tr>`; });
-        h+=`</tbody></table></div><button class="btn-mini" onclick="localStorage.removeItem('${CALENDAR_STORAGE_KEY}'); renderSearchUI(document.getElementById('calContent'))" style="margin-top:15px; width:100%; justify-content:center;">Сменить город</button>`;
-        con.innerHTML=h;
+            }).catch(() => { resDiv.innerHTML = '<div style="text-align:center;color:#e74c3c;">Ошибка сети</div>'; });
     }
 
-    // STATS & SHARE (UNCHANGED LOGIC)
+    function loadCalendarForLocation(lat, lon, cityName) {
+        const resDiv = document.getElementById('searchResults');
+        resDiv.innerHTML = '<div style="text-align:center;color:var(--accent);">Загрузка...</div>';
+        const p1 = fetch(`https://api.aladhan.com/v1/calendar?latitude=${lat}&longitude=${lon}&method=3&month=2&year=2026`).then(r=>r.json());
+        const p2 = fetch(`https://api.aladhan.com/v1/calendar?latitude=${lat}&longitude=${lon}&method=3&month=3&year=2026`).then(r=>r.json());
+        Promise.all([p1, p2]).then(([d1, d2]) => {
+            let finalCalendar = [];
+            for(let i=0; i<30; i++) {
+                let dayObj = (i < 28) ? d1.data[i] : d2.data[i - 28];
+                if(dayObj) { finalCalendar.push({ date: dayObj.date.readable, fajr: dayObj.timings.Fajr.split(' ')[0], dhuhr: dayObj.timings.Dhuhr.split(' ')[0], asr: dayObj.timings.Asr.split(' ')[0], maghrib: dayObj.timings.Maghrib.split(' ')[0], isha: dayObj.timings.Isha.split(' ')[0] }); }
+            }
+            localStorage.setItem(CALENDAR_STORAGE_KEY, JSON.stringify(finalCalendar));
+            localStorage.setItem(CITY_NAME_KEY, cityName);
+            renderTableUI(document.getElementById('calContent'), finalCalendar);
+            renderDay(activeDayNum);
+        });
+    }
+
+    function renderTableUI(container, calendar) {
+        const cityName = localStorage.getItem(CITY_NAME_KEY) || "Город";
+        let h = `<div class="current-city-info">📍 ${cityName}</div><button class="btn-set-city" onclick="resetCity()" style="margin-bottom:15px;">🔄 Сменить город</button><div class="prayer-table-container"><table class="prayer-table"><thead><tr><th>Д</th><th>Фаджр</th><th>Зухр</th><th>Аср</th><th>Магриб</th><th>Иша</th></tr></thead><tbody>`;
+        calendar.forEach((day, idx) => {
+            let isT = (idx+1)===activeDayNum ? 'class="today-row"' : '';
+            h += `<tr ${isT}><td>${idx+1}</td><td style="font-weight:700;">${day.fajr}</td><td>${day.dhuhr}</td><td>${day.asr}</td><td style="font-weight:700;color:var(--accent)">${day.maghrib}</td><td>${day.isha}</td></tr>`;
+        });
+        h += `</tbody></table></div>`; container.innerHTML = h;
+    }
+    window.resetCity = function() { localStorage.removeItem(CALENDAR_STORAGE_KEY); renderCalendarUI(); }
+
+    // Stats, Share, etc (Old logic reused)
     function calculateDetailedStats() {
-        let stats = { fasting:0, fajr:0, dhuhr:0, asr:0, maghrib:0, isha:0, sunnah:0, tarawih:0, witr:0, tahajjud:0, quran_read:0, water_liters:0, no_overeat:0, sadaqah:0, no_bad_words:0, no_gossip:0, arabic:0 };
+        let stats = { fasting: 0, fajr: 0, dhuhr: 0, asr: 0, maghrib: 0, isha: 0, sunnah: 0, tarawih: 0, witr: 0, tahajjud: 0, quran_read: 0, lecture: 0, arabic: 0, sadaqah: 0, no_bad_words: 0, no_gossip: 0, no_overeat: 0, water_liters: 0, quran_pages_total: 0, custom_goals_breakdown: {} };
         for(let i=1; i<=30; i++) {
             const d = fullHistory[i]; if(!d) continue;
-            if(d.fasting) stats.fasting++;
-            if(d.tasks) for(let k in stats) if(d.tasks[k]) stats[k]++;
-            if(d.tasks && d.tasks.quran_read) stats.quran_read++;
-            if(d.water) stats.water_liters += (d.water*0.5);
-        }
-        return stats;
+            if(d.fasting === true) stats.fasting++;
+            if(d.tasks) { for(let key in stats) { if(d.tasks[key]) stats[key]++; } }
+            if(d.water) stats.water_liters += (d.water * 0.5); 
+            if(d.quranPageCount) { let p = parseInt(d.quranPageCount); if(!isNaN(p)) stats.quran_pages_total += p; }
+            if(d.extraGoals && d.extraGoals.length > 0) { d.extraGoals.forEach(g => { if(g.done) { const t = g.text.trim() || "Своя цель"; if(!stats.custom_goals_breakdown[t]) stats.custom_goals_breakdown[t] = 0; stats.custom_goals_breakdown[t]++; } }); }
+        } return stats;
     }
-    
-    document.getElementById('btnStats').addEventListener('click', () => {
-        document.body.classList.add('no-scroll');
-        let d=0, r=0; const grid = document.getElementById('heatmapGrid'); grid.innerHTML = '';
-        for(let i=1; i<=30; i++) {
-            const day = fullHistory[i]; const sc = calculateDayScore(day);
-            const cell = document.createElement('div'); cell.className = 'heatmap-day';
-            if(day && sc>0) { cell.innerText=sc; if(sc>80) cell.classList.add('good'); else cell.classList.add('medium'); d++; r+=(day.rating||0); }
-            else { cell.innerText=i; cell.style.opacity=0.3; }
-            grid.appendChild(cell);
-        }
-        document.getElementById('statDays').innerText=d; document.getElementById('statRating').innerText=d>0?(r/d).toFixed(1):"0.0";
-        const s = calculateDetailedStats();
-        document.getElementById('statFullList').innerHTML = `
-            <div class="full-stat-item"><span class="fs-name">Пост</span><span class="fs-val">${s.fasting}/30</span></div>
-            <div class="full-stat-item"><span class="fs-name">Фаджр</span><span class="fs-val">${s.fajr}/30</span></div>
-            <div class="full-stat-item"><span class="fs-name">Таравих</span><span class="fs-val">${s.tarawih}</span></div>
-            <div class="full-stat-item"><span class="fs-name">Коран (дней)</span><span class="fs-val">${s.quran_read}</span></div>
-            <div class="full-stat-item"><span class="fs-name">Вода (л)</span><span class="fs-val">${s.water_liters}</span></div>
-            <div class="full-stat-item"><span class="fs-name">Садака</span><span class="fs-val">${s.sadaqah}</span></div>
-        `;
-        document.getElementById('modalStats').classList.add('show');
-    });
-
-    document.getElementById('btnShare').addEventListener('click', () => {
-        const d = fullHistory[activeDayNum] || {};
+    function generateDetailedStatsHTML(stats) {
+        let html = `<div class="full-stat-item"><span class="fs-name">Дней поста</span><span class="fs-val">${stats.fasting}/30</span></div>`;
+        ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'].forEach(p => { html += `<div class="full-stat-item"><span class="fs-name">${p.charAt(0).toUpperCase() + p.slice(1)}</span><span class="fs-val">${stats[p]}/30</span></div>`; });
+        html += `<div class="group-label">Активность</div>`;
+        html += `<div class="full-stat-item"><span class="fs-name">Къур'ан (дни)</span><span class="fs-val">${stats.quran_read}</span></div>`;
+        html += `<div class="full-stat-item"><span class="fs-name">Вода (литры)</span><span class="fs-val">${stats.water_liters}</span></div>`;
+        return html;
+    }
+    document.getElementById('btnStats').addEventListener('click', () => { document.body.classList.add('no-scroll'); const dStats = calculateDetailedStats(); document.getElementById('statFullList').innerHTML = generateDetailedStatsHTML(dStats); document.getElementById('modalStats').classList.add('show'); });
+    document.getElementById('btnFinish').addEventListener('click', function() { saveData(); const btn = this; const ot = btn.innerText; btn.innerText = "СОХРАНЕНО!"; setTimeout(() => { btn.innerText = ot; }, 2000); });
+    document.getElementById('btnShare').addEventListener('click', () => { 
+        document.body.classList.add('no-scroll'); 
+        const d = fullHistory[activeDayNum] || {}; const score = calculateDayScore(d);
+        const percent = score/100;
+        // Share circle update
         document.getElementById('shareDayNum').innerText = activeDayNum;
-        document.getElementById('shareAiText').innerText = calculateDayScore(d) > 80 ? "Мощный день!" : "Двигаюсь дальше.";
-        document.getElementById('modalShare').classList.add('show');
+        const circle = document.getElementById('shareCircle');
+        circle.style.strokeDashoffset = 350 - (percent * 350); 
+        document.getElementById('modalShare').classList.add('show'); 
     });
-
     window.generateAndSend = function() {
-        const el = document.getElementById('shareCardToRender');
-        el.parentElement.style.display='block';
-        html2canvas(el, {scale:2}).then(c => {
-            el.parentElement.style.display='none';
-            c.toBlob(b => {
-                const f = new File([b], "ramadan.png", {type:"image/png"});
-                if(navigator.share) navigator.share({files:[f]}); else alert("Сохраните скриншот");
-            });
+        const btn = document.getElementById('btnGenImage'); btn.innerText = "Генерация...";
+        html2canvas(document.getElementById('shareCardToRender'), { scale: 2, useCORS: true }).then(canvas => {
+            const imgData = canvas.toDataURL("image/png");
+            const img = document.createElement('img'); img.src = imgData;
+            document.getElementById('generatedImageContainer').appendChild(img);
+            document.getElementById('generatedImageContainer').style.display='block';
+            document.getElementById('shareCardToRender').style.display='none';
+            btn.innerText = "Готово (Сохранить фото)";
         });
     }
-
-    // Extras
-    window.addNewGoalFromInput = function() { const v=document.getElementById('newGoalInput').value; if(v){ensureDayObj(activeDayNum); if(!fullHistory[activeDayNum].extraGoals) fullHistory[activeDayNum].extraGoals=[]; fullHistory[activeDayNum].extraGoals.push({text:v,done:false}); renderDay(activeDayNum); saveData(); } }
-    window.toggleExtraGoal = function(i) { ensureDayObj(activeDayNum); fullHistory[activeDayNum].extraGoals[i].done=!fullHistory[activeDayNum].extraGoals[i].done; renderDay(activeDayNum); saveData(); }
-    window.removeExtraGoal = function(i) { fullHistory[activeDayNum].extraGoals.splice(i,1); renderDay(activeDayNum); saveData(); }
+    function dataURItoBlob(dataURI) { var byteString = atob(dataURI.split(',')[1]); var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0]; var ab = new ArrayBuffer(byteString.length); var ia = new Uint8Array(ab); for (var i = 0; i < byteString.length; i++) { ia[i] = byteString.charCodeAt(i); } return new Blob([ab], {type: mimeString}); }
 
     initApp();
 </script>
