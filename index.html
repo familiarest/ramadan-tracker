@@ -33,8 +33,9 @@
             font-family: 'Manrope', sans-serif;
             margin: 0; padding: 0; 
             min-height: 100vh;
-            overflow-x: hidden;
+            overflow-x: hidden; /* Fix horizontal scroll */
             -webkit-user-select: none; user-select: none;
+            width: 100vw;
         }
         
         body.no-scroll { overflow: hidden !important; height: 100vh; position: fixed; width: 100%; }
@@ -199,34 +200,28 @@
         }
         .author-btn:active { transform: scale(0.98); background: rgba(255,255,255,0.1); }
 
-        /* --- ИСПРАВЛЕННАЯ ГЕНЕРАЦИЯ КАРТИНКИ (4:5 Ratio) --- */
-        /* Размер 4:5 (600x750) - оптимально для ленты и экранов */
-        /* Позиционирование 0,0, но Z-index -100 - так HTML2Canvas видит его ровно */
+        /* --- СКРЫТЫЙ КОНТЕЙНЕР (FIXED SAFE AREA) --- */
+        /* Прячем его в блок с нулевым размером, чтобы не ломал верстку */
+        #hidden-share-wrapper {
+            position: fixed; top: 0; left: 0;
+            width: 0; height: 0; overflow: hidden;
+            pointer-events: none; z-index: -9999;
+        }
+
         #hidden-share-container {
-            position: absolute;
-            top: 0; left: 0;
-            width: 600px; /* 4:5 Ratio width */
-            height: 750px; /* 4:5 Ratio height */
+            width: 600px; /* 4:5 ratio width */
+            height: 750px; /* 4:5 ratio height */
             background: radial-gradient(circle at 50% 0%, #1a2332 0%, #000000 90%);
-            display: flex; 
-            flex-direction: column; 
-            justify-content: space-between;
-            align-items: center; 
-            padding: 50px 40px; 
-            text-align: center;
-            z-index: -100; /* Скрываем за контентом */
-            font-family: 'Manrope', sans-serif;
-            color: #fff;
+            display: flex; flex-direction: column; 
+            justify-content: space-between; align-items: center; 
+            padding: 50px 40px; text-align: center;
+            font-family: 'Manrope', sans-serif; color: #fff;
             box-sizing: border-box;
-            /* Важно: не использовать display:none */
-            visibility: hidden; 
         }
 
         #hidden-share-container .share-border {
             position: absolute; top: 15px; left: 15px; right: 15px; bottom: 15px;
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 20px;
-            pointer-events: none;
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; pointer-events: none;
         }
 
         #generatedImageContainer { width: 100%; border-radius: 16px; overflow: hidden; margin-top: 20px; display: none; box-shadow: 0 10px 40px rgba(0,0,0,0.5); border: 1px solid #333; }
@@ -272,7 +267,7 @@
             <div class="nav-arrow" id="prevDay"><i class="ph ph-caret-left"></i></div>
             
             <div class="circle-container">
-                <svg viewBox="0 0 160 160">
+                <svg viewBox="0 0 160 160" style="transform: rotate(135deg);">
                     <circle class="circle-bg" cx="80" cy="80" r="70" stroke-dasharray="330 440"></circle>
                     <circle class="circle-progress" id="monthCircle" cx="80" cy="80" r="70" stroke-dasharray="330 440"></circle>
                 </svg>
@@ -453,36 +448,34 @@
     </div>
 </div>
 
-<div id="hidden-share-container">
-    <div class="share-border"></div>
-    
-    <div style="width: 100%; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 25px;">
-        <div style="font-size: 22px; font-weight: 300; color: #aaa; letter-spacing: 5px; text-transform: uppercase;">Рамадан 2026</div>
-        <div id="renderDate" style="font-size: 18px; color: #d4af37; font-weight: 700; margin-top: 10px;">...</div>
-    </div>
-
-    <div style="flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%;">
-        <div style="position: relative; width: 300px; height: 300px; display: flex; align-items: center; justify-content: center;">
-            <svg width="300" height="300" viewBox="0 0 160 160" style="position:absolute; top:0; left:0; width:100%; height:100%; display:block;">
-                <g transform="rotate(135 80 80)">
-                    <circle cx="80" cy="80" r="70" style="stroke: rgba(255,255,255,0.05); stroke-width: 5; fill: none; stroke-dasharray: 330 440; stroke-linecap: round;"></circle>
-                    <circle id="renderCircle" cx="80" cy="80" r="70" style="stroke: #d4af37; stroke-width: 5; fill: none; stroke-dasharray: 330 440; stroke-dashoffset: 330; stroke-linecap: round; filter: drop-shadow(0 0 15px rgba(212,175,55,0.5));"></circle>
-                </g>
-            </svg>
-
-            <div style="position: absolute; display: flex; flex-direction: column; align-items: center; z-index: 10;">
-                <div id="renderDayNum" style="font-size: 110px; font-weight: 200; color: #fff; line-height: 0.9;">1</div>
-                <div style="font-size: 14px; font-weight: 800; color: #666; letter-spacing: 4px; text-transform: uppercase; margin-top: 10px;">День</div>
-            </div>
+<div id="hidden-share-wrapper">
+    <div id="hidden-share-container">
+        <div class="share-border"></div>
+        
+        <div style="width: 100%; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 25px;">
+            <div style="font-size: 22px; font-weight: 300; color: #aaa; letter-spacing: 5px; text-transform: uppercase;">Рамадан 2026</div>
+            <div id="renderDate" style="font-size: 18px; color: #d4af37; font-weight: 700; margin-top: 10px;">...</div>
         </div>
 
-        <div id="renderAiText" style="font-size: 20px; color: #eee; font-weight: 500; margin-top: 35px; max-width: 85%; line-height: 1.5; font-style: italic;">...</div>
-        <div id="renderStars" style="display: flex; gap: 15px; font-size: 44px; margin-top: 25px;"></div>
-    </div>
+        <div style="flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%;">
+            <div style="position: relative; width: 300px; height: 300px; display: flex; align-items: center; justify-content: center;">
+                
+                <canvas id="renderCanvas" width="300" height="300" style="position: absolute; top:0; left:0;"></canvas>
 
-    <div style="width: 100%; padding-top: 25px; border-top: 1px solid rgba(255,255,255,0.1);">
-        <div style="font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;">Мой прогресс в боте</div>
-        <div style="font-size: 16px; color: #fff; font-weight: 700;">@ramadantracking_bot</div>
+                <div style="position: absolute; display: flex; flex-direction: column; align-items: center; z-index: 10;">
+                    <div id="renderDayNum" style="font-size: 110px; font-weight: 200; color: #fff; line-height: 0.9;">1</div>
+                    <div style="font-size: 14px; font-weight: 800; color: #666; letter-spacing: 4px; text-transform: uppercase; margin-top: 10px;">День</div>
+                </div>
+            </div>
+
+            <div id="renderAiText" style="font-size: 20px; color: #eee; font-weight: 500; margin-top: 35px; max-width: 85%; line-height: 1.5; font-style: italic;">...</div>
+            <div id="renderStars" style="display: flex; gap: 15px; font-size: 44px; margin-top: 25px;"></div>
+        </div>
+
+        <div style="width: 100%; padding-top: 25px; border-top: 1px solid rgba(255,255,255,0.1);">
+            <div style="font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;">Мой прогресс в боте</div>
+            <div style="font-size: 16px; color: #fff; font-weight: 700;">@ramadantracking_bot</div>
+        </div>
     </div>
 </div>
 
@@ -521,7 +514,6 @@
     let tg = window.Telegram ? window.Telegram.WebApp : null;
     if (tg) { tg.expand(); tg.MainButton.hide(); tg.setHeaderColor('#050505'); tg.setBackgroundColor('#000000'); }
 
-    // PARALLAX
     window.addEventListener('scroll', () => {
         const scrolled = window.scrollY;
         requestAnimationFrame(() => {
@@ -541,7 +533,7 @@
         no_overeat: 3 
     };
 
-    const ramadanStart = new Date(2026, 1, 1); // 1 Feb 2026 (approx)
+    const ramadanStart = new Date(2026, 1, 1);
     const STORAGE_KEY = 'ramadan_tracker_pro_v1';
     const CALENDAR_STORAGE_KEY = 'ramadan_api_calendar_v2';
     const CITY_NAME_KEY = 'ramadan_city_name_v2';
@@ -1121,18 +1113,17 @@
         document.getElementById('modalFinal').classList.add('show');
     }
 
-    // --- NEW AUTO SHARE LOGIC ---
+    // --- NEW AUTO SHARE LOGIC WITH CANVAS DRAWING ---
     document.getElementById('btnShare').addEventListener('click', () => {
         document.body.classList.add('no-scroll');
         const d = fullHistory[activeDayNum] || {}; 
         const score = calculateDayScore(d);
         const rating = d.rating || 0;
         
-        // Prepare hidden container
+        // Prepare hidden container data
         const date = new Date(ramadanStart); 
         date.setDate(ramadanStart.getDate() + (activeDayNum - 1));
         document.getElementById('renderDate').innerText = date.toLocaleDateString('ru-RU', {day:'numeric', month:'long'});
-        
         document.getElementById('renderDayNum').innerText = activeDayNum;
         
         let aiMsg = "День прошел. Постоянство — ключ к успеху.";
@@ -1147,44 +1138,73 @@
         }
         document.getElementById('renderStars').innerHTML = starsHtml;
 
-        const percent = score / 100;
-        const circle = document.getElementById('renderCircle');
-        const dash = 440; 
-        const offset = dash - (percent * dash);
-        circle.style.strokeDasharray = `${dash} ${dash}`;
-        circle.style.strokeDashoffset = offset;
+        // --- DRAW CIRCLE ON CANVAS (NO HTML/CSS ROTATION ISSUES) ---
+        const canvas = document.getElementById('renderCanvas');
+        const ctx = canvas.getContext('2d');
+        const width = canvas.width;
+        const height = canvas.height;
+        const centerX = width / 2;
+        const centerY = height / 2;
+        const radius = 70 * (width/160); // Scale 70 to 300px box (approx)
         
-        if(percent < 0.3) circle.style.stroke = "#e74c3c"; 
-        else if(percent < 0.8) circle.style.stroke = "#d4af37"; 
-        else circle.style.stroke = "#27ae60";
+        // Clear
+        ctx.clearRect(0, 0, width, height);
+        
+        // Settings
+        ctx.lineWidth = 10; 
+        ctx.lineCap = 'round';
+        
+        // Draw Background Circle (220 degrees arc, rotated 135 deg)
+        // Start angle: 135 degrees (0.75 PI)
+        // End angle: 135 + 270 = 405 (2.25 PI) -> Gap is at bottom
+        
+        const startAngle = (135 * Math.PI) / 180;
+        const endAngle = (405 * Math.PI) / 180;
+        
+        ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, 70, startAngle, endAngle); // Fixed radius matching visual
+        ctx.stroke();
 
-        // Reset Modal State
+        // Draw Progress
+        // Calculate progress end angle
+        const totalAngle = endAngle - startAngle;
+        const progressEndAngle = startAngle + (totalAngle * (score / 100));
+        
+        if (score > 0) {
+            let color = '#27ae60';
+            if(score < 30) color = '#e74c3c';
+            else if(score < 80) color = '#d4af37';
+            
+            ctx.strokeStyle = color;
+            ctx.shadowColor = color;
+            ctx.shadowBlur = 15;
+            
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 70, startAngle, progressEndAngle);
+            ctx.stroke();
+            
+            ctx.shadowBlur = 0; // Reset shadow
+        }
+
+        // Show Modal & Loader
         document.getElementById('generatedImageContainer').style.display = 'none';
         document.getElementById('btnGenImage').style.display = 'none';
         document.getElementById('shareHint').style.display = 'none';
-        
-        // Show Loading
         const loader = document.getElementById('loadingState');
         loader.style.display = 'block';
-        
-        // Make hidden container visible for render
-        document.getElementById('hidden-share-container').style.visibility = 'visible';
-
         document.getElementById('modalShare').classList.add('show');
 
-        // Auto Generate immediately
+        // Auto Generate
         setTimeout(() => {
-            const hiddenContainer = document.getElementById('hidden-share-container');
+            const hiddenWrapper = document.getElementById('hidden-share-container');
             
-            html2canvas(hiddenContainer, { 
-                scale: 2, // Sufficient for mobile
+            html2canvas(hiddenWrapper, { 
+                scale: 2, 
                 useCORS: true, 
                 backgroundColor: null,
-                allowTaint: true,
-                scrollY: 0,
-                scrollX: 0
+                allowTaint: true
             }).then(canvas => {
-                hiddenContainer.style.visibility = 'hidden';
                 loader.style.display = 'none';
 
                 const imgData = canvas.toDataURL("image/png"); 
@@ -1202,7 +1222,7 @@
                 
                 document.getElementById('shareHint').style.display = 'block';
                 
-                // Try auto share
+                // Auto share
                 canvas.toBlob(function(blob) {
                     const file = new File([blob], "ramadan_report.png", { type: "image/png" });
                     const shareData = {
@@ -1219,11 +1239,10 @@
                 console.error(err);
                 loader.innerText = "Ошибка создания картинки";
             });
-        }, 300);
+        }, 500); // Slight delay for canvas render
     });
 
     window.manualShare = function() {
-        // Just trigger the same logic if auto-share failed or user cancelled
         const img = document.querySelector('#generatedImageContainer img');
         if(img) {
             fetch(img.src).then(res => res.blob()).then(blob => {
@@ -1235,7 +1254,7 @@
                 if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
                     navigator.share(shareData);
                 } else {
-                    alert("Ваше устройство не поддерживает отправку. Сохраните фото долгим нажатием.");
+                    alert("Сохраните фото долгим нажатием.");
                 }
             });
         }
