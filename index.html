@@ -229,7 +229,6 @@
         .author-btn:active { transform: scale(0.98); background: rgba(255,255,255,0.1); }
 
         /* --- СКРЫТЫЙ КОНТЕЙНЕР (FIXED SAFE AREA) --- */
-        /* Прячем его в блок с нулевым размером, чтобы не ломал верстку */
         #hidden-share-wrapper {
             position: fixed; top: 0; left: 0;
             width: 0; height: 0; overflow: hidden;
@@ -286,7 +285,7 @@
         <button class="btn-mini" id="btnCalendar"><i class="ph ph-calendar-blank"></i> Календарь</button>
     </div>
 
-    <a href="https://t.me/ametov_design" class="brand-link" target="_blank">
+    <a href="https://t.me/ametovstudio" class="brand-link" target="_blank">
         Трекер Азиза Аметова ↗
     </a>
 
@@ -455,7 +454,7 @@
         <div class="full-stat-list" id="statFullList"></div>
 
         <div class="author-links">
-            <a href="https://t.me/ametov_design" target="_blank" class="author-btn">Telegram: @ametov_design</a>
+            <a href="https://t.me/ametovstudio" target="_blank" class="author-btn">Telegram: @ametovstudio</a>
             <a href="https://instagram.com/a.ametov" target="_blank" class="author-btn">Instagram: @a.ametov</a>
         </div>
     </div>
@@ -561,7 +560,7 @@
         no_overeat: 3 
     };
 
-    const ramadanStart = new Date(2026, 1, 1);
+    const ramadanStart = new Date(2026, 1, 19);
     const STORAGE_KEY = 'ramadan_tracker_pro_v1';
     const CALENDAR_STORAGE_KEY = 'ramadan_api_calendar_v2';
     const CITY_NAME_KEY = 'ramadan_city_name_v2';
@@ -663,6 +662,7 @@
             const cityName = localStorage.getItem(CITY_NAME_KEY) || "Город";
             
             timeBlock.innerHTML = `
+                <div style="font-size:10px; color:#888; margin-bottom:8px; text-transform:uppercase; letter-spacing:1px;">* Время указано приблизительно</div>
                 <div class="time-row">
                     <div class="time-item">
                         <span class="time-label">Сухур</span>
@@ -957,9 +957,11 @@
             const arr2 = d2.data || [];
             const fullArr = [...arr1, ...arr2];
 
+            // Начинаем с 19 февраля. 1 февраля = 0 индекс, значит 19 февраля = 18 индекс.
+            const startIndex = 18; 
             for(let i=0; i<30; i++) {
-                if(fullArr[i]) {
-                     const dayObj = fullArr[i];
+                if(fullArr[startIndex + i]) {
+                     const dayObj = fullArr[startIndex + i];
                      finalCalendar.push({
                         date: dayObj.date.readable,
                         fajr: dayObj.timings.Fajr.split(' ')[0],
@@ -984,6 +986,7 @@
     function renderTableUI(container, calendar) {
         const cityName = localStorage.getItem(CITY_NAME_KEY) || "Город";
         let h = `<div class="current-city-info">📍 ${cityName}</div>`;
+        h += `<div style="text-align:center; font-size:11px; color:#aaa; margin-bottom:10px;">* Все время намазов указано приблизительно</div>`;
         h += `<button class="btn-set-city" onclick="resetCity()" style="margin-bottom:15px; border:1px solid #444;">🔄 Сменить город</button>`;
         h += `<div class="prayer-table-container"><table class="prayer-table"><thead><tr><th>Д</th><th>Фаджр<br><span class="th-sub">(Сухур)</span></th><th>Зухр</th><th>Аср</th><th>Магриб<br><span class="th-sub">(Ифтар)</span></th><th>Иша</th></tr></thead><tbody>`;
         
