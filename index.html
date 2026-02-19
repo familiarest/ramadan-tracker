@@ -114,7 +114,6 @@
         .fasting-option.active-nothold { background: rgba(255,255,255,0.05); color: #aaa; }
         .fasting-option.active-hold { background: rgba(255,255,255,0.05); color: #fff; border: 1px solid var(--accent); box-shadow: 0 0 15px rgba(212,175,55,0.1); }
         
-        /* НОВЫЙ ДИЗАЙН ВРЕМЕНИ НАМАЗА */
         .fasting-times-block { 
             background: rgba(255,255,255,0.03); 
             border-radius: 20px; 
@@ -131,16 +130,9 @@
             position: relative;
             padding: 10px 0;
         }
-        /* Разделительная линия */
         .time-row::after {
-            content: '';
-            position: absolute;
-            left: 50%;
-            top: 5px;
-            bottom: 5px;
-            width: 1px;
-            background: rgba(255,255,255,0.1);
-            transform: translateX(-50%);
+            content: ''; position: absolute; left: 50%; top: 5px; bottom: 5px; width: 1px;
+            background: rgba(255,255,255,0.1); transform: translateX(-50%);
         }
         .time-item { flex: 1; display: flex; flex-direction: column; align-items: center; }
         .time-label { font-size: 11px; color: #777; text-transform: uppercase; margin-bottom: 6px; letter-spacing: 2px; font-weight: 700; }
@@ -161,16 +153,15 @@
         .add-goal-area { display: flex; gap: 10px; margin-top: 15px; }
         .custom-input { flex: 1; border: 1px solid #333; background: rgba(0,0,0,0.3); padding: 12px; border-radius: 12px; font-size: 14px; color: #fff; outline: none; font-family: 'Manrope', sans-serif; }
         .btn-plus { width: 44px; background: rgba(255,255,255,0.05); border: 1px solid #333; border-radius: 12px; color: var(--accent); font-size: 24px; font-weight: 300; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        .delete-custom { color: #555; padding: 10px; font-size: 18px; cursor: pointer; margin-right: -10px; }
+        .delete-custom { color: #555; padding: 10px; font-size: 18px; cursor: pointer; margin-right: -10px; transition: 0.2s; }
+        .delete-custom:hover { color: var(--red); }
 
-        .water-row { display: flex; gap: 8px; align-items: center; }
-        .water-glass { width: 22px; height: 30px; cursor: pointer; position: relative; opacity: 0.3; transition: 0.3s; }
-        .water-glass svg { transform: none; width: 100%; height: 100%; }
-        .water-glass path { stroke: #fff; stroke-width: 1.5; fill: transparent; transition: 0.3s; } 
-        .water-glass.filled { opacity: 1; transform: scale(1.1); }
-        .water-glass.filled path { fill: var(--blue); stroke: var(--blue); filter: drop-shadow(0 0 8px rgba(52, 152, 219, 0.6)); }
+        /* COUNTERS UI (Water & Quran) */
+        .counter-ui { display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.3); padding: 4px; border-radius: 12px; border: 1px solid #333; }
+        .counter-btn { width: 32px; height: 32px; background: rgba(255,255,255,0.05); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--accent); font-size: 18px; font-weight: 600; cursor: pointer; }
+        .counter-btn:active { transform: scale(0.9); }
+        .counter-val { min-width: 50px; text-align: center; font-size: 13px; font-weight: 700; color: #fff; }
 
-        .page-input { width: 70px; background: rgba(0,0,0,0.3); border: 1px solid #444; color: var(--accent); padding: 8px; border-radius: 8px; font-size: 14px; font-weight: 700; text-align: center; margin-right: 10px; outline: none; }
         .stars { display: flex; justify-content: center; gap: 8px; margin-top: 10px; }
         .star { font-size: 32px; color: #333; cursor: pointer; transition: color 0.2s; }
         .star.active { color: var(--accent); text-shadow: 0 0 15px var(--accent-glow); }
@@ -228,45 +219,22 @@
         }
         .author-btn:active { transform: scale(0.98); background: rgba(255,255,255,0.1); }
 
-        /* --- СКРЫТЫЙ КОНТЕЙНЕР (FIXED SAFE AREA) --- */
         #hidden-share-wrapper {
-            position: fixed; top: 0; left: 0;
-            width: 0; height: 0; overflow: hidden;
-            pointer-events: none; z-index: -9999;
+            position: fixed; top: 0; left: 0; width: 0; height: 0; overflow: hidden; pointer-events: none; z-index: -9999;
         }
-
         #hidden-share-container {
-            width: 600px; /* 4:5 ratio width */
-            height: 750px; /* 4:5 ratio height */
-            background: radial-gradient(circle at 50% 0%, #1a2332 0%, #000000 90%);
-            display: flex; flex-direction: column; 
-            justify-content: space-between; align-items: center; 
-            padding: 50px 40px; text-align: center;
-            font-family: 'Manrope', sans-serif; color: #fff;
-            box-sizing: border-box;
+            width: 600px; height: 750px; background: radial-gradient(circle at 50% 0%, #1a2332 0%, #000000 90%); display: flex; flex-direction: column; justify-content: space-between; align-items: center; padding: 50px 40px; text-align: center; font-family: 'Manrope', sans-serif; color: #fff; box-sizing: border-box;
         }
-
         #hidden-share-container .share-border {
-            position: absolute; top: 15px; left: 15px; right: 15px; bottom: 15px;
-            border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; pointer-events: none;
+            position: absolute; top: 15px; left: 15px; right: 15px; bottom: 15px; border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; pointer-events: none;
         }
-
         #generatedImageContainer { width: 100%; border-radius: 16px; overflow: hidden; margin-top: 20px; display: none; box-shadow: 0 10px 40px rgba(0,0,0,0.5); border: 1px solid #333; }
         #generatedImageContainer img { width: 100%; display: block; height: auto; }
-
         .btn-send-image {
-            background: linear-gradient(135deg, #d4af37 0%, #b4932a 100%);
-            color: #000; width: 100%; padding: 18px; 
-            border: none; border-radius: 20px; 
-            font-size: 14px; font-weight: 800; 
-            cursor: pointer; text-transform: uppercase; 
-            font-family: 'Manrope', sans-serif; 
-            box-shadow: 0 5px 20px rgba(212, 175, 55, 0.3);
-            transition: transform 0.2s, opacity 0.2s;
+            background: linear-gradient(135deg, #d4af37 0%, #b4932a 100%); color: #000; width: 100%; padding: 18px; border: none; border-radius: 20px; font-size: 14px; font-weight: 800; cursor: pointer; text-transform: uppercase; font-family: 'Manrope', sans-serif; box-shadow: 0 5px 20px rgba(212, 175, 55, 0.3); transition: transform 0.2s, opacity 0.2s;
         }
         .btn-send-image:active { transform: scale(0.96); }
         .btn-send-image:disabled { opacity: 0.7; cursor: wait; }
-        
         .loading-text { color: #888; margin-top: 20px; font-size: 14px; animation: pulse 1.5s infinite; }
         @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
     </style>
@@ -292,7 +260,6 @@
     <div class="progress-header">
         <div class="circle-wrapper">
             <div class="nav-arrow" id="prevDay"><i class="ph ph-caret-left"></i></div>
-            
             <div class="circle-container">
                 <svg viewBox="0 0 160 160" style="transform: rotate(135deg);">
                     <circle class="circle-bg" cx="80" cy="80" r="70" stroke-dasharray="330 440"></circle>
@@ -303,7 +270,6 @@
                     <div class="day-label" id="uiDayLabel">День</div>
                 </div>
             </div>
-
             <div class="nav-arrow disabled" id="nextDay"><i class="ph ph-caret-right"></i></div>
         </div>
         
@@ -331,7 +297,7 @@
         </div>
         <div class="progress-bar-bg"><div class="progress-bar-fill"></div></div>
         
-        <div class="group-label">Обязательные</div>
+        <div class="group-label">Обязательные (Влияют на 80%)</div>
         <div class="task-item" onclick="toggleTask(this, 'fajr')"><span class="task-text">Фаджр</span><div class="checkbox"></div></div>
         <div class="task-item" onclick="toggleTask(this, 'dhuhr')"><span class="task-text">Зухр</span><div class="checkbox"></div></div>
         <div class="task-item" onclick="toggleTask(this, 'asr')"><span class="task-text">Аср</span><div class="checkbox"></div></div>
@@ -339,10 +305,16 @@
         <div class="task-item" onclick="toggleTask(this, 'isha')"><span class="task-text">Иша</span><div class="checkbox"></div></div>
         
         <div class="group-label">Дополнительные</div>
-        <div class="task-item" onclick="toggleTask(this, 'sunnah')"><span class="task-text">Сунна намазы</span><div class="checkbox"></div></div>
-        <div class="task-item" onclick="toggleTask(this, 'tarawih')"><span class="task-text">Таравих</span><div class="checkbox"></div></div>
-        <div class="task-item" onclick="toggleTask(this, 'witr')"><span class="task-text">Витр</span><div class="checkbox"></div></div>
-        <div class="task-item" onclick="toggleTask(this, 'tahajjud')"><span class="task-text">Тахаджуд</span><div class="checkbox"></div></div>
+        <div class="task-item" id="task-sunnah" onclick="toggleTask(this, 'sunnah')"><span class="task-text">Сунна намазы</span><div class="checkbox"></div><div class="delete-custom" onclick="hideHardcodedTask('sunnah', event)">×</div></div>
+        <div class="task-item" id="task-tarawih" onclick="toggleTask(this, 'tarawih')"><span class="task-text">Таравих</span><div class="checkbox"></div><div class="delete-custom" onclick="hideHardcodedTask('tarawih', event)">×</div></div>
+        <div class="task-item" id="task-witr" onclick="toggleTask(this, 'witr')"><span class="task-text">Витр</span><div class="checkbox"></div><div class="delete-custom" onclick="hideHardcodedTask('witr', event)">×</div></div>
+        <div class="task-item" id="task-tahajjud" onclick="toggleTask(this, 'tahajjud')"><span class="task-text">Тахаджуд</span><div class="checkbox"></div><div class="delete-custom" onclick="hideHardcodedTask('tahajjud', event)">×</div></div>
+        
+        <div id="extraPrayersContainer"></div>
+        <div class="add-goal-area">
+            <input type="text" class="custom-input" id="newPrayerInput" autocomplete="off" placeholder="Добавить свой намаз...">
+            <div class="btn-plus" onclick="addNewCustom('extraPrayers', 'newPrayerInput')">+</div>
+        </div>
     </div>
 
     <div class="tracker-section">
@@ -351,13 +323,22 @@
             <div class="section-percent">0%</div>
         </div>
         <div class="progress-bar-bg"><div class="progress-bar-fill"></div></div>
-        <div class="task-item">
-            <span class="task-text" onclick="toggleTask(this.parentElement, 'quran_read')">Читал Къур'ан</span>
-            <input type="number" id="quranPages" class="page-input" placeholder="стр." min="0" autocomplete="off" oninput="saveQuranPages(this.value)">
-            <div class="checkbox" onclick="toggleTask(this.parentElement, 'quran_read')"></div>
+        <div class="task-item" style="cursor: default;">
+            <span class="task-text">Читал Къур'ан</span>
+            <div class="counter-ui">
+                <div class="counter-btn" onclick="updateQuran(-1)">-</div>
+                <div class="counter-val" id="quranCountText">0 стр</div>
+                <div class="counter-btn" onclick="updateQuran(1)">+</div>
+            </div>
         </div>
-        <div class="task-item" onclick="toggleTask(this, 'lecture')"><span class="task-text">Прослушал лекцию</span><div class="checkbox"></div></div>
-        <div class="task-item" onclick="toggleTask(this, 'arabic')"><span class="task-text">Изучал арабский</span><div class="checkbox"></div></div>
+        <div class="task-item" id="task-lecture" onclick="toggleTask(this, 'lecture')"><span class="task-text">Прослушал лекцию</span><div class="checkbox"></div><div class="delete-custom" onclick="hideHardcodedTask('lecture', event)">×</div></div>
+        <div class="task-item" id="task-arabic" onclick="toggleTask(this, 'arabic')"><span class="task-text">Изучал арабский</span><div class="checkbox"></div><div class="delete-custom" onclick="hideHardcodedTask('arabic', event)">×</div></div>
+
+        <div id="extraKnowledgeContainer"></div>
+        <div class="add-goal-area">
+            <input type="text" class="custom-input" id="newKnowledgeInput" autocomplete="off" placeholder="Добавить цель...">
+            <div class="btn-plus" onclick="addNewCustom('extraKnowledge', 'newKnowledgeInput')">+</div>
+        </div>
     </div>
 
     <div class="tracker-section">
@@ -368,17 +349,16 @@
         <div class="progress-bar-bg"><div class="progress-bar-fill"></div></div>
         
         <div class="task-item" style="cursor: default;">
-            <span class="task-text">Вода (стакан - 500мл)</span>
-            <div class="water-row">
-                <div class="water-glass" onclick="updateWater(1)"><svg viewBox="0 0 24 24"><path d="M5,5 L19,5 L17,21 L7,21 L5,5 Z"></path></svg></div>
-                <div class="water-glass" onclick="updateWater(2)"><svg viewBox="0 0 24 24"><path d="M5,5 L19,5 L17,21 L7,21 L5,5 Z"></path></svg></div>
-                <div class="water-glass" onclick="updateWater(3)"><svg viewBox="0 0 24 24"><path d="M5,5 L19,5 L17,21 L7,21 L5,5 Z"></path></svg></div>
-                <div class="water-glass" onclick="updateWater(4)"><svg viewBox="0 0 24 24"><path d="M5,5 L19,5 L17,21 L7,21 L5,5 Z"></path></svg></div>
-                <div class="water-glass" onclick="updateWater(5)"><svg viewBox="0 0 24 24"><path d="M5,5 L19,5 L17,21 L7,21 L5,5 Z"></path></svg></div>
+            <span class="task-text">Вода</span>
+            <div class="counter-ui">
+                <div class="counter-btn" onclick="updateWater(-1)">-</div>
+                <div class="counter-val" id="waterCountText">0 мл</div>
+                <div class="counter-btn" onclick="updateWater(1)">+</div>
             </div>
         </div>
         
-        <div class="task-item" onclick="toggleTask(this, 'no_overeat')"><span class="task-text">Не переел</span><div class="checkbox"></div></div>
+        <div class="task-item" id="task-suhoor" onclick="toggleTask(this, 'suhoor')"><span class="task-text">Проснулся на сухур</span><div class="checkbox"></div><div class="delete-custom" onclick="hideHardcodedTask('suhoor', event)">×</div></div>
+        <div class="task-item" id="task-no_overeat" onclick="toggleTask(this, 'no_overeat')"><span class="task-text">Не переел на ифтар</span><div class="checkbox"></div><div class="delete-custom" onclick="hideHardcodedTask('no_overeat', event)">×</div></div>
     </div>
 
     <div class="tracker-section">
@@ -388,16 +368,16 @@
         </div>
         <div class="progress-bar-bg"><div class="progress-bar-fill"></div></div>
         
-        <div class="task-item" onclick="toggleTask(this, 'sadaqah')"><span class="task-text">Сделал садака</span><div class="checkbox"></div></div>
         <div class="task-item" onclick="toggleTask(this, 'no_bad_words')"><span class="task-text">Не злословил</span><div class="checkbox"></div></div>
         <div class="task-item" onclick="toggleTask(this, 'no_gossip')"><span class="task-text">Не сплетничал</span><div class="checkbox"></div></div>
+        <div class="task-item" id="task-sadaqah" onclick="toggleTask(this, 'sadaqah')"><span class="task-text">Сделал садака</span><div class="checkbox"></div><div class="delete-custom" onclick="hideHardcodedTask('sadaqah', event)">×</div></div>
         
         <div class="group-label">Мои цели</div>
         <div id="extraGoalsContainer"></div>
 
         <div class="add-goal-area">
             <input type="text" class="custom-input" id="newGoalInput" autocomplete="off" placeholder="Напиши свою цель...">
-            <div class="btn-plus" onclick="addNewGoalFromInput()">+</div>
+            <div class="btn-plus" onclick="addNewCustom('extraGoals', 'newGoalInput')">+</div>
         </div>
     </div>
 
@@ -437,6 +417,15 @@
         <div class="close-modal" onclick="closeModal('modalStats')">×</div>
     </div>
     <div class="modal-content">
+
+        <div class="tracker-section" style="padding: 15px; margin-bottom: 25px;">
+            <div class="section-title" style="margin-bottom: 10px; font-size: 14px;">Закят аль-фитр</div>
+            <div class="fasting-switch" style="margin-bottom: 0;">
+                <div class="fasting-option" id="zakatNo" onclick="toggleZakat(false)">Не выплатил</div>
+                <div class="fasting-option" id="zakatYes" onclick="toggleZakat(true)">Выплатил</div>
+            </div>
+        </div>
+
         <div class="group-label" style="margin-bottom:10px;">Прогресс по дням</div>
         <div class="heatmap-grid" id="heatmapGrid"></div>
 
@@ -550,20 +539,11 @@
         });
     });
 
-    const SCORES = {
-        fasting: 15,
-        fajr: 8, dhuhr: 8, asr: 8, maghrib: 8, isha: 8,
-        sunnah: 2, tarawih: 2, witr: 2, tahajjud: 2,
-        quran_read: 8, lecture: 6, arabic: 4,
-        sadaqah: 5,
-        no_bad_words: 3, no_gossip: 3, 
-        no_overeat: 3 
-    };
-
-    const ramadanStart = new Date(2026, 1, 19);
-    const STORAGE_KEY = 'ramadan_tracker_pro_v1';
+    let ramadanStart = new Date(2026, 1, 18); // Базово 18 февраля
+    const STORAGE_KEY = 'ramadan_tracker_pro_v2';
     const CALENDAR_STORAGE_KEY = 'ramadan_api_calendar_v2';
     const CITY_NAME_KEY = 'ramadan_city_name_v2';
+    const COUNTRY_FLAG_KEY = 'ramadan_country_cis_v2';
 
     function getCurrentDay() {
         const now = new Date();
@@ -577,17 +557,28 @@
 
     let realDayNum = getCurrentDay();
     let activeDayNum = realDayNum;
-    let fullHistory = {};
+    let fullHistory = { settings: { hiddenTasks: [] } };
 
     function initApp() {
         if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
             const user = tg.initDataUnsafe.user;
         }
+        
+        // Zakat Init
+        const zakatPaid = localStorage.getItem('zakat_paid') === 'true';
+        updateZakatUI(zakatPaid);
+
+        // Восстановление даты старта по сохраненному региону
+        const isCis = localStorage.getItem(COUNTRY_FLAG_KEY) === 'true';
+        ramadanStart = isCis ? new Date(2026, 1, 19) : new Date(2026, 1, 18);
+        realDayNum = getCurrentDay();
+        activeDayNum = realDayNum;
 
         try {
             const loc = localStorage.getItem(STORAGE_KEY);
             if(loc) {
                  fullHistory = JSON.parse(loc);
+                 if(!fullHistory.settings) fullHistory.settings = { hiddenTasks: [] };
                  document.getElementById('syncStatus').innerText = "✨ Готов к работе";
             }
             renderDay(activeDayNum);
@@ -598,6 +589,7 @@
                         try { 
                             const cloudData = JSON.parse(val);
                             fullHistory = cloudData;
+                            if(!fullHistory.settings) fullHistory.settings = { hiddenTasks: [] };
                             document.getElementById('syncStatus').innerText = "☁️ Синхронизировано";
                             renderDay(activeDayNum);
                             localStorage.setItem(STORAGE_KEY, val);
@@ -608,30 +600,43 @@
         } catch(e) { renderDay(activeDayNum); }
     }
 
+    // НОВАЯ СИСТЕМА ПОДСЧЕТА БАЛЛОВ
     function calculateDayScore(dayData) {
         if (!dayData) return 0;
-        let score = 0;
-        if (dayData.fasting === true) score += SCORES.fasting;
         
-        if (dayData.tasks) {
-            for (let task in dayData.tasks) {
-                if (dayData.tasks[task] && SCORES[task]) {
-                    score += SCORES[task];
-                }
-            }
-        }
-        if (dayData.water) {
-            if (dayData.water >= 2) score += 3;
-            else score += (dayData.water * 1.5);
-        }
-        
-        if (dayData.extraGoals) {
-            dayData.extraGoals.forEach(g => {
-                if(g.done) score += 7;
-            });
-        }
+        // 1. Обязательные 80%
+        let mandatoryScore = 0;
+        if (dayData.fasting) mandatoryScore += 16;
+        if (dayData.tasks?.fajr) mandatoryScore += 8;
+        if (dayData.tasks?.dhuhr) mandatoryScore += 8;
+        if (dayData.tasks?.asr) mandatoryScore += 8;
+        if (dayData.tasks?.maghrib) mandatoryScore += 8;
+        if (dayData.tasks?.isha) mandatoryScore += 8;
+        if (dayData.quranPageCount > 0) mandatoryScore += 8;
+        if (dayData.tasks?.no_bad_words) mandatoryScore += 8;
+        if (dayData.tasks?.no_gossip) mandatoryScore += 8;
 
-        return score > 100 ? 100 : Math.round(score);
+        // 2. Желательные 20%
+        let optionalScore = 0;
+        const optionalTasks = ['sunnah', 'tarawih', 'witr', 'tahajjud', 'lecture', 'arabic', 'sadaqah', 'suhoor', 'no_overeat'];
+        optionalTasks.forEach(t => {
+            if (dayData.tasks && dayData.tasks[t] && !fullHistory.settings.hiddenTasks.includes(t)) optionalScore += 2;
+        });
+        
+        // Вода (1 клик = 250мл = 0.5 балла, максимум 5 баллов за воду)
+        if (dayData.water && dayData.water > 0) optionalScore += Math.min(dayData.water * 0.5, 5);
+
+        // Кастомные категории
+        ['extraPrayers', 'extraKnowledge', 'extraGoals'].forEach(cat => {
+            if(dayData[cat]) {
+                dayData[cat].forEach(g => { if(g.done) optionalScore += 2; });
+            }
+        });
+
+        if (optionalScore > 20) optionalScore = 20;
+
+        const total = Math.round(mandatoryScore + optionalScore);
+        return total > 100 ? 100 : total;
     }
 
     function getStoredCalendar() {
@@ -644,7 +649,7 @@
         document.getElementById('prevDay').classList.toggle('disabled', dayNum <= 1);
         document.getElementById('nextDay').classList.toggle('disabled', dayNum >= realDayNum);
         
-        const data = fullHistory[dayNum] || { tasks: {}, rating: 0, thoughts: "", fasting: false, extraGoals: [], water: 0, quranPageCount: "" };
+        const data = fullHistory[dayNum] || { tasks: {}, rating: 0, thoughts: "", fasting: false, extraGoals: [], extraKnowledge: [], extraPrayers: [], water: 0, quranPageCount: 0 };
         if(!data.tasks) data.tasks = {};
 
         const isFasting = (data.fasting === true); 
@@ -680,41 +685,39 @@
             timeBlock.innerHTML = `<button class="btn-set-city" onclick="openCityModal()">📍 Выбрать город</button>`;
         }
 
-        document.querySelectorAll('.task-item').forEach(el => el.classList.remove('checked'));
+        ['sunnah', 'tarawih', 'witr', 'tahajjud', 'lecture', 'arabic', 'sadaqah', 'suhoor', 'no_overeat'].forEach(id => {
+            const el = document.getElementById('task-' + id);
+            if(el) {
+                if(fullHistory.settings?.hiddenTasks?.includes(id)) el.style.display = 'none';
+                else el.style.display = 'flex';
+            }
+        });
+
+        document.querySelectorAll('.task-item').forEach(el => {
+            if(!el.id || !el.id.startsWith('task-')) el.classList.remove('checked');
+            else el.classList.remove('checked');
+        });
+
         for(const [id, done] of Object.entries(data.tasks)) {
             if(done) {
                 const els = document.querySelectorAll('.task-item');
                 els.forEach(el => {
                     if(el.getAttribute('onclick') && el.getAttribute('onclick').includes(`'${id}'`)) el.classList.add('checked');
-                    if(!el.getAttribute('onclick') && id === 'quran_read' && el.querySelector(`[onclick*="'quran_read'"]`)) el.classList.add('checked');
                 });
             }
         }
         
         const waterVal = data.water || 0;
-        document.querySelectorAll('.water-glass').forEach((el, idx) => {
-            if (idx < waterVal) el.classList.add('filled');
-            else el.classList.remove('filled');
-        });
+        document.getElementById('waterCountText').innerText = (waterVal * 250) + ' мл';
+        
+        const quranVal = data.quranPageCount || 0;
+        document.getElementById('quranCountText').innerText = quranVal + ' стр';
 
-        document.getElementById('quranPages').value = data.quranPageCount || "";
         document.getElementById('dailyThoughts').value = data.thoughts || "";
 
-        const extraContainer = document.getElementById('extraGoalsContainer');
-        extraContainer.innerHTML = '';
-        if(data.extraGoals && data.extraGoals.length > 0) {
-            data.extraGoals.forEach((goal, idx) => {
-                const checked = goal.done ? 'checked' : '';
-                const html = `
-                <div class="task-item ${checked}" style="margin-bottom:1px;">
-                      <span class="task-text" onclick="toggleExtraGoal(${idx})">${goal.text}</span>
-                      <div class="checkbox" onclick="toggleExtraGoal(${idx})"></div>
-                      <div class="delete-custom" onclick="removeExtraGoal(${idx})">×</div>
-                </div>`;
-                extraContainer.insertAdjacentHTML('beforeend', html);
-            });
-        }
-        document.getElementById('newGoalInput').value = "";
+        renderCustomList(data, 'extraGoals', 'extraGoalsContainer');
+        renderCustomList(data, 'extraKnowledge', 'extraKnowledgeContainer');
+        renderCustomList(data, 'extraPrayers', 'extraPrayersContainer');
         
         const r = data.rating || 0;
         document.querySelectorAll('.star').forEach(s => s.classList.toggle('active', parseInt(s.dataset.val) <= r));
@@ -723,28 +726,43 @@
         updateDailyCircle();
     }
 
-    // --- ACTIONS ---
+    function renderCustomList(data, category, containerId) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = '';
+        if(data[category] && data[category].length > 0) {
+            data[category].forEach((goal, idx) => {
+                const checked = goal.done ? 'checked' : '';
+                const html = `
+                <div class="task-item ${checked}" style="margin-bottom:1px;">
+                      <span class="task-text" onclick="toggleCustom('${category}', ${idx})">${goal.text}</span>
+                      <div class="checkbox" onclick="toggleCustom('${category}', ${idx})"></div>
+                      <div class="delete-custom" onclick="removeCustom('${category}', ${idx})">×</div>
+                </div>`;
+                container.insertAdjacentHTML('beforeend', html);
+            });
+        }
+    }
 
-    window.updateWater = function(count) {
+    window.updateWater = function(delta) {
         ensureDayObj(activeDayNum);
-        const current = fullHistory[activeDayNum].water || 0;
-        if (current === count) fullHistory[activeDayNum].water = count - 1;
-        else { fullHistory[activeDayNum].water = count; hapticBurst(1); }
+        let current = fullHistory[activeDayNum].water || 0;
+        current += delta;
+        if(current < 0) current = 0;
+        fullHistory[activeDayNum].water = current; 
+        if(delta > 0) hapticBurst(1); else haptic();
         renderDay(activeDayNum);
         saveData();
     }
 
-    let quranSaveTimeout;
-    window.saveQuranPages = function(val) {
+    window.updateQuran = function(delta) {
         ensureDayObj(activeDayNum);
-        if (val < 0) val = 0;
-        fullHistory[activeDayNum].quranPageCount = val;
-        if(val && val > 0 && !fullHistory[activeDayNum].tasks['quran_read']) {
-            fullHistory[activeDayNum].tasks['quran_read'] = true;
-            renderDay(activeDayNum); 
-        }
-        clearTimeout(quranSaveTimeout); 
-        quranSaveTimeout = setTimeout(saveData, 500);
+        let current = fullHistory[activeDayNum].quranPageCount || 0;
+        current += delta;
+        if(current < 0) current = 0;
+        fullHistory[activeDayNum].quranPageCount = current;
+        if(delta > 0) hapticBurst(1); else haptic();
+        renderDay(activeDayNum);
+        saveData();
     }
 
     window.setFasting = function(val) {
@@ -753,61 +771,84 @@
         renderDay(activeDayNum);
         saveData();
         if(val) {
-            hapticBurst(SCORES.fasting);
-            // FIREWORKS!
+            hapticBurst(15);
             if(window.confetti) {
-                confetti({
-                    particleCount: 100,
-                    spread: 70,
-                    origin: { y: 0.6 },
-                    colors: ['#d4af37', '#ffffff', '#27ae60']
-                });
+                confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#d4af37', '#ffffff', '#27ae60'] });
             }
         } else {
             haptic();
         }
     }
     
-    window.openCityModal = function() {
-        document.getElementById('btnCalendar').click();
-    }
+    window.openCityModal = function() { document.getElementById('btnCalendar').click(); }
 
-    window.addNewGoalFromInput = function() {
-        const inp = document.getElementById('newGoalInput');
+    window.addNewCustom = function(category, inputId) {
+        const inp = document.getElementById(inputId);
         const val = inp.value.trim();
         if(!val) return;
         ensureDayObj(activeDayNum);
-        if(!fullHistory[activeDayNum].extraGoals) fullHistory[activeDayNum].extraGoals = [];
-        fullHistory[activeDayNum].extraGoals.push({ text: val, done: false });
+        if(!fullHistory[activeDayNum][category]) fullHistory[activeDayNum][category] = [];
+        fullHistory[activeDayNum][category].push({ text: val, done: false });
+        inp.value = "";
         renderDay(activeDayNum); saveData(); haptic();
     }
 
-    window.removeExtraGoal = function(idx) {
+    window.removeCustom = function(category, idx) {
         if(!confirm('Удалить эту цель?')) return;
         ensureDayObj(activeDayNum);
-        fullHistory[activeDayNum].extraGoals.splice(idx, 1);
+        fullHistory[activeDayNum][category].splice(idx, 1);
         renderDay(activeDayNum); saveData();
     }
 
-    window.toggleExtraGoal = function(idx) {
+    window.toggleCustom = function(category, idx) {
         ensureDayObj(activeDayNum);
-        const current = fullHistory[activeDayNum].extraGoals[idx].done;
-        fullHistory[activeDayNum].extraGoals[idx].done = !current;
+        const current = fullHistory[activeDayNum][category][idx].done;
+        fullHistory[activeDayNum][category][idx].done = !current;
         renderDay(activeDayNum); saveData(); 
         if(!current) hapticBurst(4); else haptic();
+    }
+
+    window.hideHardcodedTask = function(taskId, e) {
+        e.stopPropagation();
+        if(!confirm('Скрыть этот пункт из трекера навсегда?')) return;
+        if(!fullHistory.settings) fullHistory.settings = { hiddenTasks: [] };
+        if(!fullHistory.settings.hiddenTasks.includes(taskId)) {
+            fullHistory.settings.hiddenTasks.push(taskId);
+        }
+        renderDay(activeDayNum); saveData(); haptic();
+    }
+
+    window.toggleZakat = function(isPaid) {
+        localStorage.setItem('zakat_paid', isPaid ? 'true' : 'false');
+        updateZakatUI(isPaid);
+        haptic();
+    }
+    function updateZakatUI(isPaid) {
+        const btnYes = document.getElementById('zakatYes');
+        const btnNo = document.getElementById('zakatNo');
+        if(btnYes && btnNo) {
+            btnYes.className = 'fasting-option';
+            btnNo.className = 'fasting-option';
+            if(isPaid) btnYes.classList.add('active-hold'); 
+            else btnNo.classList.add('active-nothold');
+        }
     }
 
     function updateSectionProgress(section) {
         const title = section.querySelector('.section-title').innerText;
         let percent = 0;
+        
         if(title.includes("Личность")) {
              ensureDayObj(activeDayNum);
              const data = fullHistory[activeDayNum];
-             let total = 3; let checked = 0;
+             let total = 2; let checked = 0; 
              if(data && data.tasks) {
                  if(data.tasks.no_bad_words) checked++;
                  if(data.tasks.no_gossip) checked++;
-                 if(data.tasks.sadaqah) checked++;
+                 if(!fullHistory.settings.hiddenTasks.includes('sadaqah')) {
+                     total++;
+                     if(data.tasks.sadaqah) checked++;
+                 }
              }
              if(data && data.extraGoals) {
                  total += data.extraGoals.length;
@@ -815,16 +856,36 @@
              }
              if(total === 0) percent = 0; else percent = Math.round((checked / total) * 100);
         } else if(title.includes("Питание")) {
-            ensureDayObj(activeDayNum);
-            const water = fullHistory[activeDayNum] ? (fullHistory[activeDayNum].water || 0) : 0;
-            const notOvereat = section.querySelector('.task-item.checked') ? 1 : 0;
-            percent = Math.round(((water + notOvereat) / 6) * 100);
+             ensureDayObj(activeDayNum);
+             const data = fullHistory[activeDayNum];
+             let total = 1; let checked = 0;
+             if(data && data.water > 0) checked++; 
+             
+             if(!fullHistory.settings.hiddenTasks.includes('suhoor')) { total++; if(data?.tasks?.suhoor) checked++; }
+             if(!fullHistory.settings.hiddenTasks.includes('no_overeat')) { total++; if(data?.tasks?.no_overeat) checked++; }
+             
+             percent = Math.round((checked / total) * 100);
+        } else if(title.includes("Знания")) {
+             ensureDayObj(activeDayNum);
+             const data = fullHistory[activeDayNum];
+             let total = 1; let checked = 0; 
+             if(data && data.quranPageCount > 0) checked++;
+             
+             if(!fullHistory.settings.hiddenTasks.includes('lecture')) { total++; if(data?.tasks?.lecture) checked++; }
+             if(!fullHistory.settings.hiddenTasks.includes('arabic')) { total++; if(data?.tasks?.arabic) checked++; }
+             
+             if(data && data.extraKnowledge) {
+                 total += data.extraKnowledge.length;
+                 data.extraKnowledge.forEach(g => { if(g.done) checked++; });
+             }
+             percent = Math.round((checked / total) * 100);
         } else {
             const totalItems = section.querySelectorAll('.task-item').length;
             if(totalItems === 0) return; 
             const checkedItems = section.querySelectorAll('.task-item.checked').length;
             percent = Math.round((checkedItems / totalItems) * 100);
         }
+        
         const fill = section.querySelector('.progress-bar-fill');
         const text = section.querySelector('.section-percent');
         if(fill && text) {
@@ -848,13 +909,13 @@
     document.getElementById('nextDay').addEventListener('click', () => { if(activeDayNum<realDayNum){activeDayNum++; renderDay(activeDayNum); haptic();} });
     
     window.toggleTask = function(el, id) { 
-        if(event.target.tagName === 'INPUT') return;
+        if(event.target.tagName === 'INPUT' || event.target.className === 'delete-custom' || event.target.className.includes('counter-')) return;
         if(el.classList.contains('task-text') || el.classList.contains('checkbox')) el = el.parentElement;
         el.classList.toggle('checked'); ensureDayObj(activeDayNum); 
         const isChecked = el.classList.contains('checked');
         fullHistory[activeDayNum].tasks[id] = isChecked; 
         updateSectionProgress(el.closest('.tracker-section')); updateDailyCircle(); saveData(); 
-        if(isChecked) { const points = SCORES[id] || 1; hapticBurst(points); } else haptic(); 
+        if(isChecked) { hapticBurst(2); } else haptic(); 
     }
     
     let thoughtsSaveTimeout;
@@ -866,7 +927,7 @@
 
     document.querySelectorAll('.star').forEach(s => s.addEventListener('click', function() { ensureDayObj(activeDayNum); fullHistory[activeDayNum].rating = parseInt(this.dataset.val); renderDay(activeDayNum); saveData(); haptic(); }));
 
-    function ensureDayObj(d){ if(!fullHistory[d]) fullHistory[d] = {tasks:{}, rating:0, thoughts:"", fasting:false, extraGoals:[], water:0, quranPageCount:""}; }
+    function ensureDayObj(d){ if(!fullHistory[d]) fullHistory[d] = {tasks:{}, rating:0, thoughts:"", fasting:false, extraGoals:[], extraPrayers:[], extraKnowledge:[], water:0, quranPageCount: 0}; }
     
     function saveData(){
         const val = JSON.stringify(fullHistory);
@@ -926,25 +987,39 @@
         const resDiv = document.getElementById('searchResults');
         resDiv.innerHTML = '<div style="text-align:center;color:#666; margin-top:20px;">Поиск...</div>';
         
-        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&accept-language=ru`)
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&accept-language=ru&featuretype=settlement`)
             .then(r => r.json())
             .then(data => {
                 resDiv.innerHTML = '';
+                
+                data = data.filter(item => {
+                    const type = item.addresstype || item.type;
+                    const badTypes = ['amenity', 'building', 'highway', 'house', 'shop', 'office', 'tourism', 'leisure', 'historic', 'railway', 'aeroway'];
+                    return !badTypes.includes(type);
+                });
+
                 if(data.length === 0) { resDiv.innerHTML = '<div style="text-align:center;color:#666;">Не найдено</div>'; return; }
                 
+                const cis = ['казахстан', 'россия', 'украина', 'турция', 'беларусь', 'узбекистан', 'кыргызстан', 'таджикистан', 'азербайджан'];
+                data.sort((a, b) => {
+                    const aCis = cis.some(c => a.display_name.toLowerCase().includes(c));
+                    const bCis = cis.some(c => b.display_name.toLowerCase().includes(c));
+                    return (aCis === bCis) ? 0 : aCis ? -1 : 1;
+                });
+
                 data.slice(0, 5).forEach(item => {
                     const el = document.createElement('div');
                     el.className = 'search-item';
                     const simpleName = item.display_name.split(',')[0];
                     el.innerText = simpleName; 
-                    el.onclick = () => loadCalendarForLocation(item.lat, item.lon, simpleName);
+                    el.onclick = () => loadCalendarForLocation(item.lat, item.lon, simpleName, item.display_name);
                     resDiv.appendChild(el);
                 });
             })
             .catch(() => { resDiv.innerHTML = '<div style="text-align:center;color:#e74c3c;">Ошибка сети</div>'; });
     }
 
-    function loadCalendarForLocation(lat, lon, cityName) {
+    function loadCalendarForLocation(lat, lon, cityName, fullName) {
         const resDiv = document.getElementById('searchResults');
         resDiv.innerHTML = '<div style="text-align:center;color:var(--accent); margin-top:20px;">Загрузка расписания...</div>';
         
@@ -957,8 +1032,17 @@
             const arr2 = d2.data || [];
             const fullArr = [...arr1, ...arr2];
 
-            // Начинаем с 19 февраля. 1 февраля = 0 индекс, значит 19 февраля = 18 индекс.
-            const startIndex = 18; 
+            const cisKeywords = ['казахстан', 'россия', 'украина', 'турция', 'kazakhstan', 'russia', 'ukraine', 'turkey'];
+            const isCis = cisKeywords.some(kw => fullName.toLowerCase().includes(kw));
+            
+            // Установка даты начала Рамадана
+            ramadanStart = isCis ? new Date(2026, 1, 19) : new Date(2026, 1, 18);
+            localStorage.setItem(COUNTRY_FLAG_KEY, isCis);
+
+            // 18-е февраля в массиве февраля - это индекс 17
+            // 19-е февраля в массиве февраля - это индекс 18
+            const startIndex = isCis ? 18 : 17; 
+            
             for(let i=0; i<30; i++) {
                 if(fullArr[startIndex + i]) {
                      const dayObj = fullArr[startIndex + i];
@@ -975,6 +1059,11 @@
             
             localStorage.setItem(CALENDAR_STORAGE_KEY, JSON.stringify(finalCalendar));
             localStorage.setItem(CITY_NAME_KEY, cityName);
+            
+            // Пересчет текущего дня после смены региона
+            realDayNum = getCurrentDay();
+            activeDayNum = realDayNum;
+            
             renderTableUI(document.getElementById('calContent'), finalCalendar);
             renderDay(activeDayNum);
         }).catch(e => {
@@ -1015,7 +1104,7 @@
         let stats = {
             fasting: 0, fajr: 0, dhuhr: 0, asr: 0, maghrib: 0, isha: 0,
             sunnah: 0, tarawih: 0, witr: 0, tahajjud: 0,
-            quran_read: 0, lecture: 0, arabic: 0, sadaqah: 0,
+            quran_read: 0, lecture: 0, arabic: 0, sadaqah: 0, suhoor: 0,
             no_bad_words: 0, no_gossip: 0, no_overeat: 0,
             water_liters: 0, quran_pages_total: 0, custom_goals_breakdown: {} 
         };
@@ -1025,17 +1114,23 @@
             if(!d) continue;
             if(d.fasting === true) stats.fasting++;
             if(d.tasks) { for(let key in stats) { if(d.tasks[key]) stats[key]++; } }
-            if(d.water) stats.water_liters += (d.water * 0.5); 
-            if(d.quranPageCount) { let p = parseInt(d.quranPageCount); if(!isNaN(p)) stats.quran_pages_total += p; }
-            if(d.extraGoals && d.extraGoals.length > 0) {
-                d.extraGoals.forEach(g => {
-                    if(g.done) {
-                        const t = g.text.trim() || "Своя цель";
-                        if(!stats.custom_goals_breakdown[t]) stats.custom_goals_breakdown[t] = 0;
-                        stats.custom_goals_breakdown[t]++;
-                    }
-                });
+            if(d.water) stats.water_liters += (d.water * 0.25); 
+            if(d.quranPageCount) { 
+                stats.quran_pages_total += d.quranPageCount; 
+                if(d.quranPageCount > 0) stats.quran_read++;
             }
+            
+            ['extraGoals', 'extraKnowledge', 'extraPrayers'].forEach(cat => {
+                if(d[cat] && d[cat].length > 0) {
+                    d[cat].forEach(g => {
+                        if(g.done) {
+                            const t = g.text.trim() || "Своя цель";
+                            if(!stats.custom_goals_breakdown[t]) stats.custom_goals_breakdown[t] = 0;
+                            stats.custom_goals_breakdown[t]++;
+                        }
+                    });
+                }
+            });
         }
         return stats;
     }
@@ -1045,7 +1140,7 @@
             fasting: "Дней поста", fajr: "Фаджр", dhuhr: "Зухр", asr: "Аср", maghrib: "Магриб", isha: "Иша",
             sunnah: "Сунна намазы", tarawih: "Таравих", witr: "Витр", tahajjud: "Тахаджуд",
             quran_read: "Дней чтения Къур'ана", lecture: "Лекции", arabic: "Арабский",
-            sadaqah: "Сделал Садака", no_bad_words: "Не злословил", no_gossip: "Не сплетничал", no_overeat: "Не переедал"
+            sadaqah: "Сделал Садака", no_bad_words: "Не злословил", no_gossip: "Не сплетничал", no_overeat: "Не переедал на ифтар", suhoor: "Вставал на сухур"
         };
         let html = '';
         html += `<div class="full-stat-item"><span class="fs-name">${labels.fasting}</span><span class="fs-val">${stats.fasting}/30</span></div>`;
@@ -1055,8 +1150,7 @@
         if(stats.quran_pages_total > 0) html += `<div class="full-stat-item"><span class="fs-name">Прочитано страниц Къурана</span><span class="fs-val">${stats.quran_pages_total} стр.</span></div>`;
         else if(stats.quran_read > 0) html += `<div class="full-stat-item"><span class="fs-name">${labels.quran_read}</span><span class="fs-val">${stats.quran_read} дн.</span></div>`;
         if(stats.water_liters > 0) html += `<div class="full-stat-item"><span class="fs-name">Выпито воды</span><span class="fs-val">${stats.water_liters} л.</span></div>`;
-        html += `<div class="full-stat-item"><span class="fs-name">${labels.no_overeat}</span><span class="fs-val">${stats.no_overeat} дн.</span></div>`;
-        ['sadaqah', 'lecture', 'arabic', 'no_bad_words', 'no_gossip'].forEach(p => { if(stats[p] > 0) html += `<div class="full-stat-item"><span class="fs-name">${labels[p]}</span><span class="fs-val">${stats[p]} дн.</span></div>`; });
+        ['suhoor', 'no_overeat', 'sadaqah', 'lecture', 'arabic', 'no_bad_words', 'no_gossip'].forEach(p => { if(stats[p] > 0) html += `<div class="full-stat-item"><span class="fs-name">${labels[p]}</span><span class="fs-val">${stats[p]} дн.</span></div>`; });
         if(Object.keys(stats.custom_goals_breakdown).length > 0) {
             html += `<div class="group-label" style="margin-top:10px;">Мои цели</div>`;
             for(let [name, count] of Object.entries(stats.custom_goals_breakdown)) { html += `<div class="full-stat-item"><span class="fs-name">${name}</span><span class="fs-val">${count} раз</span></div>`; }
@@ -1067,7 +1161,6 @@
     document.getElementById('btnStats').addEventListener('click', () => {
         document.body.classList.add('no-scroll');
         
-        // NEW STATS LOGIC: Calculate Average Rating based on Task Completion %
         let totalScoreSum = 0;
         let daysWithScore = 0;
         let filledDaysCount = 0;
@@ -1102,11 +1195,10 @@
 
         document.getElementById('statDays').innerText = daysPassedReal; 
         
-        // CALCULATE AVG RATING (0-100% -> 0.0-5.0)
         let avgRatingVal = 0;
         if(daysWithScore > 0) {
             const avgPercent = totalScoreSum / daysWithScore;
-            avgRatingVal = (avgPercent / 20); // 100% / 20 = 5.0
+            avgRatingVal = (avgPercent / 20); 
         }
         document.getElementById('statRating').innerText = avgRatingVal.toFixed(1);
 
@@ -1158,14 +1250,12 @@
         document.getElementById('modalFinal').classList.add('show');
     }
 
-    // --- NEW AUTO SHARE LOGIC WITH CANVAS DRAWING ---
     document.getElementById('btnShare').addEventListener('click', () => {
         document.body.classList.add('no-scroll');
         const d = fullHistory[activeDayNum] || {}; 
         const score = calculateDayScore(d);
         const rating = d.rating || 0;
         
-        // Prepare hidden container data
         const date = new Date(ramadanStart); 
         date.setDate(ramadanStart.getDate() + (activeDayNum - 1));
         document.getElementById('renderDate').innerText = date.toLocaleDateString('ru-RU', {day:'numeric', month:'long'});
@@ -1183,101 +1273,64 @@
         }
         document.getElementById('renderStars').innerHTML = starsHtml;
 
-        // --- DRAW CIRCLE ON CANVAS (NO HTML/CSS ROTATION ISSUES) ---
         const canvas = document.getElementById('renderCanvas');
         const ctx = canvas.getContext('2d');
         const width = canvas.width;
         const height = canvas.height;
         const centerX = width / 2;
         const centerY = height / 2;
-        
         const radius = 125; 
-        
-        // Clear
         ctx.clearRect(0, 0, width, height);
-        
-        // Settings. 
         ctx.lineWidth = 15; 
         ctx.lineCap = 'round';
-        
-        // Draw Background Circle (220 degrees arc, rotated 135 deg)
         const startAngle = (135 * Math.PI) / 180;
         const endAngle = (405 * Math.PI) / 180;
-        
         ctx.strokeStyle = 'rgba(255,255,255,0.05)';
         ctx.beginPath();
-        // ИСПОЛЬЗУЕМ ПЕРЕМЕННУЮ radius
         ctx.arc(centerX, centerY, radius, startAngle, endAngle); 
         ctx.stroke();
-
-        // Draw Progress
         const totalAngle = endAngle - startAngle;
         const progressEndAngle = startAngle + (totalAngle * (score / 100));
-        
         if (score > 0) {
             let color = '#27ae60';
             if(score < 30) color = '#e74c3c';
             else if(score < 80) color = '#d4af37';
-            
             ctx.strokeStyle = color;
             ctx.shadowColor = color;
             ctx.shadowBlur = 15;
-            
             ctx.beginPath();
             ctx.arc(centerX, centerY, radius, startAngle, progressEndAngle);
             ctx.stroke();
-            
-            ctx.shadowBlur = 0; // Reset shadow
+            ctx.shadowBlur = 0; 
         }
-
-        // Show Modal & Loader
         document.getElementById('generatedImageContainer').style.display = 'none';
         document.getElementById('btnGenImage').style.display = 'none';
         document.getElementById('shareHint').style.display = 'none';
         const loader = document.getElementById('loadingState');
         loader.style.display = 'block';
         document.getElementById('modalShare').classList.add('show');
-
-        // Auto Generate
         setTimeout(() => {
             const hiddenWrapper = document.getElementById('hidden-share-container');
-            
-            html2canvas(hiddenWrapper, { 
-                scale: 2, 
-                useCORS: true, 
-                backgroundColor: null,
-                allowTaint: true
-            }).then(canvas => {
+            html2canvas(hiddenWrapper, { scale: 2, useCORS: true, backgroundColor: null, allowTaint: true }).then(canvas => {
                 loader.style.display = 'none';
-
                 const imgData = canvas.toDataURL("image/png"); 
                 const img = document.createElement('img'); 
                 img.src = imgData; 
-                
                 const imgCont = document.getElementById('generatedImageContainer');
                 imgCont.innerHTML = ''; 
                 imgCont.appendChild(img); 
                 imgCont.style.display = 'block';
-
                 const btn = document.getElementById('btnGenImage');
                 btn.style.display = 'block';
                 btn.innerText = "Отправить";
-                
                 document.getElementById('shareHint').style.display = 'block';
-                
-                // Auto share
                 canvas.toBlob(function(blob) {
                     const file = new File([blob], "ramadan_report.png", { type: "image/png" });
-                    const shareData = {
-                        files: [file],
-                        text: "Сегодня мой день прошел так. Отслеживаю это в @ramadantracking_bot"
-                    };
-
+                    const shareData = { files: [file], text: "Сегодня мой день прошел так. Отслеживаю это в @ramadantracking_bot" };
                     if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
                         navigator.share(shareData).catch((err) => { console.log("Auto-share dismissed"); });
                     }
                 });
-
             }).catch(err => { 
                 console.error(err);
                 loader.innerText = "Ошибка создания картинки";
@@ -1290,10 +1343,7 @@
         if(img) {
             fetch(img.src).then(res => res.blob()).then(blob => {
                 const file = new File([blob], "ramadan_report.png", { type: "image/png" });
-                const shareData = {
-                     files: [file],
-                     text: "Сегодня мой день прошел так. Отслеживаю это в @ramadantracking_bot"
-                };
+                const shareData = { files: [file], text: "Сегодня мой день прошел так. Отслеживаю это в @ramadantracking_bot" };
                 if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
                     navigator.share(shareData);
                 } else {
