@@ -545,12 +545,19 @@
     const CITY_NAME_KEY = 'ramadan_city_name_v2';
     const COUNTRY_FLAG_KEY = 'ramadan_country_cis_v2';
 
+    // Функция обертка для сохранения в облако и локально
+    function sysSave(key, val) {
+        localStorage.setItem(key, val);
+        if(tg && tg.CloudStorage) tg.CloudStorage.setItem(key, String(val));
+    }
+
     function getCurrentDay() {
         const now = new Date();
-        const startZero = new Date(ramadanStart.getFullYear(), ramadanStart.getMonth(), ramadanStart.getDate());
-        const nowZero = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        const diff = nowZero - startZero;
-        let day = Math.ceil(diff / (1000 * 60 * 60 * 24)) + 1;
+        // Используем UTC для расчетов, чтобы избежать сбоев из-за часовых поясов (DST)
+        const utcStart = Date.UTC(ramadanStart.getFullYear(), ramadanStart.getMonth(), ramadanStart.getDate());
+        const utcNow = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+        const diff = utcNow - utcStart;
+        let day = Math.floor(diff / (1000 * 60 * 60 * 24)) + 1;
         if (day < 1) return 1;
         return day > 30 ? 30 : day;
     }
@@ -564,7 +571,7 @@
             const user = tg.initDataUnsafe.user;
         }
         
-        // Zakat Init
+        // Zakat Init (сначала локально для скорости)
         const zakatPaid = localStorage.getItem('zakat_paid') === 'true';
         updateZakatUI(zakatPaid);
 
@@ -583,17 +590,47 @@
             }
             renderDay(activeDayNum);
             
+            // Запрашиваем ВСЕ ключи из облака и перекрываем локальные
             if (tg && tg.CloudStorage) {
-                tg.CloudStorage.getItem(STORAGE_KEY, (err, val) => {
-                    if (!err && val) { 
-                        try { 
-                            const cloudData = JSON.parse(val);
-                            fullHistory = cloudData;
-                            if(!fullHistory.settings) fullHistory.settings = { hiddenTasks: [] };
+                const keysToSync = [STORAGE_KEY, CALENDAR_STORAGE_KEY, CITY_NAME_KEY, COUNTRY_FLAG_KEY, 'zakat_paid'];
+                tg.CloudStorage.getItems(keysToSync, (err, values) => {
+                    if (!err && values) { 
+                        let needsRender = false;
+                        
+                        if(values[COUNTRY_FLAG_KEY] !== undefined) {
+                            const cloudIsCis = values[COUNTRY_FLAG_KEY] === 'true';
+                            ramadanStart = cloudIsCis ? new Date(2026, 1, 19) : new Date(2026, 1, 18);
+                            localStorage.setItem(COUNTRY_FLAG_KEY, values[COUNTRY_FLAG_KEY]);
+                            realDayNum = getCurrentDay();
+                            activeDayNum = realDayNum;
+                            needsRender = true;
+                        }
+                        if(values[CITY_NAME_KEY] !== undefined) {
+                            localStorage.setItem(CITY_NAME_KEY, values[CITY_NAME_KEY]);
+                            needsRender = true;
+                        }
+                        if(values[CALENDAR_STORAGE_KEY] !== undefined) {
+                            localStorage.setItem(CALENDAR_STORAGE_KEY, values[CALENDAR_STORAGE_KEY]);
+                            needsRender = true;
+                        }
+                        if(values['zakat_paid'] !== undefined) {
+                            localStorage.setItem('zakat_paid', values['zakat_paid']);
+                            updateZakatUI(values['zakat_paid'] === 'true');
+                        }
+                        if(values[STORAGE_KEY] !== undefined) {
+                            try { 
+                                const cloudData = JSON.parse(values[STORAGE_KEY]);
+                                fullHistory = cloudData;
+                                if(!fullHistory.settings) fullHistory.settings = { hiddenTasks: [] };
+                                localStorage.setItem(STORAGE_KEY, values[STORAGE_KEY]);
+                                needsRender = true;
+                            } catch(e) {}
+                        }
+                        
+                        if (needsRender) {
                             document.getElementById('syncStatus').innerText = "☁️ Синхронизировано";
                             renderDay(activeDayNum);
-                            localStorage.setItem(STORAGE_KEY, val);
-                        } catch(e) {}
+                        }
                     }
                 });
             }
@@ -786,9 +823,15 @@
         const inp = document.getElementById(inputId);
         const val = inp.value.trim();
         if(!val) return;
-        ensureDayObj(activeDayNum);
-        if(!fullHistory[activeDayNum][category]) fullHistory[activeDayNum][category] = [];
-        fullHistory[activeDayNum][category].push({ text: val, done: false });
+        
+        // Записываем цель на каждый день месяца, если ее там еще нет
+        for(let d=1; d<=30; d++) {
+            ensureDayObj(d);
+            if(!fullHistory[d][category]) fullHistory[d][category] = [];
+            const exists = fullHistory[d][category].find(g => g.text === val);
+            if(!exists) fullHistory[d][category].push({ text: val, done: false });
+        }
+        
         inp.value = "";
         renderDay(activeDayNum); saveData(); haptic();
     }
@@ -796,7 +839,14 @@
     window.removeCustom = function(category, idx) {
         if(!confirm('Удалить эту цель?')) return;
         ensureDayObj(activeDayNum);
-        fullHistory[activeDayNum][category].splice(idx, 1);
+        const textToRemove = fullHistory[activeDayNum][category][idx].text;
+        
+        // Удаляем цель из каждого дня месяца, сохраняя остальной прогресс
+        for(let d=1; d<=30; d++) {
+            if(fullHistory[d] && fullHistory[d][category]) {
+                fullHistory[d][category] = fullHistory[d][category].filter(g => g.text !== textToRemove);
+            }
+        }
         renderDay(activeDayNum); saveData();
     }
 
@@ -819,10 +869,11 @@
     }
 
     window.toggleZakat = function(isPaid) {
-        localStorage.setItem('zakat_paid', isPaid ? 'true' : 'false');
+        sysSave('zakat_paid', isPaid ? 'true' : 'false');
         updateZakatUI(isPaid);
         haptic();
     }
+    
     function updateZakatUI(isPaid) {
         const btnYes = document.getElementById('zakatYes');
         const btnNo = document.getElementById('zakatNo');
@@ -934,9 +985,23 @@
         const status = document.getElementById('syncStatus');
         status.innerText = "Сохранение...";
         const key = STORAGE_KEY;
-        const cb = (e) => { if(!e) { status.innerText = "Сохранено"; status.classList.add('active'); setTimeout(() => status.classList.remove('active'), 1000); } };
-        if(tg && tg.CloudStorage) tg.CloudStorage.setItem(key, val, cb);
-        else { localStorage.setItem(key, val); cb(null); }
+        
+        localStorage.setItem(key, val); // Сохраняем всегда локально
+        
+        const cb = (e) => { 
+            if(!e) { 
+                status.innerText = "Сохранено"; 
+                status.classList.add('active'); 
+                setTimeout(() => status.classList.remove('active'), 1000); 
+            } 
+        };
+        
+        // Отдаем строгий приоритет Telegram Cloud
+        if(tg && tg.CloudStorage) {
+            tg.CloudStorage.setItem(key, val, cb);
+        } else {
+            cb(null);
+        }
     }
     
     function haptic(){ if(tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light'); }
@@ -1037,7 +1102,7 @@
             
             // Установка даты начала Рамадана
             ramadanStart = isCis ? new Date(2026, 1, 19) : new Date(2026, 1, 18);
-            localStorage.setItem(COUNTRY_FLAG_KEY, isCis);
+            sysSave(COUNTRY_FLAG_KEY, isCis ? 'true' : 'false');
 
             // 18-е февраля в массиве февраля - это индекс 17
             // 19-е февраля в массиве февраля - это индекс 18
@@ -1057,8 +1122,8 @@
                 }
             }
             
-            localStorage.setItem(CALENDAR_STORAGE_KEY, JSON.stringify(finalCalendar));
-            localStorage.setItem(CITY_NAME_KEY, cityName);
+            sysSave(CALENDAR_STORAGE_KEY, JSON.stringify(finalCalendar));
+            sysSave(CITY_NAME_KEY, cityName);
             
             // Пересчет текущего дня после смены региона
             realDayNum = getCurrentDay();
@@ -1096,6 +1161,7 @@
 
     window.resetCity = function() {
         localStorage.removeItem(CALENDAR_STORAGE_KEY);
+        if(tg && tg.CloudStorage) tg.CloudStorage.removeItem(CALENDAR_STORAGE_KEY);
         renderCalendarUI();
     }
 
@@ -1243,7 +1309,7 @@
         const detailedStats = calculateDetailedStats();
         document.getElementById('f_fullList').innerHTML = generateDetailedStatsHTML(detailedStats);
         let msg = "";
-        if(avgScore > 80) msg = "МашаАллах! Это был мощный Рамадан. Ты показал отличную дисциплину. Пусть Аллах примет!";
+        if(avgScore > 80) msg = "МашаАллах! Это был мощный Рамадан. Ты показал отличную дисциплину. Пусть всё будет принято!";
         else if(avgScore > 50) msg = "Хороший результат. Были пропуски, но ты старался. В следующий раз ин ша Аллах будет еще лучше!";
         else msg = "Месяц прошел тяжело. Главное — не отчаиваться. Начни готовиться к следующему Рамадану уже сейчас.";
         document.getElementById('f_robot').innerText = msg;
@@ -1262,7 +1328,7 @@
         document.getElementById('renderDayNum').innerText = activeDayNum;
         
         let aiMsg = "День прошел. Постоянство — ключ к успеху.";
-        if(score >= 80) aiMsg = "🔥 МашаАллах! Очень продуктивный день. Пусть Аллах примет!"; 
+        if(score >= 80) aiMsg = "🔥 МашаАллах! Очень продуктивный день. Пусть всё будет принято!"; 
         else if(score >= 50) aiMsg = "💪 Хорошая работа, но можно лучше. Старайся усерднее."; 
         else aiMsg = "Не останавливайся. Каждый день — это новый шанс стать лучше.";
         document.getElementById('renderAiText').innerText = aiMsg;
