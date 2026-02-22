@@ -539,13 +539,13 @@
         });
     });
 
-    let ramadanStart = new Date(2026, 1, 18); // Базово 18 февраля
+    let ramadanStart = new Date(2026, 1, 18);
     const STORAGE_KEY = 'ramadan_tracker_pro_v2';
     const CALENDAR_STORAGE_KEY = 'ramadan_api_calendar_v2';
     const CITY_NAME_KEY = 'ramadan_city_name_v2';
     const COUNTRY_FLAG_KEY = 'ramadan_country_cis_v2';
 
-    // Функция обертка для сохранения в облако и локально
+    // Функция обертка для настроек
     function sysSave(key, val) {
         localStorage.setItem(key, val);
         if(tg && tg.CloudStorage) tg.CloudStorage.setItem(key, String(val));
@@ -553,7 +553,6 @@
 
     function getCurrentDay() {
         const now = new Date();
-        // Используем UTC для расчетов, чтобы избежать сбоев из-за часовых поясов (DST)
         const utcStart = Date.UTC(ramadanStart.getFullYear(), ramadanStart.getMonth(), ramadanStart.getDate());
         const utcNow = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
         const diff = utcNow - utcStart;
@@ -564,33 +563,61 @@
 
     let realDayNum = getCurrentDay();
     let activeDayNum = realDayNum;
-    let fullHistory = { settings: { hiddenTasks: [] } };
+    let fullHistory = { settings: { hiddenTasks: [] }, lastUpdated: Date.now() };
+
+    // ГЛОБАЛЬНЫЙ СИНХРОНИЗАТОР КАСТОМНЫХ ЦЕЛЕЙ (ЧИНИТ СБИТЫЕ ЧЕКБОКСЫ)
+    function syncCustomTasks() {
+        const categories = ['extraGoals', 'extraKnowledge', 'extraPrayers'];
+        categories.forEach(cat => {
+            let allUniqueTasks = [];
+            
+            // 1. Собираем все уникальные цели юзера за все дни
+            for(let d=1; d<=30; d++) {
+                if(fullHistory[d] && fullHistory[d][cat]) {
+                    fullHistory[d][cat].forEach(t => {
+                        if(!allUniqueTasks.includes(t.text)) allUniqueTasks.push(t.text);
+                    });
+                }
+            }
+            
+            // 2. Раскладываем их во все 30 дней в строгом порядке
+            for(let d=1; d<=30; d++) {
+                ensureDayObj(d);
+                let currentDayTasks = fullHistory[d][cat] || [];
+                let newTasksArr = [];
+                allUniqueTasks.forEach(taskText => {
+                    let existing = currentDayTasks.find(g => g.text === taskText);
+                    newTasksArr.push(existing ? existing : { text: taskText, done: false });
+                });
+                fullHistory[d][cat] = newTasksArr;
+            }
+        });
+    }
 
     function initApp() {
         if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
             const user = tg.initDataUnsafe.user;
         }
         
-        // Zakat Init (сначала локально для скорости)
         const zakatPaid = localStorage.getItem('zakat_paid') === 'true';
         updateZakatUI(zakatPaid);
 
-        // Восстановление даты старта по сохраненному региону
         const isCis = localStorage.getItem(COUNTRY_FLAG_KEY) === 'true';
         ramadanStart = isCis ? new Date(2026, 1, 19) : new Date(2026, 1, 18);
         realDayNum = getCurrentDay();
         activeDayNum = realDayNum;
 
         try {
-            const loc = localStorage.getItem(STORAGE_KEY);
-            if(loc) {
-                 fullHistory = JSON.parse(loc);
+            const locStr = localStorage.getItem(STORAGE_KEY);
+            if(locStr) {
+                 fullHistory = JSON.parse(locStr);
                  if(!fullHistory.settings) fullHistory.settings = { hiddenTasks: [] };
                  document.getElementById('syncStatus').innerText = "✨ Готов к работе";
             }
+            syncCustomTasks();
             renderDay(activeDayNum);
             
-            // Запрашиваем ВСЕ ключи из облака и перекрываем локальные
+            // ТЕЛЕГРАМ CLOUD SYNC
             if (tg && tg.CloudStorage) {
                 const keysToSync = [STORAGE_KEY, CALENDAR_STORAGE_KEY, CITY_NAME_KEY, COUNTRY_FLAG_KEY, 'zakat_paid'];
                 tg.CloudStorage.getItems(keysToSync, (err, values) => {
@@ -620,9 +647,30 @@
                         if(values[STORAGE_KEY] !== undefined) {
                             try { 
                                 const cloudData = JSON.parse(values[STORAGE_KEY]);
-                                fullHistory = cloudData;
+                                const localDataStr = localStorage.getItem(STORAGE_KEY);
+                                let useCloud = true;
+
+                                // ЗАЩИТА ОТ ПЕРЕЗАПИСИ: проверяем что новее — облако или локалка
+                                if (localDataStr) {
+                                    const localData = JSON.parse(localDataStr);
+                                    const localTime = localData.lastUpdated || 0;
+                                    const cloudTime = cloudData.lastUpdated || 0;
+
+                                    if (localTime > cloudTime) {
+                                        // Локальные данные свежее! Пушим их в облако.
+                                        fullHistory = localData;
+                                        tg.CloudStorage.setItem(STORAGE_KEY, localDataStr);
+                                        useCloud = false;
+                                    }
+                                }
+
+                                if (useCloud) {
+                                    fullHistory = cloudData;
+                                    localStorage.setItem(STORAGE_KEY, values[STORAGE_KEY]);
+                                }
+
                                 if(!fullHistory.settings) fullHistory.settings = { hiddenTasks: [] };
-                                localStorage.setItem(STORAGE_KEY, values[STORAGE_KEY]);
+                                syncCustomTasks();
                                 needsRender = true;
                             } catch(e) {}
                         }
@@ -637,11 +685,8 @@
         } catch(e) { renderDay(activeDayNum); }
     }
 
-    // НОВАЯ СИСТЕМА ПОДСЧЕТА БАЛЛОВ
     function calculateDayScore(dayData) {
         if (!dayData) return 0;
-        
-        // 1. Обязательные 80%
         let mandatoryScore = 0;
         if (dayData.fasting) mandatoryScore += 16;
         if (dayData.tasks?.fajr) mandatoryScore += 8;
@@ -653,17 +698,14 @@
         if (dayData.tasks?.no_bad_words) mandatoryScore += 8;
         if (dayData.tasks?.no_gossip) mandatoryScore += 8;
 
-        // 2. Желательные 20%
         let optionalScore = 0;
         const optionalTasks = ['sunnah', 'tarawih', 'witr', 'tahajjud', 'lecture', 'arabic', 'sadaqah', 'suhoor', 'no_overeat'];
         optionalTasks.forEach(t => {
             if (dayData.tasks && dayData.tasks[t] && !fullHistory.settings.hiddenTasks.includes(t)) optionalScore += 2;
         });
         
-        // Вода (1 клик = 250мл = 0.5 балла, максимум 5 баллов за воду)
         if (dayData.water && dayData.water > 0) optionalScore += Math.min(dayData.water * 0.5, 5);
 
-        // Кастомные категории
         ['extraPrayers', 'extraKnowledge', 'extraGoals'].forEach(cat => {
             if(dayData[cat]) {
                 dayData[cat].forEach(g => { if(g.done) optionalScore += 2; });
@@ -824,14 +866,12 @@
         const val = inp.value.trim();
         if(!val) return;
         
-        // Записываем цель на каждый день месяца, если ее там еще нет
-        for(let d=1; d<=30; d++) {
-            ensureDayObj(d);
-            if(!fullHistory[d][category]) fullHistory[d][category] = [];
-            const exists = fullHistory[d][category].find(g => g.text === val);
-            if(!exists) fullHistory[d][category].push({ text: val, done: false });
-        }
+        ensureDayObj(activeDayNum);
+        if(!fullHistory[activeDayNum][category]) fullHistory[activeDayNum][category] = [];
+        const exists = fullHistory[activeDayNum][category].find(g => g.text === val);
+        if(!exists) fullHistory[activeDayNum][category].push({ text: val, done: false });
         
+        syncCustomTasks(); // Глобально раскидывает новую цель на все 30 дней
         inp.value = "";
         renderDay(activeDayNum); saveData(); haptic();
     }
@@ -841,12 +881,13 @@
         ensureDayObj(activeDayNum);
         const textToRemove = fullHistory[activeDayNum][category][idx].text;
         
-        // Удаляем цель из каждого дня месяца, сохраняя остальной прогресс
+        // Удаляем из всех 30 дней
         for(let d=1; d<=30; d++) {
             if(fullHistory[d] && fullHistory[d][category]) {
                 fullHistory[d][category] = fullHistory[d][category].filter(g => g.text !== textToRemove);
             }
         }
+        syncCustomTasks();
         renderDay(activeDayNum); saveData();
     }
 
@@ -980,28 +1021,30 @@
 
     function ensureDayObj(d){ if(!fullHistory[d]) fullHistory[d] = {tasks:{}, rating:0, thoughts:"", fasting:false, extraGoals:[], extraPrayers:[], extraKnowledge:[], water:0, quranPageCount: 0}; }
     
-    function saveData(){
+    // ГЛОБАЛЬНАЯ ЗАЩИТА ОТ ТРОТТЛИНГА ТЕЛЕГРАМА ПРИ СОХРАНЕНИИ
+    let cloudSaveTimeout;
+    function saveData() {
+        fullHistory.lastUpdated = Date.now(); // Ставим таймстемп
         const val = JSON.stringify(fullHistory);
         const status = document.getElementById('syncStatus');
         status.innerText = "Сохранение...";
-        const key = STORAGE_KEY;
         
-        localStorage.setItem(key, val); // Сохраняем всегда локально
+        localStorage.setItem(STORAGE_KEY, val); // Сначала мгновенно на телефон
         
-        const cb = (e) => { 
-            if(!e) { 
-                status.innerText = "Сохранено"; 
-                status.classList.add('active'); 
-                setTimeout(() => status.classList.remove('active'), 1000); 
-            } 
-        };
-        
-        // Отдаем строгий приоритет Telegram Cloud
-        if(tg && tg.CloudStorage) {
-            tg.CloudStorage.setItem(key, val, cb);
-        } else {
-            cb(null);
-        }
+        clearTimeout(cloudSaveTimeout);
+        cloudSaveTimeout = setTimeout(() => { // Ждем 500мс, чтобы отправить пачку, а не по одному клику
+            if(tg && tg.CloudStorage) {
+                tg.CloudStorage.setItem(STORAGE_KEY, val, (e) => {
+                    if(!e) { 
+                        status.innerText = "☁️ Облако обновлено"; 
+                        status.classList.add('active'); 
+                        setTimeout(() => status.classList.remove('active'), 2000); 
+                    } 
+                });
+            } else {
+                status.innerText = "✨ Сохранено";
+            }
+        }, 500);
     }
     
     function haptic(){ if(tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light'); }
@@ -1100,12 +1143,9 @@
             const cisKeywords = ['казахстан', 'россия', 'украина', 'турция', 'kazakhstan', 'russia', 'ukraine', 'turkey'];
             const isCis = cisKeywords.some(kw => fullName.toLowerCase().includes(kw));
             
-            // Установка даты начала Рамадана
             ramadanStart = isCis ? new Date(2026, 1, 19) : new Date(2026, 1, 18);
             sysSave(COUNTRY_FLAG_KEY, isCis ? 'true' : 'false');
 
-            // 18-е февраля в массиве февраля - это индекс 17
-            // 19-е февраля в массиве февраля - это индекс 18
             const startIndex = isCis ? 18 : 17; 
             
             for(let i=0; i<30; i++) {
@@ -1125,7 +1165,6 @@
             sysSave(CALENDAR_STORAGE_KEY, JSON.stringify(finalCalendar));
             sysSave(CITY_NAME_KEY, cityName);
             
-            // Пересчет текущего дня после смены региона
             realDayNum = getCurrentDay();
             activeDayNum = realDayNum;
             
